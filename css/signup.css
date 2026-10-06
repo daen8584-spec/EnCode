@@ -1,0 +1,87 @@
+:root {
+    --color-warning: #fbbf24;
+}
+
+.page-signup .form-group:nth-of-type(3) {
+    animation-delay: 0.56s;
+}
+
+.page-signup .form-group:nth-of-type(4) {
+    animation-delay: 0.64s;
+}
+
+.login-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    animation: rise-in 0.6s var(--ease-out) both 0.72s;
+}
+
+.login-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--color-accent-start);
+    cursor: pointer;
+}
+
+.page-signup .login-button {
+    animation-delay: 0.8s;
+}
+
+.page-signup .login-switch {
+    animation-delay: 0.88s;
+}
+
+.strength-meter {
+    height: 6px;
+    margin-top: var(--space-xs);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.strength-meter-bar {
+    height: 100%;
+    width: 0;
+    border-radius: 3px;
+    transition: width 0.3s var(--ease-out), background-color 0.3s;
+}
+
+.strength-meter[data-strength="weak"] .strength-meter-bar {
+    width: 33%;
+    background-color: var(--color-error);
+}
+
+.strength-meter[data-strength="medium"] .strength-meter-bar {
+    width: 66%;
+    background-color: var(--color-warning);
+}
+
+.strength-meter[data-strength="strong"] .strength-meter-bar {
+    width: 100%;
+    background-color: var(--color-success);
+}
+
+.strength-label {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.strength-label[data-strength="weak"] {
+    color: var(--color-error);
+}
+
+.strength-label[data-strength="medium"] {
+    color: var(--color-warning);
+}
+
+.strength-label[data-strength="strong"] {
+    color: var(--color-success);
+}

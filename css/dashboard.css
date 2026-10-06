@@ -1,0 +1,187 @@
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(15, 18, 34, 0.7);
+    border-bottom: 1px solid var(--color-surface-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10;
+    animation: topbar-enter 0.5s var(--ease-out) both;
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.topbar-logo {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
+    border-radius: 12px;
+}
+
+.topbar-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.user-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 6px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-surface-border);
+    border-radius: 50px;
+}
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.user-name {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.signout-button {
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 107, 107, 0.4);
+    border-radius: 10px;
+    background: rgba(255, 107, 107, 0.12);
+    color: var(--color-error);
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
+}
+
+.signout-button:hover {
+    background: rgba(255, 107, 107, 0.2);
+    transform: translateY(-1px);
+}
+
+.signout-button:focus-visible {
+    outline: 2px solid var(--color-error);
+    outline-offset: 2px;
+}
+
+.dashboard-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 96px var(--space-md) var(--space-lg);
+}
+
+.dashboard-hero {
+    margin-bottom: var(--space-lg);
+    animation: rise-in 0.6s var(--ease-out) both 0.15s;
+}
+
+.dashboard-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: var(--space-xs);
+}
+
+.dashboard-subtitle {
+    color: var(--color-text-muted);
+    font-size: 15px;
+}
+
+.dashboard-tracks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-md);
+}
+
+.track-card {
+    padding: var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-surface-border);
+    border-radius: var(--radius-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s, border-color 0.2s;
+    animation: rise-in 0.6s var(--ease-out) both;
+}
+
+.track-card:nth-child(1) { animation-delay: 0.25s; }
+.track-card:nth-child(2) { animation-delay: 0.33s; }
+.track-card:nth-child(3) { animation-delay: 0.41s; }
+.track-card:nth-child(4) { animation-delay: 0.49s; }
+
+.track-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    border-color: var(--track-color);
+}
+
+.track-icon {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-sm);
+    border-radius: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 16px;
+    background: color-mix(in srgb, var(--track-color) 18%, transparent);
+    color: var(--track-color);
+}
+
+.track-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: var(--space-xs);
+}
+
+.track-description {
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+.track-python { --track-color: #4b8bbe; }
+.track-javascript { --track-color: #f7df1e; }
+.track-c { --track-color: #659ad2; }
+.track-java { --track-color: #e76f00; }
+
+@keyframes topbar-enter {
+    from { opacity: 0; transform: translateY(-100%); }
+    to { opacity: 1; transform: none; }
+}

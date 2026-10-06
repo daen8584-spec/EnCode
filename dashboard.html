@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Website description here">
+    <title>Dashboard  EnCoder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css\login.css">
+    <link rel="stylesheet" href="css\dashboard.css">
+</head>
+<body>
+    <div class="background" aria-hidden="true">
+        <div class="background-orb background-orb-left"></div>
+        <div class="background-orb background-orb-right"></div>
+        <div class="background-symbols">
+            <span class="symbol">&lt;/&gt;</span>
+            <span class="symbol">{ }</span>
+            <span class="symbol">( )</span>
+            <span class="symbol">;</span>
+            <span class="symbol">=&gt;</span>
+            <span class="symbol">#</span>
+        </div>
+    </div>
+    <header class="topbar">
+        <div class="topbar-brand">
+            <span class="topbar-logo">&lt;/&gt;</span>
+            <span class="topbar-name">EnCoder</span>
+        </div>
+        <div class="topbar-actions">
+            <div class="user-chip">
+                <span class="user-avatar" id="user-avatar">?</span>
+                <span class="user-name" id="user-name">Nome do Usuário</span>
+            </div>
+                <button class="signout-button" type="button" id="signout-button">Sair</button>
+        </div>
+    </header>
+    <main class="dashboard-page" id="dashboard-content" hidden>
+        <section class="dashboard-hero">
+            <h1 class="dashboard-title" id="dashboard-greeting">Page Title Here</h1>
+            <p class="dashboard-subtitle">Page description here</p>
+        </section>
+        <section class="dashboard-tracks" aria-label="Trilhas">
+            <article class="track-card track-python">
+                <span class="track-icon">py</span>
+                <h2 class="track-name">Python</h2>
+                <p class="track-description">Track description here</p>
+            </article>
+            <article class="track-card track-javascript">
+                <span class="track-icon">js</span>
+                <h2 class="track-name">JavaScript</h2>
+                <p class="track-description">Track description here</p>
+            </article>
+            <article class="track-card track-c">
+                <span class="track-icon">c</span>
+                <h2 class="track-name">C</h2>
+                <p class="track-description">Track description here</p>
+            </article>
+            <article class="track-card track-java">
+                <span class="track-icon">jv</span>
+                <h2 class="track-name">Java</h2>
+                <p class="track-description">Track description here</p>
+            </article>
+        </section>
+    </main>
+    <script type="module" src="js\dashboard.js"></script>
+</body>
+</html>
