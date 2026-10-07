@@ -1,10 +1,13 @@
 import { signUpWithEmail } from "./auth-service.js";
+import { setFieldError, clearFieldError, clearAllErrors, focusFirstInvalid, showToast } from "./form-errors.js";
 
 const signupForm = document.getElementById("signup-form");
 const submitButton = document.getElementById("signup-submit");
-const feedbackElement = document.getElementById("signup-feedback");
+const nameInput = document.getElementById("signup-name");
+const emailInput = document.getElementById("signup-email");
 const passwordInput = document.getElementById("signup-password");
 const confirmInput = document.getElementById("signup-password-confirm");
+const termsInput = document.getElementById("signup-terms");
 const strengthMeter = document.getElementById("signup-strength-meter");
 const strengthLabel = document.getElementById("signup-strength-label");
 const requirementsList = document.getElementById("signup-password-requirements");
@@ -27,18 +30,6 @@ const PASSWORD_CHECKS = {
 function setFormLoading(isLoading) {
     submitButton.disabled = isLoading;
     submitButton.classList.toggle("is-loading", isLoading);
-}
-
-function showFeedback(message, type) {
-    feedbackElement.textContent = message;
-    feedbackElement.classList.remove("is-error", "is-success");
-    feedbackElement.classList.add("is-" + type);
-    feedbackElement.hidden = false;
-}
-
-function hideFeedback() {
-    feedbackElement.hidden = true;
-    feedbackElement.classList.remove("is-error", "is-success");
 }
 
 function triggerShake() {
@@ -84,67 +75,98 @@ function updateStrengthMeter(value) {
     updateRequirements(value);
 }
 
-function passwordsMatch(first, second) {
-    return first.length > 0 && first === second;
+function validateName() {
+    if (nameInput.value.trim().length < 2) {
+        setFieldError(nameInput, "O nome deve ter pelo menos 2 caracteres.");
+        return false;
+    }
+    clearFieldError(nameInput);
+    return true;
+}
+
+function validateEmail() {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
+        setFieldError(emailInput, "Digite um email válido.");
+        return false;
+    }
+    clearFieldError(emailInput);
+    return true;
+}
+
+function validatePassword() {
+    if (passwordInput.value.length < 8) {
+        setFieldError(passwordInput, "A senha deve ter pelo menos 8 caracteres.");
+        return false;
+    }
+    clearFieldError(passwordInput);
+    return true;
+}
+
+function validateConfirm() {
+    if (confirmInput.value.length === 0 || confirmInput.value !== passwordInput.value) {
+        setFieldError(confirmInput, "As senhas não coincidem.");
+        return false;
+    }
+    clearFieldError(confirmInput);
+    return true;
+}
+
+function validateTerms() {
+    if (!termsInput.checked) {
+        setFieldError(termsInput, "Você precisa aceitar os Termos e Condições.");
+        return false;
+    }
+    clearFieldError(termsInput);
+    return true;
 }
 
 async function handleSignupSubmit(event) {
     event.preventDefault();
     if (isRedirecting) return;
-
-    hideFeedback();
-
-    const formData = new FormData(signupForm);
-    const name = String(formData.get("name")).trim();
-    const email = String(formData.get("email")).trim();
-    const password = String(formData.get("password"));
-    const confirm = String(formData.get("password-confirm"));
-
-    if (name.length < 2) {
-        showFeedback("Name must be at least 2 characters.", "error");
+    clearAllErrors(signupForm);
+    const results = [validateName(), validateEmail(), validatePassword(), validateConfirm(), validateTerms()];
+    if (results.includes(false)) {
         triggerShake();
+        focusFirstInvalid(signupForm);
         return;
     }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showFeedback("Please enter a valid email address.", "error");
-        triggerShake();
-        return;
-    }
-
-    if (password.length < 8) {
-        showFeedback("Password must be at least 8 characters.", "error");
-        triggerShake();
-        return;
-    }
-
-    if (!passwordsMatch(password, confirm)) {
-        showFeedback("As senhas não coincidem.", "error");
-        triggerShake();
-        return;
-    }
-
     setFormLoading(true);
-
     try {
-        await signUpWithEmail(name, email, password);
+        await signUpWithEmail(nameInput.value.trim(), emailInput.value.trim(), passwordInput.value);
         submitButton.classList.remove("is-loading");
         submitButton.classList.add("is-success");
         submitButton.disabled = true;
-        showFeedback("Sucesso", "success");
+        showToast("Conta criada com sucesso!", "success");
         isRedirecting = true;
         setTimeout(function () {
             window.location.href = "dashboard.html";
         }, 1400);
     } catch (error) {
         setFormLoading(false);
-        showFeedback(error.message, "error");
+        showToast(error.message, "error");
         triggerShake();
     }
 }
 
+nameInput.addEventListener("blur", validateName);
+emailInput.addEventListener("blur", validateEmail);
+passwordInput.addEventListener("blur", validatePassword);
+confirmInput.addEventListener("blur", validateConfirm);
+termsInput.addEventListener("change", validateTerms);
+
+nameInput.addEventListener("input", function () {
+    if (nameInput.classList.contains("is-invalid")) validateName();
+});
+emailInput.addEventListener("input", function () {
+    if (emailInput.classList.contains("is-invalid")) validateEmail();
+});
 passwordInput.addEventListener("input", function () {
     updateStrengthMeter(passwordInput.value);
+    if (passwordInput.classList.contains("is-invalid")) validatePassword();
+    if (confirmInput.classList.contains("is-invalid") && confirmInput.value) validateConfirm();
+});
+confirmInput.addEventListener("input", function () {
+    if (confirmInput.classList.contains("is-invalid")) validateConfirm();
 });
 
 signupForm.addEventListener("submit", handleSignupSubmit);
