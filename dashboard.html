@@ -1,74 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Website description here">
-    <title>Dashboard  EnCoder</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css\login.css">
-    <link rel="stylesheet" href="css\dashboard.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Website description here">
+<title>Dashboard  EnCoder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/login.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-    <div class="background" aria-hidden="true">
-        <div class="background-orb background-orb-left"></div>
-        <div class="background-orb background-orb-right"></div>
-        <div class="background-symbols">
-            <span class="symbol">&lt;/&gt;</span>
-            <span class="symbol">{ }</span>
-            <span class="symbol">( )</span>
-            <span class="symbol">;</span>
-            <span class="symbol">=&gt;</span>
-            <span class="symbol">#</span>
-        </div>
-    </div>
-    <header class="topbar" hidden>
-        <div class="topbar-brand">
-            <span class="topbar-logo">&lt;/&gt;</span>
-            <span class="topbar-name">EnCoder</span>
-        </div>
-        <div class="topbar-actions">
-            <div class="user-chip">
-                <span class="user-avatar" id="user-avatar">?</span>
-                <span class="user-name" id="user-name">Usuário</span>
-            </div>
-            <button class="signout-button" type="button" id="signout-button">Sair</button>
-        </div>
-    </header>
-    <main class="dashboard-page" id="dashboard-content" hidden>
-        <section class="dashboard-hero">
-            <h1 class="dashboard-title" id="dashboard-greeting">Carregando...</h1>
-            <p class="dashboard-subtitle">Continue seus estudos e acompanhe seu progresso.</p>
-        </section>
-        <section class="dashboard-tracks" aria-label="Trilhas">
-            <article class="track-card track-python">
-                <span class="track-icon">py</span>
-                <h2 class="track-name">Python</h2>
-                <p class="track-description">Aprenda lógica e automação com a linguagem mais popular.</p>
-            </article>
-            <article class="track-card track-javascript">
-                <span class="track-icon">js</span>
-                <h2 class="track-name">JavaScript</h2>
-                <p class="track-description">Domine a linguagem da web e construa interfaces interativas.</p>
-            </article>
-            <article class="track-card track-c">
-                <span class="track-icon">c</span>
-                <h2 class="track-name">C</h2>
-                <p class="track-description">Entenda fundamentos de baixo nível e gerenciamento de memória.</p>
-            </article>
-            <article class="track-card track-java">
-                <span class="track-icon">jv</span>
-                <h2 class="track-name">Java</h2>
-                <p class="track-description">Desenvolva aplicações robustas e orientadas a objetos.</p>
-            </article>
-        </section>
-        <section class="dashboard-continue" aria-label="Continuar">
-            <h2 class="continue-title">Continue de onde parou</h2>
-            <p class="continue-empty" id="continue-empty">Você ainda não iniciou nenhuma trilha. Escolha uma acima para começar.</p>
-        </section>
-    </main>
-    <script type="module" src="js\dashboard.js"></script>
+<div class="background" aria-hidden="true">
+<div class="background-orb background-orb-left"></div>
+<div class="background-orb background-orb-right"></div>
+<div class="background-symbols">
+<span class="symbol">{ }</span>
+<span class="symbol">&lt;/&gt;</span>
+<span class="symbol">( )</span>
+<span class="symbol">;</span>
+<span class="symbol">[ ]</span>
+<span class="symbol">=&gt;</span>
+<span class="symbol">++</span>
+<span class="symbol">==</span>
+<span class="symbol">&amp;&amp;</span>
+<span class="symbol">//</span>
+<span class="symbol">*</span>
+<span class="symbol">#</span>
+<span class="symbol">$</span>
+<span class="symbol">%</span>
+<span class="symbol">?</span>
+<span class="symbol">:</span>
+<span class="symbol">~</span>
+<span class="symbol">^</span>
+<span class="symbol">&lt; &gt;</span>
+<span class="symbol">=</span>
+</div>
+</div>
+<header class="topbar" hidden>
+<div class="topbar-brand">
+<span class="topbar-logo">&lt;/&gt;</span>
+<span class="topbar-name">EnCoder</span>
+</div>
+<div class="topbar-actions">
+<div class="user-chip">
+<span class="user-avatar" id="user-avatar">?</span>
+<span class="user-name" id="user-name">Usuario</span>
+</div>
+<button class="signout-button" type="button" id="signout-button">Sair</button>
+</div>
+</header>
+<div class="app-shell" id="app-shell" hidden>
+<aside class="sidebar">
+<nav class="sidebar-nav">
+<button class="nav-item is-active" data-view="home" type="button"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 01-2 2h-4v-7h-6v7H5a2 2 0 01-2-2z"/></svg><span>Inicio</span></button>
+<button class="nav-item" data-view="lessons" type="button"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h11a3 3 0 013 3v13H7a3 3 0 01-3-3z"/><path d="M4 17a3 3 0 013-3h11"/></svg><span>Licoes</span></button>
+<button class="nav-item" data-view="editor" type="button"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 7 3 12 8 17"/><polyline points="16 7 21 12 16 17"/></svg><span>Editor</span></button>
+<button class="nav-item" data-view="settings" type="button"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg><span>Config</span></button>
+<button class="nav-item" data-view="profile" type="button"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Perfil</span></button>
+</nav>
+</aside>
+<main class="app-main">
+<section class="view is-active" id="view-home">
+<div class="home-hero">
+<div>
+<h1 class="view-title" id="dashboard-greeting">Carregando...</h1>
+<p class="view-subtitle">Pronto para programar hoje?</p>
+</div>
+<div class="mascot" aria-hidden="true">
+<svg viewBox="0 0 160 180" class="mascot-svg">
+<ellipse cx="80" cy="172" rx="40" ry="6" fill="rgba(0,0,0,0.35)"/>
+<path d="M108 100 C138 100 158 130 152 160 C150 168 142 170 138 164 C132 156 122 152 108 148 Z" fill="#dbe9f7"/>
+<path d="M138 156 C146 156 152 162 152 168 C152 174 144 176 140 172 C132 164 128 158 122 154 Z" fill="#ffffff"/>
+<ellipse cx="80" cy="118" rx="34" ry="46" fill="#eef4fb"/>
+<ellipse cx="80" cy="130" rx="24" ry="32" fill="#ffffff"/>
+<ellipse cx="66" cy="158" rx="9" ry="6" fill="#eef4fb"/>
+<ellipse cx="94" cy="158" rx="9" ry="6" fill="#eef4fb"/>
+<ellipse cx="52" cy="120" rx="7" ry="12" fill="#eef4fb" transform="rotate(-20 52 120)"/>
+<ellipse cx="108" cy="120" rx="7" ry="12" fill="#eef4fb" transform="rotate(20 108 120)"/>
+<ellipse cx="80" cy="52" rx="38" ry="36" fill="#eef4fb"/>
+<path d="M48 30 L38 2 L64 18 Z" fill="#eef4fb"/>
+<path d="M50 28 L45 10 L60 20 Z" fill="#c9b3d6"/>
+<path d="M112 30 L122 2 L96 18 Z" fill="#eef4fb"/>
+<path d="M110 28 L115 10 L100 20 Z" fill="#c9b3d6"/>
+<circle cx="56" cy="62" r="5" fill="#f7c7d6" opacity="0.55"/>
+<circle cx="104" cy="62" r="5" fill="#f7c7d6" opacity="0.55"/>
+<ellipse cx="66" cy="50" rx="5" ry="6" fill="#1a1f2e"/>
+<ellipse cx="94" cy="50" rx="5" ry="6" fill="#1a1f2e"/>
+<circle cx="67" cy="48" r="1.8" fill="#ffffff"/>
+<circle cx="95" cy="48" r="1.8" fill="#ffffff"/>
+<path d="M76 62 L80 66 L84 62 Z" fill="#3a4052"/>
+<path d="M80 66 C80 70 76 72 72 70" stroke="#3a4052" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<path d="M80 66 C80 70 84 72 88 70" stroke="#3a4052" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>
+</div>
+</div>
+<div class="xp-panel">
+<div class="xp-header">
+<span class="xp-level">Nivel <span id="xp-level">3</span></span>
+<span class="xp-count"><span id="xp-current">450</span> / <span id="xp-total">1000</span> XP</span>
+</div>
+<div class="xp-bar"><div class="xp-fill" id="xp-fill"></div></div>
+</div>
+</section>
+<section class="view" id="view-lessons">
+<h1 class="view-title">Licoes</h1>
+<p class="view-subtitle">Escolha uma linguagem para comecar.</p>
+<div class="dashboard-tracks">
+<article class="track-card track-javascript">
+<span class="track-icon">js</span>
+<h2 class="track-name">JavaScript</h2>
+<p class="track-description">Domine a linguagem da web e construa interfaces interativas.</p>
+<button class="track-start" type="button">Comecar</button>
+</article>
+<article class="track-card track-python">
+<span class="track-icon">py</span>
+<h2 class="track-name">Python</h2>
+<p class="track-description">Aprenda logica e automacao com a linguagem mais popular.</p>
+<button class="track-start" type="button">Comecar</button>
+</article>
+<article class="track-card track-c is-coming">
+<span class="track-icon">c</span>
+<h2 class="track-name">C</h2>
+<p class="track-description">Em breve.</p>
+<button class="track-start" type="button" disabled>Em breve</button>
+</article>
+<article class="track-card track-java is-coming">
+<span class="track-icon">jv</span>
+<h2 class="track-name">Java</h2>
+<p class="track-description">Em breve.</p>
+<button class="track-start" type="button" disabled>Em breve</button>
+</article>
+</div>
+</section>
+<section class="view" id="view-editor">
+<h1 class="view-title">Editor</h1>
+<p class="view-subtitle">Escreva seu codigo e clique em Executar.</p>
+<div class="editor-toolbar">
+<label class="editor-label" for="snippet-select">Exemplo</label>
+<select class="editor-select" id="snippet-select">
+<option value="hello">Ola, mundo</option>
+<option value="loop">Loop</option>
+<option value="function">Funcao</option>
+</select>
+</div>
+<div class="editor-shell">
+<textarea class="editor-input" id="code-input" spellcheck="false"></textarea>
+<div class="editor-actions">
+<button class="editor-run" type="button" id="run-button">Executar</button>
+<button class="editor-clear" type="button" id="clear-button">Limpar</button>
+</div>
+<div class="console-shell">
+<div class="console-header">Saida</div>
+<pre class="editor-output" id="code-output" aria-live="polite"></pre>
+</div>
+</div>
+</section>
+<section class="view" id="view-settings">
+<h1 class="view-title">Configuracoes</h1>
+<p class="view-subtitle">Ajustes da sua conta e preferencias.</p>
+<div class="placeholder-panel"><p class="placeholder-text">Em breve.</p></div>
+</section>
+<section class="view" id="view-profile">
+<h1 class="view-title">Perfil</h1>
+<p class="view-subtitle">Suas informacoes de conta.</p>
+<div class="placeholder-panel"><p class="placeholder-text">Em breve.</p></div>
+</section>
+</main>
+</div>
+<script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
