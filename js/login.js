@@ -31,16 +31,19 @@ function triggerShake() {
 
 async function handleLoginSubmit(event) {
     event.preventDefault();
-
-    if (isRedirecting) {
-        return;
-    }
+    if (isRedirecting) return;
 
     hideFeedback();
 
     const formData = new FormData(loginForm);
-    const email = String(formData.get("email"));
+    const email = String(formData.get("email")).trim();
     const password = String(formData.get("password"));
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFeedback("Please enter a valid email address.", "error");
+        triggerShake();
+        return;
+    }
 
     setFormLoading(true);
 
@@ -49,9 +52,9 @@ async function handleLoginSubmit(event) {
         submitButton.classList.remove("is-loading");
         submitButton.classList.add("is-success");
         submitButton.disabled = true;
-        showFeedback("Successo", "success");
+        showFeedback("Sucesso", "success");
         isRedirecting = true;
-        setTimeout(() => {
+        setTimeout(function () {
             window.location.href = "dashboard.html";
         }, 1400);
     } catch (error) {

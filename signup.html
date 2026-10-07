@@ -48,6 +48,12 @@
                         <div class="strength-meter-bar"></div>
                     </div>
                     <p class="strength-label" id="signup-strength-label" hidden aria-live="polite"></p>
+                    <ul class="password-requirements" id="signup-password-requirements">
+                        <li data-requirement="length">Mínimo de 8 caracteres</li>
+                        <li data-requirement="upper-lower">Letras maiúsculas e minúsculas</li>
+                        <li data-requirement="number">Pelo menos um número</li>
+                        <li data-requirement="special">Pelo menos um caractere especial</li>
+                    </ul>
                 </div>
                 <div class="form-group">
                     <label class="login-label" for="signup-password-confirm">Confirmar Senha</label>
@@ -71,7 +77,6 @@
             <p class="login-switch">Já tem uma conta? <a href="login.html">Entrar</a></p>
         </section>
     </main>
-    <script type="module" src="signup.js"></script>
 <script type="module" src="js/signup.js"></script>
 </body>
 </html>

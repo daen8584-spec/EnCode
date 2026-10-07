@@ -7,6 +7,7 @@ const passwordInput = document.getElementById("signup-password");
 const confirmInput = document.getElementById("signup-password-confirm");
 const strengthMeter = document.getElementById("signup-strength-meter");
 const strengthLabel = document.getElementById("signup-strength-label");
+const requirementsList = document.getElementById("signup-password-requirements");
 
 let isRedirecting = false;
 
@@ -14,6 +15,13 @@ const STRENGTH_LABELS = {
     weak: "Fraca",
     medium: "Média",
     strong: "Forte"
+};
+
+const PASSWORD_CHECKS = {
+    length: function (value) { return value.length >= 8; },
+    "upper-lower": function (value) { return /[A-Z]/.test(value) && /[a-z]/.test(value); },
+    number: function (value) { return /\d/.test(value); },
+    special: function (value) { return /[^A-Za-z0-9]/.test(value); }
 };
 
 function setFormLoading(isLoading) {
@@ -39,37 +47,32 @@ function triggerShake() {
     signupForm.classList.add("is-shaking");
 }
 
-function bindPasswordToggle(toggleButton, inputElement) {
-    if (!toggleButton || !inputElement) {
-        return;
-    }
-    toggleButton.addEventListener("click", function () {
-        const isHidden = inputElement.type === "password";
-        inputElement.type = isHidden ? "text" : "password";
-        toggleButton.setAttribute("aria-pressed", String(isHidden));
-        toggleButton.classList.toggle("is-active", isHidden);
-    });
-}
-
 function passwordStrength(value) {
     let score = 0;
-    if (value.length >= 8) score += 1;
-    if (value.length >= 12) score += 1;
-    if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score += 1;
-    if (/\d/.test(value)) score += 1;
-    if (/[^A-Za-z0-9]/.test(value)) score += 1;
+    Object.values(PASSWORD_CHECKS).forEach(function (check) {
+        if (check(value)) score += 1;
+    });
     if (score <= 1) return "weak";
     if (score <= 3) return "medium";
     return "strong";
 }
 
+function updateRequirements(value) {
+    if (!requirementsList) return;
+    requirementsList.querySelectorAll("li").forEach(function (item) {
+        const key = item.getAttribute("data-requirement");
+        const check = PASSWORD_CHECKS[key];
+        if (!check) return;
+        item.classList.toggle("is-met", check(value));
+    });
+}
+
 function updateStrengthMeter(value) {
-    if (!strengthMeter || !strengthLabel) {
-        return;
-    }
+    if (!strengthMeter || !strengthLabel) return;
     if (value.length === 0) {
         strengthMeter.hidden = true;
         strengthLabel.hidden = true;
+        updateRequirements("");
         return;
     }
     const level = passwordStrength(value);
@@ -78,6 +81,7 @@ function updateStrengthMeter(value) {
     strengthMeter.setAttribute("data-strength", level);
     strengthLabel.setAttribute("data-strength", level);
     strengthLabel.textContent = "Senha " + STRENGTH_LABELS[level];
+    updateRequirements(value);
 }
 
 function passwordsMatch(first, second) {
@@ -86,18 +90,33 @@ function passwordsMatch(first, second) {
 
 async function handleSignupSubmit(event) {
     event.preventDefault();
-
-    if (isRedirecting) {
-        return;
-    }
+    if (isRedirecting) return;
 
     hideFeedback();
 
     const formData = new FormData(signupForm);
-    const name = String(formData.get("name"));
-    const email = String(formData.get("email"));
+    const name = String(formData.get("name")).trim();
+    const email = String(formData.get("email")).trim();
     const password = String(formData.get("password"));
     const confirm = String(formData.get("password-confirm"));
+
+    if (name.length < 2) {
+        showFeedback("Name must be at least 2 characters.", "error");
+        triggerShake();
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFeedback("Please enter a valid email address.", "error");
+        triggerShake();
+        return;
+    }
+
+    if (password.length < 8) {
+        showFeedback("Password must be at least 8 characters.", "error");
+        triggerShake();
+        return;
+    }
 
     if (!passwordsMatch(password, confirm)) {
         showFeedback("As senhas não coincidem.", "error");
@@ -114,7 +133,7 @@ async function handleSignupSubmit(event) {
         submitButton.disabled = true;
         showFeedback("Sucesso", "success");
         isRedirecting = true;
-        setTimeout(() => {
+        setTimeout(function () {
             window.location.href = "dashboard.html";
         }, 1400);
     } catch (error) {
@@ -124,8 +143,6 @@ async function handleSignupSubmit(event) {
     }
 }
 
-bindPasswordToggle(document.getElementById("signup-password-toggle"), passwordInput);
-bindPasswordToggle(document.getElementById("signup-confirm-toggle"), confirmInput);
 passwordInput.addEventListener("input", function () {
     updateStrengthMeter(passwordInput.value);
 });

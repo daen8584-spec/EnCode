@@ -1,36 +1,3 @@
-const VALIDATION_RULES = {
-    passwordMinLength: 8,
-    nameMinLength: 2
-};
-
-function isValidEmail(value) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-}
-
-function isValidPassword(value) {
-    return value.length >= VALIDATION_RULES.passwordMinLength;
-}
-
-function isValidName(value) {
-    return value.trim().length >= VALIDATION_RULES.nameMinLength;
-}
-
-function passwordsMatch(first, second) {
-    return first.length > 0 && first === second;
-}
-
-function passwordStrength(value) {
-    let score = 0;
-    if (value.length >= VALIDATION_RULES.passwordMinLength) score += 1;
-    if (value.length >= 12) score += 1;
-    if (/[A-Z]/.test(value) && /[a-z]/.test(value)) score += 1;
-    if (/\d/.test(value)) score += 1;
-    if (/[^A-Za-z0-9]/.test(value)) score += 1;
-    if (score <= 1) return "weak";
-    if (score <= 3) return "medium";
-    return "strong";
-}
-
 export const VALIDATION_RULES = {
     passwordMinLength: 8,
     nameMinLength: 2

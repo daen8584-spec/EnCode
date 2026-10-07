@@ -85,3 +85,35 @@
 .strength-label[data-strength="strong"] {
     color: var(--color-success);
 }
+.password-requirements {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-xs) 0 0;
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.password-requirements li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+}
+
+.password-requirements li::before {
+    content: "○";
+    font-size: 14px;
+    color: var(--color-text-muted);
+    transition: color 0.2s;
+}
+
+.password-requirements li.is-met {
+    color: var(--color-success);
+}
+
+.password-requirements li.is-met::before {
+    content: "✓";
+    color: var(--color-success);
+}
