@@ -1,5 +1,5 @@
 const SNIPPETS = {
-    hello: "console.log('Ola, mundo!');",
+    hello: "console.log('Olá, mundo!');",
     loop: "for (let i = 1; i <= 5; i++) {\n    console.log('Contando: ' + i);\n}",
     "function": "function saudacao(nome) {\n    return 'Ola, ' + nome + '!';\n}\n\nconsole.log(saudacao('EnCoder'));"
 };
@@ -63,17 +63,18 @@ export function initEditor() {
         output.textContent = "";
         const lines = [];
         const startTime = Date.now();
-        console.log = function () {
+        const safePrint = function () {
             const args = Array.prototype.slice.call(arguments);
             lines.push("> " + args.map(function (a) {
                 return typeof a === "object" ? JSON.stringify(a) : String(a);
             }).join(" "));
             output.textContent = lines.join("\n");
-            originalLog.apply(console, args);
         };
+        console.log = safePrint;
         let hasError = false;
         try {
-            new Function(input.value)();
+            const userFunction = new Function("print", "console", input.value);
+            userFunction(safePrint, { log: safePrint, error: safePrint, warn: safePrint, info: safePrint });
         } catch (error) {
             hasError = true;
             output.textContent = "Erro: " + error.message;
