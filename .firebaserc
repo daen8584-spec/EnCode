@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "proyect-af2be"
-  }
+  },
+  "targets": {
+    "proyect-af2be": {
+      "hosting": {
+        "encoden": [
+          "encoden"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "encoden",
     "public": ".",
     "ignore": [
       "firebase.json",
