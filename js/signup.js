@@ -112,7 +112,7 @@ async function handleSignupSubmit(event) {
         submitButton.classList.remove("is-loading");
         submitButton.classList.add("is-success");
         submitButton.disabled = true;
-        showFeedback("Success message here", "success");
+        showFeedback("Sucesso", "success");
         isRedirecting = true;
         setTimeout(() => {
             window.location.href = "dashboard.html";
