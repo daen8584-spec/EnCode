@@ -2,10 +2,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBhiIBHhBLhiTI9d0dXWgkLYY2TFxTEDoA",
-    authDomain: "encoder-11ba0.firebaseapp.com",
-    projectId: "encoder-11ba0",
-    storageBucket: "encoder-11ba0.appspot.com",
-    messagingSenderId: "1057192048954",
-    appId: "1:1057192048954:web:d49f5e936d91a14516f803"
+  apiKey: "TU_API_KEY_AQUI",
+  authDomain: "proyect-af2be.firebaseapp.com",
+  projectId: "proyect-af2be",
+  storageBucket: "proyect-af2be.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
 };
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
