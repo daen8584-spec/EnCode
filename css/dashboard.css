@@ -188,3 +188,29 @@
 .topbar[hidden] {
     display: none;
 }
+
+
+
+
+
+.dashboard-continue {
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--color-surface);
+    border: 1px solid var(--color-surface-border);
+    border-radius: var(--radius-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    animation: rise-in 0.6s var(--ease-out) both 0.55s;
+}
+
+.continue-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: var(--space-xs);
+}
+
+.continue-empty {
+    font-size: 14px;
+    color: var(--color-text-muted);
+}

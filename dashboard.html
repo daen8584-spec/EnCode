@@ -34,12 +34,12 @@
                 <span class="user-avatar" id="user-avatar">?</span>
                 <span class="user-name" id="user-name">Usuário</span>
             </div>
-                <button class="signout-button" type="button" id="signout-button">Sair</button>
+            <button class="signout-button" type="button" id="signout-button">Sair</button>
         </div>
     </header>
     <main class="dashboard-page" id="dashboard-content" hidden>
         <section class="dashboard-hero">
-            <h1 class="dashboard-title" id="dashboard-greeting">Page Title Here</h1>
+            <h1 class="dashboard-title" id="dashboard-greeting">Carregando...</h1>
             <p class="dashboard-subtitle">Continue seus estudos e acompanhe seu progresso.</p>
         </section>
         <section class="dashboard-tracks" aria-label="Trilhas">
@@ -63,6 +63,10 @@
                 <h2 class="track-name">Java</h2>
                 <p class="track-description">Desenvolva aplicações robustas e orientadas a objetos.</p>
             </article>
+        </section>
+        <section class="dashboard-continue" aria-label="Continuar">
+            <h2 class="continue-title">Continue de onde parou</h2>
+            <p class="continue-empty" id="continue-empty">Você ainda não iniciou nenhuma trilha. Escolha uma acima para começar.</p>
         </section>
     </main>
     <script type="module" src="js\dashboard.js"></script>
