@@ -3,6 +3,8 @@
     "target": "encoden",
     "public": ".",
     "ignore": [
+      ".git/**",
+      "profile.tmp",
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
