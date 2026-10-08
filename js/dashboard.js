@@ -36,7 +36,7 @@ observeAuthState(function (user) {
     appShell.hidden = false;
     initAppShell();
     initEditor();
-    initProfile(user).catch(function (e) { console.error("PROFILE ERROR:", e); });
+    initProfile(user).catch(function (e) { console.error("PROFILE ERROR:", e); document.body.insertAdjacentHTML("afterbegin", "<div style=\"position:fixed;top:60px;left:10px;right:10px;padding:12px;background:#ff6b6b;color:#fff;font-size:13px;z-index:9999;border-radius:8px;\">ERRO PERFIL: " + (e     initProfile(user).catch(function (e) { console.error("PROFILE ERROR:", e); });    initProfile(user).catch(function (e) { console.error("PROFILE ERROR:", e); }); e.message ? e.message : e) + "</div>"); });
 });
 
 signOutButton.addEventListener("click", async function () {
