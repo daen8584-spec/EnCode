@@ -39,6 +39,15 @@ function renderAvatar(user) {
     }
 }
 
+function syncNameEverywhere(displayName) {
+    const sidebarName = document.getElementById("user-name");
+    const sidebarAvatar = document.getElementById("user-avatar");
+    const greeting = document.getElementById("dashboard-greeting");
+    if (sidebarName) sidebarName.textContent = displayName;
+    if (sidebarAvatar) sidebarAvatar.textContent = getInitials(displayName, "");
+    if (greeting) greeting.textContent = "Olá, " + displayName.split(" ")[0];
+}
+
 function renderProfile(user) {
     const name = user.displayName || "Usuário";
     const email = user.email || "email@exemplo.com";
@@ -75,6 +84,7 @@ export function initProfile(user) {
             clearFieldError(input);
             try {
                 await updateProfile(user, { displayName: newName });
+                syncNameEverywhere(newName);
                 renderProfile(user);
                 showToast("Perfil atualizado com sucesso!", "success");
             } catch (error) {
