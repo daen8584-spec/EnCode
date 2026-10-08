@@ -688,38 +688,8 @@
     align-self: center;
 }
 
-.home-cta {
-    margin-top: var(--space-md);
-    margin-bottom: var(--space-md);
-}
 
-.home-cta-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 18px 24px;
-    border: none;
-    border-radius: var(--radius-card);
-    background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end));
-    color: #ffffff;
-    font-family: inherit;
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 8px 24px rgba(124, 92, 255, 0.4);
-}
 
-.home-cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(124, 92, 255, 0.55);
-}
 
-.home-cta-button svg {
-    width: 22px;
-    height: 22px;
-}
+
 

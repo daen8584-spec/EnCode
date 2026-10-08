@@ -33,12 +33,12 @@ observeAuthState(function (user) {
     initAppShell();
     initEditor();
     initProfile(user);
-    const cta = document.getElementById("home-cta-button");
-    if (cta) {
-        cta.addEventListener("click", function () {
-            window.location.href = "lessons.html";
+    const trackButtons = document.querySelectorAll(".track-start[data-go]");
+    trackButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            window.location.href = btn.getAttribute("data-go");
         });
-    }
+    });
 });
 
 signOutButton.addEventListener("click", async function () {
@@ -49,5 +49,6 @@ signOutButton.addEventListener("click", async function () {
     }
     window.location.href = "login.html";
 });
+
 
 
