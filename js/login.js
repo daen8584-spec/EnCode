@@ -1,3 +1,4 @@
+import { initPasswordToggles } from "./password-toggle.js";
 import { signInWithEmail, observeAuthState } from "./auth-service.js";
 import { setFieldError, clearFieldError, clearAllErrors, focusFirstInvalid, showToast } from "./form-errors.js";
 
@@ -82,3 +83,4 @@ observeAuthState(function (user) {
 });
 
 loginForm.addEventListener("submit", handleLoginSubmit);
+initPasswordToggles();

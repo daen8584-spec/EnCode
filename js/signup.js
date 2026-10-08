@@ -1,3 +1,4 @@
+import { initPasswordToggles } from "./password-toggle.js";
 import { signUpWithEmail } from "./auth-service.js";
 import { setFieldError, clearFieldError, clearAllErrors, focusFirstInvalid, showToast } from "./form-errors.js";
 
@@ -170,3 +171,4 @@ confirmInput.addEventListener("input", function () {
 });
 
 signupForm.addEventListener("submit", handleSignupSubmit);
+initPasswordToggles();

@@ -35,7 +35,7 @@
 .track-start:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(124,92,255,0.4); }
 .track-start:disabled { background: rgba(255,255,255,0.06); color: var(--color-text-muted); cursor: not-allowed; }
 .track-html { --track-color: #e34f26; }
-.track-python { --track-color: #4b8bbe; }
+.track-python { --track-color: #ffd43b; }
 .track-css { --track-color: #1572b6; }
 .editor-toolbar { display: flex; align-items: center; gap: var(--space-xs); margin-bottom: var(--space-sm); }
 .editor-label { font-size: 13px; font-weight: 700; color: var(--color-text-muted); }
@@ -123,7 +123,7 @@ html body div.background div.background-symbols span.symbol:nth-child(20) { anim
 }
 .track-html { --track-color: #e34f26; }
 .track-css { --track-color: #1572b6; }
-.track-python { --track-color: #4b8bbe; }
+.track-python { --track-color: #ffd43b; }
 .track-icon {
     font-size: 15px;
     letter-spacing: -0.5px;
