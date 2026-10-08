@@ -1,24 +1,58 @@
-import { auth, db, appId } from "./firebase-config.js";
+import { auth } from "./firebase-config.js";
 import { updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
+const PROJECT_ID = "proyect-af2be";
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 const AVATAR_SIZE = 256;
 
-let logBox = null;
+function docUrl(uid) {
+    return "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/users/" + uid;
+}
 
-function log(msg, isError) {
-    if (!logBox) {
-        logBox = document.createElement("div");
-        logBox.style.cssText = "position:fixed;top:70px;left:10px;right:10px;max-height:180px;overflow:auto;padding:10px;background:rgba(0,0,0,0.9);color:#0f0;font-size:11px;font-family:monospace;z-index:99999;border-radius:8px;white-space:pre-wrap;";
-        document.body.appendChild(logBox);
+async function getToken() {
+    if (!auth.currentUser) throw new Error("Usuário não autenticado");
+    return await auth.currentUser.getIdToken();
+}
+
+async function saveToFirestore(uid, data) {
+    const token = await getToken();
+    const fields = {};
+    Object.keys(data).forEach(function (k) {
+        fields[k] = { stringValue: String(data[k]) };
+    });
+    const mask = Object.keys(data).map(function (k) { return "updateMask.fieldPaths=" + k; }).join("&");
+    const url = docUrl(uid) + "?" + mask;
+    const res = await fetch(url, {
+        method: "PATCH",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ fields: fields })
+    });
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error("HTTP " + res.status + ": " + err);
     }
-    const line = document.createElement("div");
-    line.textContent = msg;
-    if (isError) line.style.color = "#ff6b6b";
-    logBox.appendChild(line);
-    logBox.scrollTop = logBox.scrollHeight;
+    return await res.json();
+}
+
+async function loadFromFirestore(uid) {
+    const token = await getToken();
+    const res = await fetch(docUrl(uid), {
+        headers: { "Authorization": "Bearer " + token }
+    });
+    if (res.status === 404) return {};
+    if (!res.ok) return {};
+    const json = await res.json();
+    const result = {};
+    if (json.fields) {
+        Object.keys(json.fields).forEach(function (k) {
+            result[k] = json.fields[k].stringValue || "";
+        });
+    }
+    return result;
 }
 
 function getInitials(name, email) {
@@ -67,16 +101,12 @@ function setText(id, text) {
 
 let currentPhotoUrl = "";
 
-function cacheKey(uid) {
-    return "encoder_photo_" + uid;
-}
-
 function cachePhoto(uid, photoUrl) {
-    try { localStorage.setItem(cacheKey(uid), photoUrl); } catch (e) {}
+    try { localStorage.setItem("encoder_photo_" + uid, photoUrl); } catch (e) {}
 }
 
 function readCachedPhoto(uid) {
-    try { return localStorage.getItem(cacheKey(uid)) || ""; } catch (e) { return ""; }
+    try { return localStorage.getItem("encoder_photo_" + uid) || ""; } catch (e) { return ""; }
 }
 
 function renderAvatar(photoUrl, displayName, email) {
@@ -120,32 +150,21 @@ function renderProfileFields(user, photoUrl) {
 }
 
 export function initProfile(user) {
-    log("Projeto: " + appId + " | UID: " + user.uid);
-
     const cached = readCachedPhoto(user.uid);
     currentPhotoUrl = cached || user.photoURL || "";
     renderProfileFields(user, currentPhotoUrl);
 
-    log("Testando Firestore...");
-    setDoc(doc(db, "users", user.uid), { lastSeen: new Date().toISOString() }, { merge: true })
-        .then(function () {
-            log("Firestore OK (escrita de teste passou)");
-            return getDoc(doc(db, "users", user.uid));
-        })
-        .then(function (snap) {
-            if (snap.exists()) {
-                const data = snap.data();
-                log("Campos no doc: " + Object.keys(data).join(", "));
-                if (data.photoUrl && data.photoUrl !== currentPhotoUrl) {
-                    currentPhotoUrl = data.photoUrl;
-                    cachePhoto(user.uid, data.photoUrl);
-                    renderAvatar(data.photoUrl, user.displayName || "Usuário", user.email || "");
-                }
-            }
-        })
-        .catch(function (err) {
-            log("FIRESTORE ERRO: " + (err.code || "") + " " + (err.message || err), true);
-        });
+    loadFromFirestore(user.uid).then(function (data) {
+        if (data.photoUrl && data.photoUrl !== currentPhotoUrl) {
+            currentPhotoUrl = data.photoUrl;
+            cachePhoto(user.uid, data.photoUrl);
+            renderAvatar(data.photoUrl, user.displayName || "Usuário", user.email || "");
+        }
+        if (data.displayName && data.displayName !== user.displayName) {
+            setText("profile-info-name", data.displayName);
+            setText("profile-name", data.displayName);
+        }
+    }).catch(function () {});
 
     const photoInput = document.getElementById("profile-photo-input");
     const photoLabel = document.querySelector(".profile-avatar-upload");
@@ -166,11 +185,14 @@ export function initProfile(user) {
             if (newName.length < 2) return;
             try {
                 await updateProfile(user, { displayName: newName });
-                await setDoc(doc(db, "users", user.uid), { displayName: newName }, { merge: true });
-                log("Nome atualizado na nuvem");
+                await saveToFirestore(user.uid, { displayName: newName });
+                const sidebarName = document.getElementById("user-name");
+                const greeting = document.getElementById("dashboard-greeting");
+                if (sidebarName) sidebarName.textContent = newName;
+                if (greeting) greeting.textContent = "Olá, " + newName.split(" ")[0];
                 renderProfileFields(user, currentPhotoUrl);
             } catch (err) {
-                log("ERRO nome: " + (err.message || err), true);
+                console.error("Erro nome:", err);
             }
         });
     }
@@ -179,28 +201,16 @@ export function initProfile(user) {
         photoInput.addEventListener("change", async function () {
             const file = photoInput.files && photoInput.files[0];
             if (!file) return;
-            log("Arquivo: " + file.name + " (" + file.size + " bytes)");
-            if (ALLOWED.indexOf(file.type) === -1) {
-                log("Formato não suportado", true);
-                return;
-            }
-            if (file.size > MAX_BYTES) {
-                log("Arquivo muito grande", true);
-                return;
-            }
+            if (ALLOWED.indexOf(file.type) === -1) return;
+            if (file.size > MAX_BYTES) return;
             try {
                 const base64 = await compressImage(file);
-                log("Comprimido: " + base64.length + " bytes");
                 currentPhotoUrl = base64;
-                renderAvatar(base64, user.displayName || "Usuário", user.email || "");
                 cachePhoto(user.uid, base64);
-                log("Enviando para Firestore...");
-                await setDoc(doc(db, "users", user.uid), { photoUrl: base64 }, { merge: true });
-                log("FOTO SALVA NA NUVEM!");
-                const verify = await getDoc(doc(db, "users", user.uid));
-                log("Verificação: photoUrl tem " + (verify.data().photoUrl || "").length + " bytes");
+                renderAvatar(base64, user.displayName || "Usuário", user.email || "");
+                await saveToFirestore(user.uid, { photoUrl: base64 });
             } catch (err) {
-                log("ERRO FOTO: " + (err.code || "") + " " + (err.message || err), true);
+                console.error("Erro foto:", err);
             } finally {
                 photoInput.value = "";
             }
