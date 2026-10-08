@@ -22,8 +22,7 @@ async function saveToFirestore(uid, data) {
         fields[k] = { stringValue: String(data[k]) };
     });
     const mask = Object.keys(data).map(function (k) { return "updateMask.fieldPaths=" + k; }).join("&");
-    const url = docUrl(uid) + "?" + mask;
-    const res = await fetch(url, {
+    const res = await fetch(docUrl(uid) + "?" + mask, {
         method: "PATCH",
         headers: {
             "Authorization": "Bearer " + token,
@@ -101,12 +100,16 @@ function setText(id, text) {
 
 let currentPhotoUrl = "";
 
+function cacheKey(uid) {
+    return "encoder_photo_" + uid;
+}
+
 function cachePhoto(uid, photoUrl) {
-    try { localStorage.setItem("encoder_photo_" + uid, photoUrl); } catch (e) {}
+    try { localStorage.setItem(cacheKey(uid), photoUrl); } catch (e) {}
 }
 
 function readCachedPhoto(uid) {
-    try { return localStorage.getItem("encoder_photo_" + uid) || ""; } catch (e) { return ""; }
+    try { return localStorage.getItem(cacheKey(uid)) || ""; } catch (e) { return ""; }
 }
 
 function renderAvatar(photoUrl, displayName, email) {
@@ -150,18 +153,14 @@ function renderProfileFields(user, photoUrl) {
 
 export function initProfile(user) {
     const cached = readCachedPhoto(user.uid);
-    currentPhotoUrl = cached || user.photoURL || "";
+    currentPhotoUrl = cached || "";
     renderProfileFields(user, currentPhotoUrl);
 
     loadFromFirestore(user.uid).then(function (data) {
-        if (data.photoUrl && data.photoUrl !== currentPhotoUrl) {
+        if (data.photoUrl) {
             currentPhotoUrl = data.photoUrl;
             cachePhoto(user.uid, data.photoUrl);
             renderAvatar(data.photoUrl, user.displayName || "Usuário", user.email || "");
-        }
-        if (data.displayName && data.displayName !== user.displayName) {
-            setText("profile-info-name", data.displayName);
-            setText("profile-name", data.displayName);
         }
     }).catch(function () {});
 
@@ -184,15 +183,13 @@ export function initProfile(user) {
             if (newName.length < 2) return;
             try {
                 await updateProfile(user, { displayName: newName });
-                await saveToFirestore(user.uid, { displayName: newName });
+                try { await saveToFirestore(user.uid, { displayName: newName }); } catch (err) {}
                 const sidebarName = document.getElementById("user-name");
                 const greeting = document.getElementById("dashboard-greeting");
                 if (sidebarName) sidebarName.textContent = newName;
                 if (greeting) greeting.textContent = "Olá, " + newName.split(" ")[0];
                 renderProfileFields(user, currentPhotoUrl);
-            } catch (err) {
-                console.error("Erro nome:", err);
-            }
+            } catch (err) {}
         });
     }
 
@@ -209,11 +206,10 @@ export function initProfile(user) {
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
                 await saveToFirestore(user.uid, { photoUrl: base64 });
             } catch (err) {
-                console.error("Erro foto:", err);
+                console.error("Erro ao salvar foto:", err);
             } finally {
                 photoInput.value = "";
             }
         });
     }
 }
-
