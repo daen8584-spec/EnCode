@@ -53,6 +53,8 @@ function setText(id, text) {
     if (el) el.textContent = text;
 }
 
+let currentPhotoUrl = "";
+
 function renderAvatar(photoUrl, displayName, email) {
     const img = document.getElementById("profile-avatar-img");
     const initials = document.getElementById("profile-avatar-initials");
@@ -62,13 +64,20 @@ function renderAvatar(photoUrl, displayName, email) {
         img.src = photoUrl;
         img.hidden = false;
         initials.hidden = true;
+        if (topAvatar) {
+            topAvatar.style.backgroundImage = "url('" + photoUrl + "')";
+            topAvatar.style.backgroundSize = "cover";
+            topAvatar.style.backgroundPosition = "center";
+            topAvatar.textContent = "";
+        }
     } else {
         img.hidden = true;
         initials.hidden = false;
         initials.textContent = getInitials(displayName, email);
-    }
-    if (topAvatar) {
-        topAvatar.textContent = getInitials(displayName, email);
+        if (topAvatar) {
+            topAvatar.style.backgroundImage = "";
+            topAvatar.textContent = getInitials(displayName, email);
+        }
     }
 }
 
@@ -77,7 +86,7 @@ function syncNameEverywhere(displayName) {
     const sidebarAvatar = document.getElementById("user-avatar");
     const greeting = document.getElementById("dashboard-greeting");
     if (sidebarName) sidebarName.textContent = displayName;
-    if (sidebarAvatar) sidebarAvatar.textContent = getInitials(displayName, "");
+    if (sidebarAvatar && !currentPhotoUrl) sidebarAvatar.textContent = getInitials(displayName, "");
     if (greeting) greeting.textContent = "Olá, " + displayName.split(" ")[0];
 }
 
@@ -116,11 +125,12 @@ async function saveNameToFirestore(uid, displayName) {
 }
 
 export function initProfile(user) {
-    const photoUrl = user.photoURL || "";
-    renderProfileFields(user, photoUrl);
+    currentPhotoUrl = user.photoURL || "";
+    renderProfileFields(user, currentPhotoUrl);
 
     loadPhotoUrlFromFirestore(user.uid).then(function (stored) {
-        if (stored && stored !== photoUrl) {
+        if (stored) {
+            currentPhotoUrl = stored;
             renderAvatar(stored, user.displayName || "Usuário", user.email || "");
         }
     });
@@ -128,6 +138,14 @@ export function initProfile(user) {
     const form = document.getElementById("profile-edit-form");
     const input = document.getElementById("profile-edit-name");
     const photoInput = document.getElementById("profile-photo-input");
+    const photoLabel = document.querySelector(".profile-avatar-upload");
+
+    if (photoLabel && photoInput) {
+        photoLabel.addEventListener("click", function (event) {
+            event.preventDefault();
+            photoInput.click();
+        });
+    }
 
     if (form && input) {
         form.addEventListener("submit", async function (event) {
@@ -142,7 +160,7 @@ export function initProfile(user) {
                 await updateProfile(user, { displayName: newName });
                 try { await saveNameToFirestore(user.uid, newName); } catch (e) {}
                 syncNameEverywhere(newName);
-                renderProfileFields(user, user.photoURL || "");
+                renderProfileFields(user, currentPhotoUrl);
                 showToast("Perfil atualizado com sucesso!", "success");
             } catch (error) {
                 showToast("Não foi possível salvar o nome.", "error");
@@ -164,14 +182,15 @@ export function initProfile(user) {
                 photoInput.value = "";
                 return;
             }
+            showToast("Processando imagem...", "success");
             try {
                 const base64 = await compressImage(file);
-                await updateProfile(user, { photoURL: base64 });
-                try { await savePhotoUrlToFirestore(user.uid, base64); } catch (e) {}
+                currentPhotoUrl = base64;
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
+                await savePhotoUrlToFirestore(user.uid, base64);
                 showToast("Foto atualizada!", "success");
             } catch (error) {
-                showToast("Não foi possível processar a foto.", "error");
+                showToast("Erro: " + (error && error.message ? error.message : error), "error");
             } finally {
                 photoInput.value = "";
             }
