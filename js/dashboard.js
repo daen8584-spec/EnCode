@@ -15,14 +15,14 @@ function getUserDisplayName(user) {
     if (user.email && user.email.includes("@")) {
         return user.email.split("@")[0];
     }
-    return "Usuario";
+    return "Usuário";
 }
 
 function populateUser(user) {
     const displayName = getUserDisplayName(user);
     userName.textContent = displayName;
     userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    greeting.textContent = "Ola, " + displayName.split(" ")[0];
+    greeting.textContent = "Olá, " + displayName.split(" ")[0];
 }
 
 observeAuthState(function (user) {

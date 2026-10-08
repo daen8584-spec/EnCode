@@ -1,7 +1,7 @@
 const SNIPPETS = {
     hello: "console.log('Olá, mundo!');",
     loop: "for (let i = 1; i <= 5; i++) {\n    console.log('Contando: ' + i);\n}",
-    "function": "function saudacao(nome) {\n    return 'Ola, ' + nome + '!';\n}\n\nconsole.log(saudacao('EnCoder'));"
+    "function": "function saudacao(nome) {\n    return 'Olá, ' + nome + '!';\n}\n\nconsole.log(saudacao('EnCoder'));"
 };
 
 export function initAppShell() {
@@ -84,7 +84,7 @@ export function initEditor() {
         if (!hasError) {
             const elapsed = Date.now() - startTime;
             lines.push("");
-            lines.push("Concluido em " + elapsed + "ms");
+            lines.push("Concluído em " + elapsed + "ms");
             output.textContent = lines.join("\n");
             fireConfetti();
         }
