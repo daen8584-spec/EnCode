@@ -1,6 +1,5 @@
-import { db } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { setFieldError, clearFieldError, showToast } from "./form-errors.js";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -49,6 +48,11 @@ function compressImage(file) {
     });
 }
 
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
 function renderAvatar(photoUrl, displayName, email) {
     const img = document.getElementById("profile-avatar-img");
     const initials = document.getElementById("profile-avatar-initials");
@@ -77,42 +81,49 @@ function syncNameEverywhere(displayName) {
     if (greeting) greeting.textContent = "Olá, " + displayName.split(" ")[0];
 }
 
-async function loadUserDoc(uid) {
+function renderProfileFields(user, photoUrl) {
+    const name = user.displayName || "Usuário";
+    const email = user.email || "email@exemplo.com";
+    setText("profile-name", name);
+    setText("profile-email", email);
+    setText("profile-info-name", name);
+    setText("profile-info-email", email);
+    setText("profile-info-created", formatDate(user.metadata && user.metadata.creationTime));
+    setText("profile-info-uid", user.uid);
+    const editInput = document.getElementById("profile-edit-name");
+    if (editInput) editInput.value = user.displayName || "";
+    renderAvatar(photoUrl, name, email);
+}
+
+async function loadPhotoUrlFromFirestore(uid) {
     try {
+        const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         const snap = await getDoc(doc(db, "users", uid));
-        return snap.exists() ? snap.data() : {};
+        return snap.exists() ? (snap.data().photoUrl || "") : "";
     } catch (e) {
-        return {};
+        return "";
     }
 }
 
-async function saveUserDoc(uid, data) {
-    await setDoc(doc(db, "users", uid), data, { merge: true });
+async function savePhotoUrlToFirestore(uid, photoUrl) {
+    const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+    await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
 }
 
-export async function initProfile(user) {
-    const userDoc = await loadUserDoc(user.uid);
-    const photoUrl = user.photoURL || userDoc.photoUrl || "";
+async function saveNameToFirestore(uid, displayName) {
+    const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+    await setDoc(doc(db, "users", uid), { displayName: displayName }, { merge: true });
+}
 
-    function renderProfile() {
-        const name = user.displayName || "Usuário";
-        const email = user.email || "email@exemplo.com";
-        const setText = function (id, text) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = text;
-        };
-        setText("profile-name", name);
-        setText("profile-email", email);
-        setText("profile-info-name", name);
-        setText("profile-info-email", email);
-        setText("profile-info-created", formatDate(user.metadata && user.metadata.creationTime));
-        setText("profile-info-uid", user.uid);
-        const editInput = document.getElementById("profile-edit-name");
-        if (editInput) editInput.value = user.displayName || "";
-        renderAvatar(photoUrl, name, email);
-    }
+export function initProfile(user) {
+    const photoUrl = user.photoURL || "";
+    renderProfileFields(user, photoUrl);
 
-    renderProfile();
+    loadPhotoUrlFromFirestore(user.uid).then(function (stored) {
+        if (stored && stored !== photoUrl) {
+            renderAvatar(stored, user.displayName || "Usuário", user.email || "");
+        }
+    });
 
     const form = document.getElementById("profile-edit-form");
     const input = document.getElementById("profile-edit-name");
@@ -129,9 +140,9 @@ export async function initProfile(user) {
             clearFieldError(input);
             try {
                 await updateProfile(user, { displayName: newName });
-                await saveUserDoc(user.uid, { displayName: newName });
+                try { await saveNameToFirestore(user.uid, newName); } catch (e) {}
                 syncNameEverywhere(newName);
-                renderProfile();
+                renderProfileFields(user, user.photoURL || "");
                 showToast("Perfil atualizado com sucesso!", "success");
             } catch (error) {
                 showToast("Não foi possível salvar o nome.", "error");
@@ -156,7 +167,7 @@ export async function initProfile(user) {
             try {
                 const base64 = await compressImage(file);
                 await updateProfile(user, { photoURL: base64 });
-                await saveUserDoc(user.uid, { photoUrl: base64 });
+                try { await savePhotoUrlToFirestore(user.uid, base64); } catch (e) {}
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
                 showToast("Foto atualizada!", "success");
             } catch (error) {
