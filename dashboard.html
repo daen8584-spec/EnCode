@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Aprenda a programar com lições interativas de JavaScript e Python.">
+<meta name="description" content="Aprenda HTML, CSS e Python com lições interativas.">
 <title>Painel - EnCoder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -109,35 +109,29 @@
 <h1 class="view-title">Lições</h1>
 <p class="view-subtitle">Escolha uma linguagem para começar sua jornada.</p>
 <div class="dashboard-tracks">
-<article class="track-card track-javascript">
-<span class="track-icon">js</span>
-<h2 class="track-name">JavaScript</h2>
-<p class="track-description">Domine a linguagem da web e construa interfaces interativas.</p>
+<article class="track-card track-html">
+<span class="track-icon">html</span>
+<h2 class="track-name">HTML</h2>
+<p class="track-description">Estruture páginas web com marcação semântica e acessível.</p>
+<button class="track-start" type="button">Começar</button>
+</article>
+<article class="track-card track-css">
+<span class="track-icon">css</span>
+<h2 class="track-name">CSS</h2>
+<p class="track-description">Estilize páginas com cores, layouts e animações modernas.</p>
 <button class="track-start" type="button">Começar</button>
 </article>
 <article class="track-card track-python">
 <span class="track-icon">py</span>
 <h2 class="track-name">Python</h2>
-<p class="track-description">Aprenda lógica e automação com a linguagem mais popular.</p>
+<p class="track-description">Aprenda lógica, automação e ciência de dados.</p>
 <button class="track-start" type="button">Começar</button>
-</article>
-<article class="track-card track-c is-coming">
-<span class="track-icon">c</span>
-<h2 class="track-name">C</h2>
-<p class="track-description">Em breve: fundamentos de baixo nível e gerenciamento de memória.</p>
-<button class="track-start" type="button" disabled>Em breve</button>
-</article>
-<article class="track-card track-java is-coming">
-<span class="track-icon">jv</span>
-<h2 class="track-name">Java</h2>
-<p class="track-description">Em breve: aplicações robustas e orientadas a objetos.</p>
-<button class="track-start" type="button" disabled>Em breve</button>
 </article>
 </div>
 </section>
 <section class="view" id="view-editor">
-<h1 class="view-title">Editor</h1>
-<p class="view-subtitle">Escreva seu código e clique em Executar.</p>
+<h1 class="view-title">Editor Python</h1>
+<p class="view-subtitle">Escreva seu código Python e clique em Executar.</p>
 <div class="editor-toolbar">
 <label class="editor-label" for="snippet-select">Exemplo</label>
 <select class="editor-select" id="snippet-select">
@@ -170,6 +164,8 @@
 </section>
 </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
