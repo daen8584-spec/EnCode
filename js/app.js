@@ -10,6 +10,12 @@ function sanitizeInput(text) {
         .replace(/\u21D2/g, "=>")
         .replace(/\u2190/g, "<-")
         .replace(/\u21D0/g, "<=")
+        .replace(/\u2265/g, ">=")
+        .replace(/\u2264/g, "<=")
+        .replace(/\u2260/g, "!=")
+        .replace(/\u2212/g, "-")
+        .replace(/\u00D7/g, "*")
+        .replace(/\u00F7/g, "/")
         .replace(/\u2018|\u2019/g, "'")
         .replace(/\u201C|\u201D/g, "\"")
         .replace(/\u2014/g, "--")
@@ -17,27 +23,38 @@ function sanitizeInput(text) {
         .replace(/\u2026/g, "...")
         .replace(/\u00AB/g, "<<")
         .replace(/\u00BB/g, ">>")
-        .replace(/\u00A0/g, " ")
-        .replace(/\u2265/g, ">=")
-        .replace(/\u2264/g, "<=")
-        .replace(/\u2260/g, "!=");
+        .replace(/\u00A0/g, " ");
 }
 
 function attachSanitizer(textarea) {
+    let lastValue = textarea.value;
     function clean() {
-        const cleaned = sanitizeInput(textarea.value);
-        if (cleaned !== textarea.value) {
+        const current = textarea.value;
+        if (current === lastValue) return;
+        const cleaned = sanitizeInput(current);
+        if (cleaned !== current) {
             const pos = textarea.selectionStart;
+            const diff = current.length - cleaned.length;
             textarea.value = cleaned;
-            try { textarea.setSelectionRange(pos, pos); } catch (e) {}
+            const newPos = Math.max(0, pos - diff);
+            try { textarea.setSelectionRange(newPos, newPos); } catch (e) {}
         }
+        lastValue = textarea.value;
     }
-    textarea.addEventListener("input", function () {
-        if (textarea.isComposing) return;
-        clean();
-    });
+    textarea.addEventListener("input", clean);
     textarea.addEventListener("compositionend", clean);
-    textarea.addEventListener("blur", clean);
+    textarea.addEventListener("blur", function () {
+        clean();
+        if (textarea._monitor) {
+            clearInterval(textarea._monitor);
+            textarea._monitor = null;
+        }
+    });
+    textarea.addEventListener("focus", function () {
+        if (!textarea._monitor) {
+            textarea._monitor = setInterval(clean, 60);
+        }
+    });
 }
 
 export function initAppShell() {
