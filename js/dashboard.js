@@ -36,7 +36,7 @@ observeAuthState(function (user) {
     appShell.hidden = false;
     initAppShell();
     initEditor();
-    initProfile(user);
+    initProfile(user).catch(function (e) { console.error("PROFILE ERROR:", e); });
 });
 
 signOutButton.addEventListener("click", async function () {
