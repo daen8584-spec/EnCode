@@ -128,3 +128,23 @@ html body div.background div.background-symbols span.symbol:nth-child(20) { anim
     font-size: 15px;
     letter-spacing: -0.5px;
 }
+.profile-header { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); margin-bottom: var(--space-md); }
+.profile-avatar-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+.profile-avatar { width: 112px; height: 112px; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent-start), var(--color-accent-end)); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 12px 32px rgba(124, 92, 255, 0.4); }
+.profile-avatar-initials { font-size: 42px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+.profile-avatar-img { width: 100%; height: 100%; object-fit: cover; }
+.profile-avatar-upload { font-size: 12px; font-weight: 700; color: var(--color-accent-end); cursor: pointer; padding: 6px 12px; border-radius: 8px; background: rgba(34, 211, 238, 0.1); border: 1px solid rgba(34, 211, 238, 0.3); }
+.profile-avatar-upload:hover { background: rgba(34, 211, 238, 0.2); }
+.profile-summary { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.profile-name { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+.profile-email { font-size: 14px; color: var(--color-text-muted); word-break: break-all; }
+.profile-badge { display: inline-block; margin-top: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; color: var(--color-success); background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 999px; width: fit-content; }
+.profile-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-sm); margin-bottom: var(--space-md); }
+.profile-info-card { padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 6px; }
+.profile-info-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--color-text-muted); }
+.profile-info-value { font-size: 15px; font-weight: 700; color: var(--color-text); word-break: break-word; }
+.profile-info-small { font-size: 12px; font-family: "JetBrains Mono", monospace; color: var(--color-text-muted); }
+.profile-edit { padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.profile-edit-title { font-size: 15px; font-weight: 800; margin-bottom: var(--space-sm); }
+.profile-edit-form { display: flex; flex-direction: column; gap: var(--space-xs); }
+@media (max-width: 720px) { .profile-header { flex-direction: column; text-align: center; } .profile-summary { align-items: center; } }

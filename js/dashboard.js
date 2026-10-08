@@ -1,5 +1,6 @@
 import { observeAuthState, signOutUser } from "./auth-service.js";
 import { initAppShell, initEditor } from "./app.js";
+import { initProfile } from "./profile.js";
 
 const topbar = document.querySelector(".topbar");
 const appShell = document.getElementById("app-shell");
@@ -35,6 +36,7 @@ observeAuthState(function (user) {
     appShell.hidden = false;
     initAppShell();
     initEditor();
+    initProfile(user);
 });
 
 signOutButton.addEventListener("click", async function () {
