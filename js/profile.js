@@ -6,6 +6,17 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 const AVATAR_SIZE = 256;
 
+let debugEl = null;
+
+function debug(msg) {
+    if (!debugEl) {
+        debugEl = document.createElement("div");
+        debugEl.style.cssText = "position:fixed;top:70px;left:10px;right:10px;max-height:220px;overflow:auto;padding:10px;background:rgba(0,0,0,0.9);color:#0f0;font-size:11px;font-family:monospace;z-index:99999;border-radius:8px;white-space:pre-wrap;";
+        document.body.appendChild(debugEl);
+    }
+    debugEl.textContent += msg + "\n";
+}
+
 function getInitials(name, email) {
     const source = (name && name.trim()) || (email ? email.split("@")[0] : "");
     if (!source) return "?";
@@ -56,6 +67,7 @@ function setText(id, text) {
 let currentPhotoUrl = "";
 
 function renderAvatar(photoUrl, displayName, email) {
+    debug("renderAvatar: " + (photoUrl ? photoUrl.length + " bytes" : "vazio"));
     const img = document.getElementById("profile-avatar-img");
     const initials = document.getElementById("profile-avatar-initials");
     const topAvatar = document.getElementById("user-avatar");
@@ -106,19 +118,37 @@ function renderProfileFields(user, photoUrl) {
 
 async function loadPhotoFromFirestore(uid) {
     try {
+        debug("load: buscando users/" + uid.substring(0, 8));
         const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         const snap = await getDoc(doc(db, "users", uid));
-        if (!snap.exists()) return "";
+        if (!snap.exists()) {
+            debug("load: doc NÃO existe");
+            return "";
+        }
         const data = snap.data();
+        debug("load: doc existe, campos: " + Object.keys(data).join(","));
+        debug("load: photoUrl = " + (data.photoUrl ? data.photoUrl.length + " bytes" : "vazio"));
         return data.photoUrl || "";
     } catch (e) {
+        debug("load: ERRO " + (e && e.message ? e.message : e));
         return "";
     }
 }
 
 async function savePhotoToFirestore(uid, photoUrl) {
-    const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-    await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
+    try {
+        debug("save: users/" + uid.substring(0, 8) + " com " + photoUrl.length + " bytes");
+        const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
+        debug("save: setDoc OK, verificando...");
+        const { getDoc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+        const snap = await getDoc(doc(db, "users", uid));
+        const data = snap.data() || {};
+        debug("save: verificação retornou " + (data.photoUrl ? data.photoUrl.length + " bytes" : "vazio"));
+    } catch (e) {
+        debug("save: ERRO " + (e && e.message ? e.message : e));
+        throw e;
+    }
 }
 
 async function saveNameToFirestore(uid, displayName) {
@@ -129,6 +159,7 @@ async function saveNameToFirestore(uid, displayName) {
 }
 
 export function initProfile(user) {
+    debug("init: uid=" + user.uid.substring(0, 8) + " authPhotoUrl=" + (user.photoURL ? "sim" : "não"));
     currentPhotoUrl = user.photoURL || "";
     renderProfileFields(user, currentPhotoUrl);
 
@@ -136,6 +167,8 @@ export function initProfile(user) {
         if (stored) {
             currentPhotoUrl = stored;
             renderAvatar(stored, user.displayName || "Usuário", user.email || "");
+        } else {
+            debug("init: Firestore não retornou foto");
         }
     });
 
@@ -190,15 +223,11 @@ export function initProfile(user) {
                 const base64 = await compressImage(file);
                 currentPhotoUrl = base64;
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
-                try {
-                    await savePhotoToFirestore(user.uid, base64);
-                    showToast("Foto salva!", "success");
-                } catch (saveErr) {
-                    const msg = saveErr && saveErr.message ? saveErr.message : String(saveErr);
-                    showToast("Erro ao salvar: " + msg, "error");
-                }
+                await savePhotoToFirestore(user.uid, base64);
+                showToast("Foto salva!", "success");
             } catch (error) {
-                showToast("Erro ao processar a foto.", "error");
+                const msg = error && error.message ? error.message : String(error);
+                showToast("Erro: " + msg, "error");
             } finally {
                 photoInput.value = "";
             }
