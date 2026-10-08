@@ -4,24 +4,40 @@ const SNIPPETS = {
     "function": "def saudacao(nome):\n    return 'Olá, ' + nome + '!'\n\nprint(saudacao('EnCoder'))"
 };
 
-const SYMBOL_FIXES = [
-    [/[\u2018\u2019]/g, "'"],
-    [/[\u201C\u201D]/g, "\""],
-    [/\u2014/g, "--"],
-    [/\u2013/g, "-"],
-    [/\u2026/g, "..."],
-    [/\u00AB/g, "<<"],
-    [/\u00BB/g, ">>"],
-    [/\u2192/g, "->"],
-    [/\u21D2/g, "=>"]
-];
-
 function sanitizeInput(text) {
-    let result = text;
-    SYMBOL_FIXES.forEach(function (pair) {
-        result = result.replace(pair[0], pair[1]);
+    return text
+        .replace(/\u2192/g, "->")
+        .replace(/\u21D2/g, "=>")
+        .replace(/\u2190/g, "<-")
+        .replace(/\u21D0/g, "<=")
+        .replace(/\u2018|\u2019/g, "'")
+        .replace(/\u201C|\u201D/g, "\"")
+        .replace(/\u2014/g, "--")
+        .replace(/\u2013/g, "-")
+        .replace(/\u2026/g, "...")
+        .replace(/\u00AB/g, "<<")
+        .replace(/\u00BB/g, ">>")
+        .replace(/\u00A0/g, " ")
+        .replace(/\u2265/g, ">=")
+        .replace(/\u2264/g, "<=")
+        .replace(/\u2260/g, "!=");
+}
+
+function attachSanitizer(textarea) {
+    function clean() {
+        const cleaned = sanitizeInput(textarea.value);
+        if (cleaned !== textarea.value) {
+            const pos = textarea.selectionStart;
+            textarea.value = cleaned;
+            try { textarea.setSelectionRange(pos, pos); } catch (e) {}
+        }
+    }
+    textarea.addEventListener("input", function () {
+        if (textarea.isComposing) return;
+        clean();
     });
-    return result;
+    textarea.addEventListener("compositionend", clean);
+    textarea.addEventListener("blur", clean);
 }
 
 export function initAppShell() {
@@ -66,8 +82,7 @@ function looksLikeOtherLanguage(code) {
         /\bfunction\s+\w+\s*\([^)]*\)\s*\{/,
         /<script[\s>]/i,
         /<div[\s>]/i,
-        /<body[\s>]/i,
-        /<head[\s>]/i
+        /<body[\s>]/i
     ];
     return patterns.some(function (p) { return p.test(code); });
 }
@@ -98,15 +113,7 @@ export function initEditor() {
     if (!input || !runButton || !output) return;
 
     input.value = SNIPPETS.hello;
-
-    input.addEventListener("input", function () {
-        const sanitized = sanitizeInput(input.value);
-        if (sanitized !== input.value) {
-            const pos = input.selectionStart;
-            input.value = sanitized;
-            input.setSelectionRange(pos, pos);
-        }
-    });
+    attachSanitizer(input);
 
     if (snippetSelect) {
         snippetSelect.addEventListener("change", function () {
@@ -120,6 +127,7 @@ export function initEditor() {
     }
 
     runButton.addEventListener("click", async function () {
+        input.value = sanitizeInput(input.value);
         const code = input.value;
         output.textContent = "";
         if (!code.trim()) {
