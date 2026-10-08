@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { setFieldError, clearFieldError, showToast } from "./form-errors.js";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -123,29 +124,6 @@ function renderProfileFields(user, photoUrl) {
     renderAvatar(photoUrl, name, email);
 }
 
-async function loadPhotoFromFirestore(uid) {
-    try {
-        const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-        const snap = await getDoc(doc(db, "users", uid));
-        if (!snap.exists()) return "";
-        return snap.data().photoUrl || "";
-    } catch (e) {
-        return "";
-    }
-}
-
-async function savePhotoToFirestore(uid, photoUrl) {
-    const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-    await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
-}
-
-async function saveNameToFirestore(uid, displayName) {
-    try {
-        const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-        await setDoc(doc(db, "users", uid), { displayName: displayName }, { merge: true });
-    } catch (e) {}
-}
-
 export function initProfile(user) {
     const cached = readCachedPhoto(user.uid);
     currentPhotoUrl = cached || user.photoURL || "";
@@ -174,7 +152,9 @@ export function initProfile(user) {
             clearFieldError(input);
             try {
                 await updateProfile(user, { displayName: newName });
-                try { await saveNameToFirestore(user.uid, newName); } catch (e) {}
+                try {
+                    await setDoc(doc(db, "users", user.uid), { displayName: newName }, { merge: true });
+                } catch (e) {}
                 syncNameEverywhere(newName);
                 renderProfileFields(user, currentPhotoUrl);
                 showToast("Perfil atualizado com sucesso!", "success");
@@ -203,24 +183,26 @@ export function initProfile(user) {
                 currentPhotoUrl = base64;
                 cachePhoto(user.uid, base64);
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
-                showToast("Salvando foto...", "success");
-                await savePhotoToFirestore(user.uid, base64);
-                try { await updateProfile(user, { photoURL: base64 }); } catch (e) {}
+                showToast("Enviando para a nuvem...", "success");
+                await setDoc(doc(db, "users", user.uid), { photoUrl: base64 }, { merge: true });
                 showToast("Foto salva!", "success");
             } catch (error) {
                 const msg = error && error.message ? error.message : String(error);
-                showToast("Erro ao salvar: " + msg, "error");
+                showToast("Erro: " + msg, "error");
             } finally {
                 photoInput.value = "";
             }
         });
     }
 
-    loadPhotoFromFirestore(user.uid).then(function (fromFirestore) {
-        if (fromFirestore) {
-            currentPhotoUrl = fromFirestore;
-            cachePhoto(user.uid, fromFirestore);
-            renderAvatar(fromFirestore, user.displayName || "Usuário", user.email || "");
+    getDoc(doc(db, "users", user.uid)).then(function (snap) {
+        if (snap.exists()) {
+            const data = snap.data();
+            if (data.photoUrl && data.photoUrl !== currentPhotoUrl) {
+                currentPhotoUrl = data.photoUrl;
+                cachePhoto(user.uid, data.photoUrl);
+                renderAvatar(data.photoUrl, user.displayName || "Usuário", user.email || "");
+            }
         }
     }).catch(function () {});
 }
