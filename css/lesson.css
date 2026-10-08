@@ -466,3 +466,16 @@
         font-size: 14px;
     }
 }
+
+.lesson-celebration[hidden] {
+    display: none !important;
+}
+
+.lesson-feedback[hidden] {
+    display: none !important;
+}
+
+.lesson-body-main[hidden] {
+    display: none !important;
+}
+
