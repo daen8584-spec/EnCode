@@ -143,7 +143,6 @@ function renderProfileFields(user, photoUrl) {
     setText("profile-info-name", name);
     setText("profile-info-email", email);
     setText("profile-info-created", formatDate(user.metadata && user.metadata.creationTime));
-    setText("profile-info-uid", user.uid);
     const editInput = document.getElementById("profile-edit-name");
     if (editInput) editInput.value = user.displayName || "";
     renderAvatar(photoUrl, name, email);
