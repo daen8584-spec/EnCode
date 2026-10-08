@@ -6,7 +6,6 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 const AVATAR_SIZE = 256;
 
-
 function getInitials(name, email) {
     const source = (name && name.trim()) || (email ? email.split("@")[0] : "");
     if (!source) return "?";
@@ -39,17 +38,12 @@ function compressImage(file) {
                 canvas.height = AVATAR_SIZE;
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
-                const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-                resolve(dataUrl);
+                resolve(canvas.toDataURL("image/jpeg", 0.85));
             };
-            img.onerror = function (e) {
-                reject(e);
-            };
+            img.onerror = reject;
             img.src = event.target.result;
         };
-        reader.onerror = function (e) {
-            reject(e);
-        };
+        reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
@@ -65,9 +59,7 @@ function renderAvatar(photoUrl, displayName, email) {
     const img = document.getElementById("profile-avatar-img");
     const initials = document.getElementById("profile-avatar-initials");
     const topAvatar = document.getElementById("user-avatar");
-    if (!img || !initials) {
-        return;
-    }
+    if (!img || !initials) return;
     if (photoUrl) {
         img.src = photoUrl;
         img.hidden = false;
@@ -82,6 +74,10 @@ function renderAvatar(photoUrl, displayName, email) {
         img.hidden = true;
         initials.hidden = false;
         initials.textContent = getInitials(displayName, email);
+        if (topAvatar) {
+            topAvatar.style.backgroundImage = "";
+            topAvatar.textContent = getInitials(displayName, email);
+        }
     }
 }
 
@@ -119,12 +115,8 @@ async function loadPhotoUrlFromFirestore(uid) {
 }
 
 async function savePhotoUrlToFirestore(uid, photoUrl) {
-    try {
-        const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
-        await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
-    } catch (e) {
-        throw e;
-    }
+    const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
+    await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
 }
 
 async function saveNameToFirestore(uid, displayName) {
@@ -135,7 +127,6 @@ async function saveNameToFirestore(uid, displayName) {
 }
 
 export function initProfile(user) {
-
     currentPhotoUrl = user.photoURL || "";
     renderProfileFields(user, currentPhotoUrl);
 
@@ -150,8 +141,6 @@ export function initProfile(user) {
     const input = document.getElementById("profile-edit-name");
     const photoInput = document.getElementById("profile-photo-input");
     const photoLabel = document.querySelector(".profile-avatar-upload");
-
-
 
     if (photoLabel && photoInput) {
         photoLabel.addEventListener("click", function (event) {
@@ -184,9 +173,7 @@ export function initProfile(user) {
     if (photoInput) {
         photoInput.addEventListener("change", async function () {
             const file = photoInput.files && photoInput.files[0];
-            if (!file) {
-                return;
-            }
+            if (!file) return;
             if (ALLOWED.indexOf(file.type) === -1) {
                 showToast("Formato não suportado. Use PNG, JPG ou WebP.", "error");
                 photoInput.value = "";
@@ -204,7 +191,7 @@ export function initProfile(user) {
                 await savePhotoUrlToFirestore(user.uid, base64);
                 showToast("Foto atualizada!", "success");
             } catch (error) {
-                showToast("Erro: " + (error && error.message ? error.message : error), "error");
+                showToast("Erro ao processar a foto.", "error");
             } finally {
                 photoInput.value = "";
             }
