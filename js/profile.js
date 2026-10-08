@@ -1,28 +1,33 @@
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { updateProfile } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const PROJECT_ID = "proyect-af2be";
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 const AVATAR_SIZE = 256;
 
-function docUrl(uid) {
-    return "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents/users/" + uid;
-}
-
-async function getToken() {
-    if (!auth.currentUser) throw new Error("Usuário não autenticado");
-    return await auth.currentUser.getIdToken();
+function showStatus(msg, isError) {
+    let box = document.getElementById("profile-status");
+    if (!box) {
+        box = document.createElement("div");
+        box.id = "profile-status";
+        box.style.cssText = "position:fixed;bottom:20px;left:10px;right:10px;padding:12px;background:" + (isError ? "#c0392b" : "#27ae60") + ";color:#fff;font-size:12px;font-family:monospace;z-index:9999;border-radius:8px;white-space:pre-wrap;";
+        document.body.appendChild(box);
+    }
+    box.textContent = msg;
+    setTimeout(function () { if (box) box.remove(); }, 4000);
 }
 
 async function saveToFirestore(uid, data) {
-    const token = await getToken();
+    const token = await auth.currentUser.getIdToken();
     const fields = {};
     Object.keys(data).forEach(function (k) {
         fields[k] = { stringValue: String(data[k]) };
     });
     const mask = Object.keys(data).map(function (k) { return "updateMask.fieldPaths=" + k; }).join("&");
-    const res = await fetch(docUrl(uid) + "?" + mask, {
+    const url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents/users/" + uid + "?" + mask;
+    const res = await fetch(url, {
         method: "PATCH",
         headers: {
             "Authorization": "Bearer " + token,
@@ -30,28 +35,33 @@ async function saveToFirestore(uid, data) {
         },
         body: JSON.stringify({ fields: fields })
     });
-    if (!res.ok) {
-        const err = await res.text();
-        throw new Error("HTTP " + res.status + ": " + err);
-    }
+    if (!res.ok) throw new Error("save " + res.status);
     return await res.json();
 }
 
 async function loadFromFirestore(uid) {
-    const token = await getToken();
-    const res = await fetch(docUrl(uid), {
-        headers: { "Authorization": "Bearer " + token }
-    });
-    if (res.status === 404) return {};
-    if (!res.ok) return {};
-    const json = await res.json();
-    const result = {};
-    if (json.fields) {
-        Object.keys(json.fields).forEach(function (k) {
-            result[k] = json.fields[k].stringValue || "";
+    try {
+        const token = await auth.currentUser.getIdToken();
+        const url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents/users/" + uid;
+        const res = await fetch(url, {
+            headers: { "Authorization": "Bearer " + token }
         });
-    }
-    return result;
+        if (res.ok) {
+            const json = await res.json();
+            const result = {};
+            if (json.fields) {
+                Object.keys(json.fields).forEach(function (k) {
+                    result[k] = json.fields[k].stringValue || "";
+                });
+            }
+            return result;
+        }
+    } catch (e) {}
+    try {
+        const snap = await getDoc(doc(db, "users", uid));
+        if (snap.exists()) return snap.data();
+    } catch (e) {}
+    return {};
 }
 
 function getInitials(name, email) {
@@ -64,11 +74,8 @@ function getInitials(name, email) {
 
 function formatDate(value) {
     if (!value) return "-";
-    try {
-        return new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-    } catch (e) {
-        return "-";
-    }
+    try { return new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" }); }
+    catch (e) { return "-"; }
 }
 
 function compressImage(file) {
@@ -100,17 +107,9 @@ function setText(id, text) {
 
 let currentPhotoUrl = "";
 
-function cacheKey(uid) {
-    return "encoder_photo_" + uid;
-}
-
-function cachePhoto(uid, photoUrl) {
-    try { localStorage.setItem(cacheKey(uid), photoUrl); } catch (e) {}
-}
-
-function readCachedPhoto(uid) {
-    try { return localStorage.getItem(cacheKey(uid)) || ""; } catch (e) { return ""; }
-}
+function cacheKey(uid) { return "encoder_photo_" + uid; }
+function cachePhoto(uid, url) { try { localStorage.setItem(cacheKey(uid), url); } catch (e) {} }
+function readCachedPhoto(uid) { try { return localStorage.getItem(cacheKey(uid)) || ""; } catch (e) { return ""; } }
 
 function renderAvatar(photoUrl, displayName, email) {
     const img = document.getElementById("profile-avatar-img");
@@ -161,8 +160,13 @@ export function initProfile(user) {
             currentPhotoUrl = data.photoUrl;
             cachePhoto(user.uid, data.photoUrl);
             renderAvatar(data.photoUrl, user.displayName || "Usuário", user.email || "");
+            showStatus("Foto carregada da nuvem");
+        } else if (!cached) {
+            showStatus("Nenhuma foto salva na nuvem ainda", true);
         }
-    }).catch(function () {});
+    }).catch(function (e) {
+        showStatus("Erro ao carregar: " + (e.message || e), true);
+    });
 
     const photoInput = document.getElementById("profile-photo-input");
     const photoLabel = document.querySelector(".profile-avatar-upload");
@@ -189,7 +193,10 @@ export function initProfile(user) {
                 if (sidebarName) sidebarName.textContent = newName;
                 if (greeting) greeting.textContent = "Olá, " + newName.split(" ")[0];
                 renderProfileFields(user, currentPhotoUrl);
-            } catch (err) {}
+                showStatus("Nome atualizado");
+            } catch (err) {
+                showStatus("Erro nome: " + err.message, true);
+            }
         });
     }
 
@@ -197,16 +204,24 @@ export function initProfile(user) {
         photoInput.addEventListener("change", async function () {
             const file = photoInput.files && photoInput.files[0];
             if (!file) return;
-            if (ALLOWED.indexOf(file.type) === -1) return;
-            if (file.size > MAX_BYTES) return;
+            if (ALLOWED.indexOf(file.type) === -1) {
+                showStatus("Formato inválido", true);
+                return;
+            }
+            if (file.size > MAX_BYTES) {
+                showStatus("Arquivo grande demais", true);
+                return;
+            }
             try {
                 const base64 = await compressImage(file);
                 currentPhotoUrl = base64;
                 cachePhoto(user.uid, base64);
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
+                showStatus("Enviando para a nuvem...");
                 await saveToFirestore(user.uid, { photoUrl: base64 });
+                showStatus("Foto salva na nuvem!");
             } catch (err) {
-                console.error("Erro ao salvar foto:", err);
+                showStatus("Erro ao salvar: " + (err.message || err), true);
             } finally {
                 photoInput.value = "";
             }
