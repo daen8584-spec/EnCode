@@ -1,6 +1,7 @@
 import { observeAuthState, signOutUser } from "./auth-service.js";
 import { initAppShell, initEditor } from "./app.js";
 import { initProfile } from "./profile.js";
+import { runFirestoreDebug } from "./debug-firestore.js";
 
 const topbar = document.querySelector(".topbar");
 const appShell = document.getElementById("app-shell");
@@ -37,6 +38,11 @@ observeAuthState(function (user) {
     initAppShell();
     initEditor();
     initProfile(user);
+    const debugBtn = document.createElement("button");
+    debugBtn.textContent = "DEBUG";
+    debugBtn.style.cssText = "position:fixed;bottom:20px;right:20px;padding:10px 16px;background:#ff6b6b;color:#fff;border:none;border-radius:50px;font-weight:bold;z-index:9999;cursor:pointer;font-size:12px;";
+    debugBtn.onclick = runFirestoreDebug;
+    document.body.appendChild(debugBtn);
 });
 
 signOutButton.addEventListener("click", async function () {
