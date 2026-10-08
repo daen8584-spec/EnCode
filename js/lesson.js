@@ -234,6 +234,7 @@ function renderExercise() {
 }
 
 function handleAnswer(isCorrect) {
+    state.answered = true;
     el.feedback.hidden = false;
     el.feedback.className = "lesson-feedback is-" + (isCorrect ? "correct" : "wrong");
     const icon = document.createElement("span");
@@ -331,3 +332,4 @@ onAuthStateChanged(auth, async function (user) {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
+
