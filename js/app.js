@@ -61,6 +61,11 @@ export function initAppShell() {
     const views = document.querySelectorAll(".view");
     navItems.forEach(function (item) {
         item.addEventListener("click", function () {
+            const href = item.getAttribute("data-href");
+            if (href) {
+                window.location.href = href;
+                return;
+            }
             const target = item.getAttribute("data-view");
             navItems.forEach(function (nav) { nav.classList.remove("is-active"); });
             item.classList.add("is-active");
@@ -187,5 +192,6 @@ export function initEditor() {
         input.focus();
     });
 }
+
 
 

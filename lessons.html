@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lições - EnCoder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/login.css">
+<link rel="stylesheet" href="css/lesson.css">
+</head>
+<body class="lessons-page-body">
+<div class="background" aria-hidden="true">
+<div class="background-orb background-orb-left"></div>
+<div class="background-orb background-orb-right"></div>
+</div>
+
+<header class="lesson-header">
+<button class="lesson-close" id="lessons-close" type="button" aria-label="Voltar">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+</button>
+<h1 class="lessons-page-title">Lições</h1>
+</header>
+
+<main class="lessons-page-main">
+<div class="language-tabs">
+<button class="language-tab is-active" type="button" data-lang="python">Python</button>
+<button class="language-tab" type="button" data-lang="html" disabled>HTML</button>
+<button class="language-tab" type="button" data-lang="css" disabled>CSS</button>
+</div>
+<div id="lessons-path-container"></div>
+</main>
+
+<script type="module" src="js/lessons-page.js"></script>
+</body>
+</html>
+
