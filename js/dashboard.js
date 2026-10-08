@@ -1,5 +1,5 @@
 import { observeAuthState, signOutUser } from "./auth-service.js";
-import { initAppShell, initEditor } from "./app.js";
+import { initAppShell, initEditor, initLessonButtons } from "./app.js";
 import { initProfile } from "./profile.js";
 
 const topbar = document.querySelector(".topbar");
@@ -37,6 +37,7 @@ observeAuthState(function (user) {
     initAppShell();
     initEditor();
     initProfile(user);
+    initLessonButtons();
 });
 
 signOutButton.addEventListener("click", async function () {
