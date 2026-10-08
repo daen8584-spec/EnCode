@@ -148,8 +148,7 @@ async function saveNameToFirestore(uid, displayName) {
 
 export function initProfile(user) {
     const cached = readCachedPhoto(user.uid);
-    const authPhoto = user.photoURL || "";
-    currentPhotoUrl = cached || authPhoto;
+    currentPhotoUrl = cached || user.photoURL || "";
     renderProfileFields(user, currentPhotoUrl);
 
     const form = document.getElementById("profile-edit-form");
@@ -204,11 +203,13 @@ export function initProfile(user) {
                 currentPhotoUrl = base64;
                 cachePhoto(user.uid, base64);
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
+                showToast("Salvando foto...", "success");
+                await savePhotoToFirestore(user.uid, base64);
+                try { await updateProfile(user, { photoURL: base64 }); } catch (e) {}
                 showToast("Foto salva!", "success");
-                savePhotoToFirestore(user.uid, base64).catch(function () {});
             } catch (error) {
                 const msg = error && error.message ? error.message : String(error);
-                showToast("Erro: " + msg, "error");
+                showToast("Erro ao salvar: " + msg, "error");
             } finally {
                 photoInput.value = "";
             }
