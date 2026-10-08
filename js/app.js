@@ -4,6 +4,26 @@ const SNIPPETS = {
     "function": "def saudacao(nome):\n    return 'Olá, ' + nome + '!'\n\nprint(saudacao('EnCoder'))"
 };
 
+const SYMBOL_FIXES = [
+    [/[\u2018\u2019]/g, "'"],
+    [/[\u201C\u201D]/g, "\""],
+    [/\u2014/g, "--"],
+    [/\u2013/g, "-"],
+    [/\u2026/g, "..."],
+    [/\u00AB/g, "<<"],
+    [/\u00BB/g, ">>"],
+    [/\u2192/g, "->"],
+    [/\u21D2/g, "=>"]
+];
+
+function sanitizeInput(text) {
+    let result = text;
+    SYMBOL_FIXES.forEach(function (pair) {
+        result = result.replace(pair[0], pair[1]);
+    });
+    return result;
+}
+
 export function initAppShell() {
     const navItems = document.querySelectorAll(".nav-item");
     const views = document.querySelectorAll(".view");
@@ -40,33 +60,31 @@ function fireConfetti() {
 
 function looksLikeOtherLanguage(code) {
     const patterns = [
-        /console\s*\.\s*log/,
-        /\bvar\s+\w+\s*=/,
-        /\blet\s+\w+\s*=/,
-        /\bconst\s+\w+\s*=/,
-        /=>\s*\{/,
-        /\bfunction\s+\w+\s*\(/,
-        /document\s*\.\s*querySelector/,
-        /<[a-z][\s\S]*>/i,
-        /\{\s*[\w-]+\s*:\s*[^}]+\}/
+        /console\s*\.\s*log\s*\(/,
+        /document\s*\.\s*(querySelector|getElementById)/,
+        /=>\s*[\{\(]/,
+        /\bfunction\s+\w+\s*\([^)]*\)\s*\{/,
+        /<script[\s>]/i,
+        /<div[\s>]/i,
+        /<body[\s>]/i,
+        /<head[\s>]/i
     ];
     return patterns.some(function (p) { return p.test(code); });
 }
 
-function initSkulpt() {
+function setupSkulpt() {
     const Sk = window.Sk;
     if (typeof Sk === "undefined") return null;
     Sk.configure({
-        output: function () {},
+        __future__: Sk.python3,
+        inputfun: function (prompt) { return window.prompt(prompt) || ""; },
+        inputfunTakesPrompt: true,
         read: function (x) {
             if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
                 throw "File not found: '" + x + "'";
             }
             return Sk.builtinFiles["files"][x];
-        },
-        __future__: Sk.python3,
-        inputfun: function (prompt) { return window.prompt(prompt) || ""; },
-        inputfunTakesPrompt: true
+        }
     });
     return Sk;
 }
@@ -78,7 +96,18 @@ export function initEditor() {
     const clearButton = document.getElementById("clear-button");
     const snippetSelect = document.getElementById("snippet-select");
     if (!input || !runButton || !output) return;
+
     input.value = SNIPPETS.hello;
+
+    input.addEventListener("input", function () {
+        const sanitized = sanitizeInput(input.value);
+        if (sanitized !== input.value) {
+            const pos = input.selectionStart;
+            input.value = sanitized;
+            input.setSelectionRange(pos, pos);
+        }
+    });
+
     if (snippetSelect) {
         snippetSelect.addEventListener("change", function () {
             const key = snippetSelect.value;
@@ -89,6 +118,7 @@ export function initEditor() {
             }
         });
     }
+
     runButton.addEventListener("click", async function () {
         const code = input.value;
         output.textContent = "";
@@ -100,7 +130,7 @@ export function initEditor() {
             output.textContent = "Este terminal aceita apenas Python.";
             return;
         }
-        const Sk = initSkulpt();
+        const Sk = setupSkulpt();
         if (!Sk) {
             output.textContent = "Erro: o interpretador Python ainda não carregou. Aguarde alguns segundos e tente novamente.";
             return;
@@ -111,16 +141,7 @@ export function initEditor() {
             output: function (text) {
                 buffer += text;
                 output.textContent = buffer;
-            },
-            read: function (x) {
-                if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
-                    throw "File not found: '" + x + "'";
-                }
-                return Sk.builtinFiles["files"][x];
-            },
-            __future__: Sk.python3,
-            inputfun: function (prompt) { return window.prompt(prompt) || ""; },
-            inputfunTakesPrompt: true
+            }
         });
         try {
             await Sk.misceval.asyncToPromise(function () {
@@ -135,6 +156,7 @@ export function initEditor() {
             output.textContent = "Erro: " + message;
         }
     });
+
     clearButton.addEventListener("click", function () {
         input.value = "";
         output.textContent = "";
