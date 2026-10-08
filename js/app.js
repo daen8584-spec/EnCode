@@ -4,57 +4,56 @@ const SNIPPETS = {
     "function": "def saudacao(nome):\n    return 'Olá, ' + nome + '!'\n\nprint(saudacao('EnCoder'))"
 };
 
+const SYMBOL_MAP = {
+    "\u2192": "->", "\u21D2": "=>", "\u2190": "<-", "\u21D0": "<=",
+    "\u21D4": "<=>", "\u21D1": "^", "\u21D3": "v",
+    "\u2265": ">=", "\u2267": ">=", "\u2A7E": ">=", "\u226B": ">>",
+    "\u2264": "<=", "\u2266": "<=", "\u2A7D": "<=", "\u226A": "<<",
+    "\u2260": "!=", "\u2262": "!==",
+    "\u2212": "-", "\u2013": "-", "\u2014": "--", "\u2015": "--",
+    "\u00D7": "*", "\u00F7": "/",
+    "\u2018": "'", "\u2019": "'", "\u201A": "'", "\u201B": "'",
+    "\u201C": "\"", "\u201D": "\"", "\u201E": "\"",
+    "\u2026": "...",
+    "\u00AB": "<<", "\u00BB": ">>",
+    "\u00A0": " ",
+    "\uFF1C": "<", "\uFF1E": ">", "\uFF1D": "=",
+    "\uFF0B": "+", "\uFF0D": "-", "\uFF0A": "*", "\uFF0F": "/"
+};
+
 function sanitizeInput(text) {
-    return text
-        .replace(/\u2192/g, "->")
-        .replace(/\u21D2/g, "=>")
-        .replace(/\u2190/g, "<-")
-        .replace(/\u21D0/g, "<=")
-        .replace(/\u2265/g, ">=")
-        .replace(/\u2264/g, "<=")
-        .replace(/\u2260/g, "!=")
-        .replace(/\u2212/g, "-")
-        .replace(/\u00D7/g, "*")
-        .replace(/\u00F7/g, "/")
-        .replace(/\u2018|\u2019/g, "'")
-        .replace(/\u201C|\u201D/g, "\"")
-        .replace(/\u2014/g, "--")
-        .replace(/\u2013/g, "-")
-        .replace(/\u2026/g, "...")
-        .replace(/\u00AB/g, "<<")
-        .replace(/\u00BB/g, ">>")
-        .replace(/\u00A0/g, " ");
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+        const ch = text.charAt(i);
+        result += SYMBOL_MAP[ch] || ch;
+    }
+    return result;
 }
 
 function attachSanitizer(textarea) {
-    let lastValue = textarea.value;
+    let busy = false;
+
     function clean() {
+        if (busy) return;
         const current = textarea.value;
-        if (current === lastValue) return;
         const cleaned = sanitizeInput(current);
-        if (cleaned !== current) {
-            const pos = textarea.selectionStart;
-            const diff = current.length - cleaned.length;
-            textarea.value = cleaned;
-            const newPos = Math.max(0, pos - diff);
-            try { textarea.setSelectionRange(newPos, newPos); } catch (e) {}
-        }
-        lastValue = textarea.value;
+        if (cleaned === current) return;
+        busy = true;
+        const pos = textarea.selectionStart;
+        const diff = current.length - cleaned.length;
+        textarea.value = cleaned;
+        const newPos = Math.max(0, pos - diff);
+        try { textarea.setSelectionRange(newPos, newPos); } catch (e) {}
+        setTimeout(function () { busy = false; }, 0);
     }
+
     textarea.addEventListener("input", clean);
     textarea.addEventListener("compositionend", clean);
-    textarea.addEventListener("blur", function () {
-        clean();
-        if (textarea._monitor) {
-            clearInterval(textarea._monitor);
-            textarea._monitor = null;
-        }
-    });
-    textarea.addEventListener("focus", function () {
-        if (!textarea._monitor) {
-            textarea._monitor = setInterval(clean, 60);
-        }
-    });
+    textarea.addEventListener("keyup", clean);
+    textarea.addEventListener("blur", clean);
+    textarea.addEventListener("paste", function () { setTimeout(clean, 0); });
+
+    setInterval(clean, 80);
 }
 
 export function initAppShell() {
