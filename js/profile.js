@@ -104,17 +104,19 @@ function renderProfileFields(user, photoUrl) {
     renderAvatar(photoUrl, name, email);
 }
 
-async function loadPhotoUrlFromFirestore(uid) {
+async function loadPhotoFromFirestore(uid) {
     try {
         const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         const snap = await getDoc(doc(db, "users", uid));
-        return snap.exists() ? (snap.data().photoUrl || "") : "";
+        if (!snap.exists()) return "";
+        const data = snap.data();
+        return data.photoUrl || "";
     } catch (e) {
         return "";
     }
 }
 
-async function savePhotoUrlToFirestore(uid, photoUrl) {
+async function savePhotoToFirestore(uid, photoUrl) {
     const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
     await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
 }
@@ -130,7 +132,7 @@ export function initProfile(user) {
     currentPhotoUrl = user.photoURL || "";
     renderProfileFields(user, currentPhotoUrl);
 
-    loadPhotoUrlFromFirestore(user.uid).then(function (stored) {
+    loadPhotoFromFirestore(user.uid).then(function (stored) {
         if (stored) {
             currentPhotoUrl = stored;
             renderAvatar(stored, user.displayName || "Usuário", user.email || "");
@@ -188,8 +190,13 @@ export function initProfile(user) {
                 const base64 = await compressImage(file);
                 currentPhotoUrl = base64;
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
-                await savePhotoUrlToFirestore(user.uid, base64);
-                showToast("Foto atualizada!", "success");
+                try {
+                    await savePhotoToFirestore(user.uid, base64);
+                    showToast("Foto salva!", "success");
+                } catch (saveErr) {
+                    const msg = saveErr && saveErr.message ? saveErr.message : String(saveErr);
+                    showToast("Erro ao salvar: " + msg, "error");
+                }
             } catch (error) {
                 showToast("Erro ao processar a foto.", "error");
             } finally {
