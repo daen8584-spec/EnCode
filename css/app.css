@@ -168,3 +168,16 @@ html body div.background div.background-symbols span.symbol:nth-child(20) { anim
 .profile-edit-title { font-size: 15px; font-weight: 800; margin-bottom: var(--space-sm); }
 .profile-edit-form { display: flex; flex-direction: column; gap: var(--space-xs); }
 @media (max-width: 720px) { .profile-header { flex-direction: column; text-align: center; } .profile-summary { align-items: center; } }
+.profile-avatar-img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50%;
+}
+.profile-avatar-img[hidden] {
+    display: none !important;
+}
+#user-avatar {
+    background-repeat: no-repeat;
+}

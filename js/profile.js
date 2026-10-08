@@ -6,17 +6,6 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 const AVATAR_SIZE = 256;
 
-let debugEl = null;
-
-function debug(msg) {
-    if (!debugEl) {
-        debugEl = document.createElement("div");
-        debugEl.style.cssText = "position:fixed;top:70px;left:10px;right:10px;max-height:200px;overflow:auto;padding:10px;background:rgba(0,0,0,0.85);color:#0f0;font-size:11px;font-family:monospace;z-index:99999;border-radius:8px;white-space:pre-wrap;";
-        document.body.appendChild(debugEl);
-    }
-    debugEl.textContent += msg + "\n";
-    console.log("[PROFILE]", msg);
-}
 
 function getInitials(name, email) {
     const source = (name && name.trim()) || (email ? email.split("@")[0] : "");
@@ -38,13 +27,10 @@ function formatDate(value) {
 
 function compressImage(file) {
     return new Promise(function (resolve, reject) {
-        debug("compressImage: iniciando");
         const reader = new FileReader();
         reader.onload = function (event) {
-            debug("compressImage: arquivo lido, criando imagem");
             const img = new Image();
             img.onload = function () {
-                debug("compressImage: imagem carregada " + img.width + "x" + img.height);
                 const canvas = document.createElement("canvas");
                 const size = Math.min(img.width, img.height);
                 const offsetX = (img.width - size) / 2;
@@ -54,17 +40,14 @@ function compressImage(file) {
                 const ctx = canvas.getContext("2d");
                 ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
                 const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-                debug("compressImage: resultado " + dataUrl.length + " bytes");
                 resolve(dataUrl);
             };
             img.onerror = function (e) {
-                debug("compressImage: erro ao carregar imagem");
                 reject(e);
             };
             img.src = event.target.result;
         };
         reader.onerror = function (e) {
-            debug("compressImage: erro no FileReader");
             reject(e);
         };
         reader.readAsDataURL(file);
@@ -79,19 +62,16 @@ function setText(id, text) {
 let currentPhotoUrl = "";
 
 function renderAvatar(photoUrl, displayName, email) {
-    debug("renderAvatar: photoUrl " + (photoUrl ? "sim (" + photoUrl.length + ")" : "não"));
     const img = document.getElementById("profile-avatar-img");
     const initials = document.getElementById("profile-avatar-initials");
     const topAvatar = document.getElementById("user-avatar");
     if (!img || !initials) {
-        debug("renderAvatar: elementos não encontrados img=" + !!img + " initials=" + !!initials);
         return;
     }
     if (photoUrl) {
         img.src = photoUrl;
         img.hidden = false;
         initials.hidden = true;
-        debug("renderAvatar: img.hidden=" + img.hidden + " src set");
         if (topAvatar) {
             topAvatar.style.backgroundImage = "url('" + photoUrl + "')";
             topAvatar.style.backgroundSize = "cover";
@@ -130,25 +110,19 @@ function renderProfileFields(user, photoUrl) {
 
 async function loadPhotoUrlFromFirestore(uid) {
     try {
-        debug("loadPhotoUrl: buscando no Firestore");
         const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         const snap = await getDoc(doc(db, "users", uid));
-        debug("loadPhotoUrl: snap.exists=" + snap.exists());
         return snap.exists() ? (snap.data().photoUrl || "") : "";
     } catch (e) {
-        debug("loadPhotoUrl: ERRO " + (e && e.message ? e.message : e));
         return "";
     }
 }
 
 async function savePhotoUrlToFirestore(uid, photoUrl) {
     try {
-        debug("savePhoto: salvando " + photoUrl.length + " bytes");
         const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         await setDoc(doc(db, "users", uid), { photoUrl: photoUrl }, { merge: true });
-        debug("savePhoto: sucesso");
     } catch (e) {
-        debug("savePhoto: ERRO " + (e && e.message ? e.message : e));
         throw e;
     }
 }
@@ -161,12 +135,11 @@ async function saveNameToFirestore(uid, displayName) {
 }
 
 export function initProfile(user) {
-    debug("initProfile: uid=" + user.uid.substring(0, 8));
+
     currentPhotoUrl = user.photoURL || "";
     renderProfileFields(user, currentPhotoUrl);
 
     loadPhotoUrlFromFirestore(user.uid).then(function (stored) {
-        debug("loadPhotoUrl retornou: " + (stored ? "tem " + stored.length + " bytes" : "vazio"));
         if (stored) {
             currentPhotoUrl = stored;
             renderAvatar(stored, user.displayName || "Usuário", user.email || "");
@@ -178,12 +151,11 @@ export function initProfile(user) {
     const photoInput = document.getElementById("profile-photo-input");
     const photoLabel = document.querySelector(".profile-avatar-upload");
 
-    debug("elementos: form=" + !!form + " input=" + !!input + " photoInput=" + !!photoInput + " label=" + !!photoLabel);
+
 
     if (photoLabel && photoInput) {
         photoLabel.addEventListener("click", function (event) {
             event.preventDefault();
-            debug("label clicado, ativando input");
             photoInput.click();
         });
     }
@@ -211,13 +183,10 @@ export function initProfile(user) {
 
     if (photoInput) {
         photoInput.addEventListener("change", async function () {
-            debug("change disparado");
             const file = photoInput.files && photoInput.files[0];
             if (!file) {
-                debug("nenhum arquivo selecionado");
                 return;
             }
-            debug("arquivo: " + file.name + " tipo " + file.type + " tamanho " + file.size);
             if (ALLOWED.indexOf(file.type) === -1) {
                 showToast("Formato não suportado. Use PNG, JPG ou WebP.", "error");
                 photoInput.value = "";
@@ -235,7 +204,6 @@ export function initProfile(user) {
                 await savePhotoUrlToFirestore(user.uid, base64);
                 showToast("Foto atualizada!", "success");
             } catch (error) {
-                debug("ERRO GERAL: " + (error && error.message ? error.message : error));
                 showToast("Erro: " + (error && error.message ? error.message : error), "error");
             } finally {
                 photoInput.value = "";
