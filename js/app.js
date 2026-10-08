@@ -18,9 +18,7 @@ export function initAppShell() {
         });
     });
     const xpFill = document.getElementById("xp-fill");
-    if (xpFill) {
-        setTimeout(function () { xpFill.style.width = "45%"; }, 200);
-    }
+    if (xpFill) setTimeout(function () { xpFill.style.width = "45%"; }, 200);
 }
 
 function fireConfetti() {
@@ -38,6 +36,18 @@ function fireConfetti() {
         container.appendChild(piece);
     }
     setTimeout(function () { container.remove(); }, 2400);
+}
+
+function formatValue(value) {
+    if (value === null) return "null";
+    if (value === undefined) return "undefined";
+    if (typeof value === "string") return value;
+    if (typeof value === "function") return value.toString();
+    try {
+        return JSON.stringify(value, null, 2);
+    } catch (e) {
+        return String(value);
+    }
 }
 
 export function initEditor() {
@@ -58,29 +68,47 @@ export function initEditor() {
             }
         });
     }
-    const originalLog = console.log;
     runButton.addEventListener("click", function () {
         output.textContent = "";
         const lines = [];
         const startTime = Date.now();
-        const safePrint = function () {
-            const args = Array.prototype.slice.call(arguments);
-            lines.push("> " + args.map(function (a) {
-                return typeof a === "object" ? JSON.stringify(a) : String(a);
-            }).join(" "));
-            output.textContent = lines.join("\n");
-        };
-        console.log = safePrint;
         let hasError = false;
+
+        function safePrint() {
+            const args = Array.prototype.slice.call(arguments);
+            lines.push("> " + args.map(formatValue).join(" "));
+            output.textContent = lines.join("\n");
+        }
+
+        const safeConsole = {
+            log: safePrint,
+            error: safePrint,
+            warn: safePrint,
+            info: safePrint,
+            debug: safePrint
+        };
+
         try {
-            const userFunction = new Function("print", "console", input.value);
-            userFunction(safePrint, { log: safePrint, error: safePrint, warn: safePrint, info: safePrint });
+            const userFunction = new Function(
+                "print",
+                "console",
+                "window",
+                "document",
+                "alert",
+                input.value
+            );
+            userFunction(
+                safePrint,
+                safeConsole,
+                { print: function () {} },
+                { querySelector: function () { return null; } },
+                function () {}
+            );
         } catch (error) {
             hasError = true;
             output.textContent = "Erro: " + error.message;
-        } finally {
-            console.log = originalLog;
         }
+
         if (!hasError) {
             const elapsed = Date.now() - startTime;
             lines.push("");
