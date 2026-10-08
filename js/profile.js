@@ -128,8 +128,7 @@ async function loadPhotoFromFirestore(uid) {
         const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js");
         const snap = await getDoc(doc(db, "users", uid));
         if (!snap.exists()) return "";
-        const data = snap.data();
-        return data.photoUrl || "";
+        return snap.data().photoUrl || "";
     } catch (e) {
         return "";
     }
@@ -147,21 +146,11 @@ async function saveNameToFirestore(uid, displayName) {
     } catch (e) {}
 }
 
-export async function initProfile(user) {
+export function initProfile(user) {
     const cached = readCachedPhoto(user.uid);
     const authPhoto = user.photoURL || "";
-    const initial = cached || authPhoto;
-    currentPhotoUrl = initial;
-    renderProfileFields(user, initial);
-
-    try {
-        const fromFirestore = await loadPhotoFromFirestore(user.uid);
-        if (fromFirestore) {
-            currentPhotoUrl = fromFirestore;
-            cachePhoto(user.uid, fromFirestore);
-            renderAvatar(fromFirestore, user.displayName || "Usuário", user.email || "");
-        }
-    } catch (e) {}
+    currentPhotoUrl = cached || authPhoto;
+    renderProfileFields(user, currentPhotoUrl);
 
     const form = document.getElementById("profile-edit-form");
     const input = document.getElementById("profile-edit-name");
@@ -215,9 +204,8 @@ export async function initProfile(user) {
                 currentPhotoUrl = base64;
                 cachePhoto(user.uid, base64);
                 renderAvatar(base64, user.displayName || "Usuário", user.email || "");
-                await savePhotoToFirestore(user.uid, base64);
-                try { await updateProfile(user, { photoURL: base64 }); } catch (e) {}
                 showToast("Foto salva!", "success");
+                savePhotoToFirestore(user.uid, base64).catch(function () {});
             } catch (error) {
                 const msg = error && error.message ? error.message : String(error);
                 showToast("Erro: " + msg, "error");
@@ -226,4 +214,12 @@ export async function initProfile(user) {
             }
         });
     }
+
+    loadPhotoFromFirestore(user.uid).then(function (fromFirestore) {
+        if (fromFirestore) {
+            currentPhotoUrl = fromFirestore;
+            cachePhoto(user.uid, fromFirestore);
+            renderAvatar(fromFirestore, user.displayName || "Usuário", user.email || "");
+        }
+    }).catch(function () {});
 }
