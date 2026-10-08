@@ -7,7 +7,7 @@ const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 const AVATAR_SIZE = 256;
 
 function docUrl(uid) {
-    return "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/users/" + uid;
+    return "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents/users/" + uid;
 }
 
 async function getToken() {

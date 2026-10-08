@@ -27,7 +27,7 @@ export async function runFirestoreDebug() {
         
         const uid = user.uid;
         const projectId = "proyect-af2be";
-        const url = "https://firestore.googleapis.com/v1/projects/" + projectId + "/databases/(default)/documents/users/" + uid + "?updateMask.fieldPaths=debugTest";
+        const url = "https://firestore.googleapis.com/v1/projects/" + projectId + "/databases/default/documents/users/" + uid + "?updateMask.fieldPaths=debugTest";
         log += "URL: " + url + "\n\n";
         log += "Enviando PATCH...\n";
         
