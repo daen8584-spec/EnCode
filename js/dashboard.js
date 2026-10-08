@@ -1,6 +1,7 @@
 import { observeAuthState, signOutUser } from "./auth-service.js";
-import { initAppShell, initEditor, initLessonButtons } from "./app.js";
+import { initAppShell, initEditor } from "./app.js";
 import { initProfile } from "./profile.js";
+import { initLessonPath } from "./lesson-path.js";
 
 const topbar = document.querySelector(".topbar");
 const appShell = document.getElementById("app-shell");
@@ -33,7 +34,11 @@ observeAuthState(function (user) {
     initAppShell();
     initEditor();
     initProfile(user);
-    initLessonButtons();
+    initLessonPath();
+    if (window.location.hash === "#licoes") {
+        const btn = document.querySelector('.nav-item[data-view="lessons"]');
+        if (btn) btn.click();
+    }
 });
 
 signOutButton.addEventListener("click", async function () {
@@ -44,3 +49,4 @@ signOutButton.addEventListener("click", async function () {
     }
     window.location.href = "login.html";
 });
+

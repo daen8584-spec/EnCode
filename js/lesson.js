@@ -317,11 +317,11 @@ function bootstrap(user, progress) {
 el.action.addEventListener("click", onActionClick);
 
 el.close.addEventListener("click", function () {
-    window.location.href = "dashboard.html";
+    window.location.href = "dashboard.html#licoes";
 });
 
 el.celebrationContinue.addEventListener("click", function () {
-    window.location.href = "dashboard.html";
+    window.location.href = "dashboard.html#licoes";
 });
 
 onAuthStateChanged(auth, async function (user) {
@@ -332,4 +332,5 @@ onAuthStateChanged(auth, async function (user) {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
+
 

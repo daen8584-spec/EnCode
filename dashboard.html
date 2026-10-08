@@ -107,27 +107,13 @@
 </section>
 <section class="view" id="view-lessons">
 <h1 class="view-title">Lições</h1>
-<p class="view-subtitle">Escolha uma linguagem para começar sua jornada.</p>
-<div class="dashboard-tracks">
-<article class="track-card track-html">
-<span class="track-icon">&lt;/&gt;</span>
-<h2 class="track-name">HTML</h2>
-<p class="track-description">Estruture páginas web com marcação semântica e acessível.</p>
-<button class="track-start" type="button" data-track="html">Em breve</button>
-</article>
-<article class="track-card track-css">
-<span class="track-icon">{ }</span>
-<h2 class="track-name">CSS</h2>
-<p class="track-description">Estilize páginas com cores, layouts e animações modernas.</p>
-<button class="track-start" type="button" data-track="css">Em breve</button>
-</article>
-<article class="track-card track-python">
-<span class="track-icon">py</span>
-<h2 class="track-name">Python</h2>
-<p class="track-description">Aprenda lógica, automação e ciência de dados.</p>
-<button class="track-start" type="button" data-track="python">Em breve</button>
-</article>
+<p class="view-subtitle">Escolha uma trilha para começar sua jornada.</p>
+<div class="language-tabs">
+<button class="language-tab is-active" type="button" data-lang="python">Python</button>
+<button class="language-tab" type="button" data-lang="html" disabled>HTML</button>
+<button class="language-tab" type="button" data-lang="css" disabled>CSS</button>
 </div>
+<div id="lessons-path-container"></div>
 </section>
 <section class="view" id="view-editor">
 <h1 class="view-title">Editor Python</h1>
@@ -206,5 +192,6 @@
 <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
+
 
 

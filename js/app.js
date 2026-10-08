@@ -188,19 +188,4 @@ export function initEditor() {
     });
 }
 
-export function initLessonButtons() {
-    const buttons = document.querySelectorAll(".track-start[data-track]");
-    buttons.forEach(function (btn) {
-        const track = btn.getAttribute("data-track");
-        if (track === "python") {
-            btn.textContent = "Começar";
-            btn.disabled = false;
-            btn.addEventListener("click", function () {
-                window.location.href = "lesson.html?id=py-1";
-            });
-        } else {
-            btn.textContent = "Em breve";
-            btn.disabled = true;
-        }
-    });
-}
+

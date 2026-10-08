@@ -134,3 +134,13 @@ export const LESSONS = [
 export const UNIT_NAME = "Fundamentos de Python";
 export const LESSON_XP_BASE = 10;
 export const EXERCISE_XP = 2;
+
+export const UNITS = [
+    {
+        id: "unit-1",
+        title: "Fundamentos",
+        description: "Variáveis, números e primeiras instruções em Python",
+        lessons: ["py-1", "py-2", "py-3", "py-4", "py-5"]
+    }
+];
+
