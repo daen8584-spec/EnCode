@@ -26,7 +26,7 @@ async function saveToFirestore(uid, data) {
         fields[k] = { stringValue: String(data[k]) };
     });
     const mask = Object.keys(data).map(function (k) { return "updateMask.fieldPaths=" + k; }).join("&");
-    const url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents/users/" + uid + "?" + mask;
+    const url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/users/" + uid + "?" + mask;
     const res = await fetch(url, {
         method: "PATCH",
         headers: {
@@ -42,7 +42,7 @@ async function saveToFirestore(uid, data) {
 async function loadFromFirestore(uid) {
     try {
         const token = await auth.currentUser.getIdToken();
-        const url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/default/documents/users/" + uid;
+        const url = "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/users/" + uid;
         const res = await fetch(url, {
             headers: { "Authorization": "Bearer " + token }
         });
