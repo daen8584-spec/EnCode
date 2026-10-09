@@ -5,7 +5,8 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/f
 
 const state = {
     lesson: null,
-    exerciseIndex: 0,
+    steps: [],
+    stepIndex: 0,
     user: null,
     progress: null,
     answered: false,
@@ -45,6 +46,19 @@ function pickLesson(progress) {
     return next || LESSONS[0];
 }
 
+function buildSteps(lesson) {
+    const steps = [];
+    if (lesson.teach) {
+        lesson.teach.forEach(function (t) {
+            steps.push({ type: "teach", data: t });
+        });
+    }
+    lesson.exercises.forEach(function (ex) {
+        steps.push(ex);
+    });
+    return steps;
+}
+
 function setMascot(state_) {
     el.mascot.classList.remove("is-idle", "is-happy", "is-sad");
     if (state_ === "happy") el.mascot.classList.add("is-happy");
@@ -53,9 +67,9 @@ function setMascot(state_) {
 }
 
 function updateProgressBar() {
-    const total = state.lesson.exercises.length;
-    const current = state.exerciseIndex;
-    const percent = ((current) / total) * 100;
+    const total = state.steps.length;
+    const current = state.stepIndex;
+    const percent = (current / total) * 100;
     el.progressFill.style.width = percent + "%";
     el.counterCurrent.textContent = String(current + 1);
     el.counterTotal.textContent = String(total);
@@ -66,6 +80,48 @@ function normalizeOutput(text) {
         .replace(/\r\n/g, "\n")
         .replace(/\s+$/g, "")
         .trim();
+}
+
+function renderTeach(step) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "teach-card";
+
+    const term = document.createElement("span");
+    term.className = "teach-term";
+    term.textContent = step.data.term;
+
+    const text = document.createElement("div");
+    text.className = "teach-text";
+    step.data.lines.forEach(function (line) {
+        const p = document.createElement("p");
+        p.textContent = line;
+        text.appendChild(p);
+    });
+
+    const example = document.createElement("div");
+    example.className = "teach-example";
+
+    const code = document.createElement("pre");
+    code.className = "teach-code";
+    code.textContent = step.data.example.code;
+
+    const arrow = document.createElement("div");
+    arrow.className = "teach-arrow";
+    arrow.textContent = "↓";
+
+    const out = document.createElement("pre");
+    out.className = "teach-output";
+    out.textContent = step.data.example.output;
+
+    example.appendChild(code);
+    example.appendChild(arrow);
+    example.appendChild(out);
+
+    wrapper.appendChild(term);
+    wrapper.appendChild(text);
+    wrapper.appendChild(example);
+
+    return wrapper;
 }
 
 function renderMultipleChoice(exercise) {
@@ -103,7 +159,6 @@ function renderFillBlank(exercise) {
     const codeBlock = document.createElement("pre");
     codeBlock.className = "lesson-output";
     const parts = exercise.codeTemplate.split("___");
-    codeBlock.textContent = "";
     codeBlock.appendChild(document.createTextNode(parts[0]));
     const blank = document.createElement("span");
     blank.style.color = "#fbbf24";
@@ -135,7 +190,6 @@ function renderFillBlank(exercise) {
         const expected = normalizeOutput(exercise.answer).toLowerCase();
         return value === expected;
     };
-    wrapper._readAnswer = function () { return input.value; };
 
     return wrapper;
 }
@@ -169,11 +223,7 @@ function renderWriteCode(exercise) {
 
     wrapper._checkAnswer = function () {
         const Sk = window.Sk;
-        if (typeof Sk === "undefined") {
-            return false;
-        }
-        const token = auth.currentUser ? "ok" : "anon";
-        void token;
+        if (typeof Sk === "undefined") return Promise.resolve(false);
         let buffer = "";
         Sk.configure({
             output: function (text) { buffer += text; },
@@ -187,46 +237,60 @@ function renderWriteCode(exercise) {
             inputfun: function () { return ""; },
             inputfunTakesPrompt: true
         });
-    return Sk.miseval.asyncToPromise(function () {
-        return Sk.importMainWithBody("<stdin>", false, input.value, true);
-    }).then(function () {
-        const userOut = normalizeOutput(buffer);
-        const expectedOut = normalizeOutput(exercise.expectedOutput);
-        return userOut === expectedOut;
-    }).catch(function () { return false; });
+        return Sk.miseval.asyncToPromise(function () {
+            return Sk.importMainWithBody("<stdin>", false, input.value, true);
+        }).then(function () {
+            const userOut = normalizeOutput(buffer);
+            const expectedOut = normalizeOutput(exercise.expectedOutput);
+            return userOut === expectedOut;
+        }).catch(function () { return false; });
     };
-
-    wrapper._readAnswer = function () { return input.value; };
-    wrapper._lastOutput = function () { return null; };
 
     return wrapper;
 }
 
-function renderExercise() {
+function renderStep() {
     state.answered = false;
     el.feedback.hidden = true;
     el.feedback.className = "lesson-feedback";
-    el.action.textContent = "Verificar";
     el.action.classList.remove("is-success", "is-error");
-    el.action.disabled = state.lesson.exercises[state.exerciseIndex].type !== "multiple-choice";
     el.body.innerHTML = "";
 
-    const exercise = state.lesson.exercises[state.exerciseIndex];
+    const step = state.steps[state.stepIndex];
     updateProgressBar();
 
+    if (step.type === "teach") {
+        el.title.textContent = "";
+        el.instruction.textContent = "";
+        el.title.style.display = "none";
+        el.instruction.style.display = "none";
+        const node = renderTeach(step);
+        el.body.appendChild(node);
+        el.action.textContent = "Entendi";
+        el.action.disabled = false;
+        setMascot("idle");
+        return;
+    }
+
+    el.title.style.display = "";
+    el.instruction.style.display = "";
+    el.title.textContent = state.lesson.title;
+    el.instruction.textContent = step.question || "";
+    el.action.textContent = "Verificar";
+    el.action.disabled = step.type !== "multiple-choice";
+
     let node;
-    if (exercise.type === "multiple-choice") node = renderMultipleChoice(exercise);
-    else if (exercise.type === "fill-blank") node = renderFillBlank(exercise);
-    else node = renderWriteCode(exercise);
+    if (step.type === "multiple-choice") node = renderMultipleChoice(step);
+    else if (step.type === "fill-blank") node = renderFillBlank(step);
+    else node = renderWriteCode(step);
 
     el.body.appendChild(node);
     el.body._currentExercise = node;
 
-    if (exercise.type !== "multiple-choice") {
+    if (step.type !== "multiple-choice") {
         const input = node.querySelector("input, textarea");
         if (input) {
-            input.value = input.value || "";
-            if (exercise.type === "fill-blank") input.value = "";
+            if (step.type === "fill-blank") input.value = "";
             el.action.disabled = input.value.trim().length === 0;
             setTimeout(function () { input.focus(); }, 100);
         }
@@ -259,8 +323,14 @@ function handleAnswer(isCorrect) {
 }
 
 async function onActionClick() {
+    const step = state.steps[state.stepIndex];
+
+    if (step.type === "teach") {
+        advanceStep();
+        return;
+    }
+
     if (!state.answered) {
-        const exercise = state.lesson.exercises[state.exerciseIndex];
         const node = el.body._currentExercise;
         if (!node) return;
 
@@ -268,7 +338,7 @@ async function onActionClick() {
         el.action.textContent = "Verificando...";
 
         let isCorrect = false;
-        if (exercise.type === "write-code") {
+        if (step.type === "write-code") {
             try {
                 const result = await node._checkAnswer();
                 isCorrect = result === true;
@@ -284,11 +354,15 @@ async function onActionClick() {
     }
 
     setMascot("idle");
-    state.exerciseIndex += 1;
-    if (state.exerciseIndex >= state.lesson.exercises.length) {
+    advanceStep();
+}
+
+async function advanceStep() {
+    state.stepIndex += 1;
+    if (state.stepIndex >= state.steps.length) {
         await completeLesson();
     } else {
-        renderExercise();
+        renderStep();
     }
 }
 
@@ -306,12 +380,10 @@ function bootstrap(user, progress) {
     state.user = user;
     state.progress = progress;
     state.lesson = pickLesson(progress);
-    state.exerciseIndex = 0;
+    state.steps = buildSteps(state.lesson);
+    state.stepIndex = 0;
     state.correctCount = 0;
-    el.title.textContent = state.lesson.title;
-    el.instruction.textContent = state.lesson.instruction;
-    setMascot("idle");
-    renderExercise();
+    renderStep();
 }
 
 el.action.addEventListener("click", onActionClick);
@@ -332,5 +404,4 @@ onAuthStateChanged(auth, async function (user) {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
-
 
