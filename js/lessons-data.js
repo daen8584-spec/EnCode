@@ -229,7 +229,6 @@ export const LESSONS = [
                 expectedOutput: "1\n2\n3"
             }
         ]
-    }
     },
     {
         id: "html-1",
@@ -495,3 +494,4 @@ export const LESSON_XP_BASE = 10;
 export const EXERCISE_XP = 2;
 
 
+// 1791514593
