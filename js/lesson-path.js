@@ -7,10 +7,30 @@ const ICONS = {
     locked: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>'
 };
 
+let currentLang = "python";
+
 export async function initLessonPath() {
     const container = document.getElementById("lessons-path-container");
     if (!container) return;
 
+    const tabs = document.querySelectorAll(".language-tab");
+    tabs.forEach(function (tab) {
+        tab.disabled = false;
+        tab.addEventListener("click", function () {
+            const lang = tab.getAttribute("data-lang");
+            if (!lang || lang === currentLang) return;
+            currentLang = lang;
+            tabs.forEach(function (t) {
+                t.classList.toggle("is-active", t.getAttribute("data-lang") === lang);
+            });
+            renderPath(container);
+        });
+    });
+
+    await renderPath(container);
+}
+
+async function renderPath(container) {
     let completed = [];
     try {
         const progress = await loadProgress();
@@ -19,9 +39,21 @@ export async function initLessonPath() {
         completed = [];
     }
 
+    const filteredUnits = UNITS.filter(function (u) {
+        return (u.lang || "python") === currentLang;
+    });
+
     container.innerHTML = "";
 
-    UNITS.forEach(function (unit, unitIndex) {
+    if (filteredUnits.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "roadmap-empty";
+        empty.textContent = "Novas lições em breve.";
+        container.appendChild(empty);
+        return;
+    }
+
+    filteredUnits.forEach(function (unit, unitIndex) {
         const unitEl = document.createElement("div");
         unitEl.className = "roadmap-unit";
 
@@ -104,4 +136,5 @@ export async function initLessonPath() {
         container.appendChild(unitEl);
     });
 }
+
 

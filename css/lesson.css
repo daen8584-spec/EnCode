@@ -876,3 +876,20 @@
     50% { transform: translateY(4px); }
 }
 
+
+.celebration-actions {
+    display: flex;
+    gap: var(--space-xs);
+    width: 100%;
+}
+
+.lesson-action-secondary {
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+    color: var(--color-text) !important;
+}
+
+.lesson-action-secondary:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+

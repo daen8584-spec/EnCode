@@ -78,8 +78,21 @@ function updateProgressBar() {
 function normalizeOutput(text) {
     return String(text)
         .replace(/\r\n/g, "\n")
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, "\"")
         .replace(/\s+$/g, "")
         .trim();
+}
+
+function normalizeCode(text) {
+    return String(text)
+        .replace(/\r\n/g, "\n")
+        .replace(/"/g, "'")
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, "'")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
 }
 
 function renderTeach(step) {
@@ -194,6 +207,86 @@ function renderFillBlank(exercise) {
     return wrapper;
 }
 
+function renderWriteHtml(exercise) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "lesson-editor";
+
+    const header = document.createElement("div");
+    header.className = "lesson-output-header";
+    header.textContent = "Escreva seu código HTML";
+    const hint = document.createElement("pre");
+    hint.className = "lesson-output";
+    hint.style.minHeight = "auto";
+    hint.textContent = "Exemplo: " + exercise.expectedPattern.replace(/</g, "<").replace(/>/g, ">");
+    hint.style.color = "var(--color-text-muted)";
+
+    const input = document.createElement("textarea");
+    input.className = "lesson-code-input";
+    input.spellcheck = false;
+    input.autocapitalize = "off";
+    input.autocomplete = "off";
+    input.value = exercise.starter || "";
+    input.placeholder = "<h1>Olá</h1>";
+
+    input.addEventListener("input", function () {
+        el.action.disabled = input.value.trim().length === 0;
+    });
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(hint);
+    wrapper.appendChild(input);
+
+    wrapper._checkAnswer = function () {
+        const codeNorm = String(input.value)
+            .replace(/\s+/g, "")
+            .toLowerCase();
+        const expected = String(exercise.expectedPattern)
+            .replace(/\s+/g, "")
+            .toLowerCase();
+        return codeNorm === expected;
+    };
+
+    return wrapper;
+}
+
+function renderWriteCss(exercise) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "lesson-editor";
+
+    const header = document.createElement("div");
+    header.className = "lesson-output-header";
+    header.textContent = "Escreva seu código CSS";
+
+    const input = document.createElement("textarea");
+    input.className = "lesson-code-input";
+    input.spellcheck = false;
+    input.autocapitalize = "off";
+    input.autocomplete = "off";
+    input.value = exercise.starter || "";
+    input.placeholder = "p { color: red; }";
+
+    input.addEventListener("input", function () {
+        el.action.disabled = input.value.trim().length === 0;
+    });
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(input);
+
+    wrapper._checkAnswer = function () {
+        const codeNorm = String(input.value)
+            .replace(/\s+/g, "")
+            .replace(/"/g, "'")
+            .toLowerCase();
+        const expected = String(exercise.expectedPattern)
+            .replace(/\s+/g, "")
+            .replace(/"/g, "'")
+            .toLowerCase();
+        return codeNorm === expected;
+    };
+
+    return wrapper;
+}
+
 function renderWriteCode(exercise) {
     const wrapper = document.createElement("div");
     wrapper.className = "lesson-editor";
@@ -237,6 +330,11 @@ function renderWriteCode(exercise) {
             inputfun: function () { return ""; },
             inputfunTakesPrompt: true
         });
+        const codeNorm = normalizeCode(input.value);
+        const expectedCode = exercise.expectedCode ? normalizeCode(exercise.expectedCode) : "";
+        if (expectedCode && codeNorm.indexOf(expectedCode) === -1) {
+            return Promise.resolve(false);
+        }
         return Sk.miseval.asyncToPromise(function () {
             return Sk.importMainWithBody("<stdin>", false, input.value, true);
         }).then(function () {
@@ -282,6 +380,8 @@ function renderStep() {
     let node;
     if (step.type === "multiple-choice") node = renderMultipleChoice(step);
     else if (step.type === "fill-blank") node = renderFillBlank(step);
+    else if (step.type === "write-html") node = renderWriteHtml(step);
+    else if (step.type === "write-css") node = renderWriteCss(step);
     else node = renderWriteCode(step);
 
     el.body.appendChild(node);
@@ -396,6 +496,17 @@ el.celebrationContinue.addEventListener("click", function () {
     window.location.href = "dashboard.html#licoes";
 });
 
+const repeatBtn = document.getElementById("celebration-repeat");
+if (repeatBtn) {
+    repeatBtn.addEventListener("click", function () {
+        state.stepIndex = 0;
+        state.correctCount = 0;
+        state.answered = false;
+        el.celebration.hidden = true;
+        renderStep();
+    });
+}
+
 onAuthStateChanged(auth, async function (user) {
     if (!user) {
         window.location.href = "login.html";
@@ -404,4 +515,5 @@ onAuthStateChanged(auth, async function (user) {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
+
 
