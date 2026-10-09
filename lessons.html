@@ -32,7 +32,32 @@
 <div id="lessons-path-container"></div>
 </main>
 
+<script>
+(function(){
+    var box = document.createElement("div");
+    box.id = "inline-debug";
+    box.style.cssText = "position:fixed;top:0;left:0;right:0;padding:10px;background:#0f0;color:#000;font-size:11px;font-family:monospace;z-index:999999;white-space:pre-wrap;";
+    box.textContent = "INLINE OK - aguardando módulo...";
+    function attach() {
+        if (document.body) document.body.appendChild(box);
+        else setTimeout(attach, 10);
+    }
+    attach();
+    window.addEventListener("error", function(e){
+        box.style.background = "#f00";
+        box.style.color = "#fff";
+        box.textContent = "ERRO: " + e.message + " em " + e.filename + ":" + e.lineno;
+    });
+    window.addEventListener("unhandledrejection", function(e){
+        box.style.background = "#f00";
+        box.style.color = "#fff";
+        box.textContent = "PROMISE: " + (e.reason && e.reason.message ? e.reason.message : String(e.reason));
+    });
+    window.__debugBox = box;
+})();
+</script>
 <script type="module" src="js/lessons-page.js"></script>
 </body>
 </html>
+
 
