@@ -468,9 +468,6 @@
     display: none !important;
 }
 
-.lesson-body-main[hidden] {
-    display: none !important;
-}
 
 
 .language-tabs {
@@ -889,3 +886,4 @@
     transform: scaleX(-1);
 }
 
+/* 1791691261 */
