@@ -153,7 +153,6 @@
     color: var(--color-text-muted);
 }
 
-.track-python { --track-color: #4b8bbe; }
 @keyframes topbar-enter {
     from { opacity: 0; transform: translateY(-100%); }
     to { opacity: 1; transform: none; }
@@ -170,3 +169,4 @@
     transform: scaleX(-1);
 }
 
+/* 1791750911 */

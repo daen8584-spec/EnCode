@@ -92,9 +92,6 @@
     animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1) !important;
     animation-fill-mode: forwards !important;
 }
-.track-html { --track-color: #e34f26; }
-.track-css { --track-color: #1572b6; }
-.track-python { --track-color: #ffd43b; }
 .track-icon {
     font-size: 15px;
     letter-spacing: -0.5px;
@@ -133,3 +130,4 @@
 }
 
 
+/* 1791750911 */
