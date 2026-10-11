@@ -335,12 +335,25 @@ function renderWriteCode(exercise) {
         if (expectedCode && codeNorm.indexOf(expectedCode) === -1) {
             return Promise.resolve(false);
         }
-        return Sk.miseval.asyncToPromise(function () {
-            return Sk.importMainWithBody("<stdin>", false, input.value, true);
+        const sanitized = String(input.value)
+            .replace(/[\u2018\u2019]/g, "'")
+            .replace(/[\u201C\u201D]/g, "\"")
+            .replace(/[\u2013\u2014]/g, "-")
+            .replace(/\u00A0/g, " ")
+            .replace(/\u2192/g, "->")
+            .replace(/\u21D2/g, "=>");
+        return Sk.misceval.asyncToPromise(function () {
+            return Sk.importMainWithBody("<stdin>", false, sanitized, true);
         }).then(function () {
-            const userOut = normalizeOutput(buffer);
-            const expectedOut = normalizeOutput(exercise.expectedOutput);
-            return userOut === expectedOut;
+            return new Promise(function (resolve) {
+                setTimeout(function () {
+                    const userOut = normalizeOutput(buffer);
+                    const expectedOut = normalizeOutput(exercise.expectedOutput);
+                    if (userOut === expectedOut) { resolve(true); return; }
+                    const collapse = function (s) { return s.replace(/\s+/g, " ").trim(); };
+                    resolve(collapse(userOut) === collapse(expectedOut));
+                }, 80);
+            });
         }).catch(function () { return false; });
     };
 
@@ -517,3 +530,4 @@ onAuthStateChanged(auth, async function (user) {
 });
 
 
+// 1791682045
