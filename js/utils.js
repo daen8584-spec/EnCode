@@ -34,3 +34,54 @@ export const createEl = (tag, className, text) => {
     if (text !== undefined) node.textContent = text;
     return node;
 };
+
+const PYTHON_KEYWORDS = [
+    "print", "input", "range", "int", "str", "float", "len", "type",
+    "list", "dict", "set", "tuple", "sum", "max", "min", "abs", "round",
+    "sorted", "reversed", "enumerate", "zip", "map", "filter"
+];
+
+export const friendlyError = (rawMessage, userCode) => {
+    const msg = String(rawMessage ?? "");
+    const code = String(userCode ?? "");
+
+    const nameMatch = msg.match(/name '(\w+)' is not defined/i);
+    if (nameMatch) {
+        const name = nameMatch[1];
+        const lower = name.toLowerCase();
+        if (PYTHON_KEYWORDS.includes(lower)) {
+            if (name !== lower) {
+                return `Python diferencia maiúsculas de minúsculas. Use ${lower} com letra minúscula.`;
+            }
+            return `A função ${lower} não foi usada corretamente.`;
+        }
+        return `A palavra '${name}' não está entre aspas. Textos precisam de aspas: "${name}"`;
+    }
+
+    if (msg.includes("unterminated string") || msg.includes("EOL while scanning")) {
+        return "Aspas não fechadas. Cada texto precisa de duas aspas.";
+    }
+
+    if (msg.includes("IndentationError") || msg.includes("expected an indented block")) {
+        return "Falta indentação. Use 4 espaços no início da linha dentro do if/for/def.";
+    }
+
+    if (msg.includes("expected ':'")) {
+        return "Falta dois pontos (:) no final da linha do if/for/def.";
+    }
+
+    if (msg.includes("SyntaxError")) {
+        return "Erro de sintaxe. Verifique parênteses, aspas e dois pontos.";
+    }
+
+    if (msg.includes("ZeroDivisionError")) {
+        return "Não é possível dividir por zero.";
+    }
+
+    if (msg.includes("TypeError") && msg.includes("can only concatenate str")) {
+        return "Não é possível juntar texto com número. Use str() para converter o número.";
+    }
+
+    return msg.split("\n")[0];
+};
+// 1791696887

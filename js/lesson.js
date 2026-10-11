@@ -2,7 +2,7 @@ import { auth } from "./firebase-config.js";
 import { LESSONS, UNITS, LESSON_XP_BASE, EXERCISE_XP } from "./lessons-data.js";
 import { loadProgress, addXpAndStreak, markLessonComplete } from "./progress-service.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { sanitizeCode, createEl } from "./utils.js";
+import { sanitizeCode, createEl, friendlyError } from "./utils.js";
 
 const state = {
     lesson: null,
@@ -202,8 +202,7 @@ function renderWriteCode(exercise) {
             }))
             .catch((error) => {
                 const raw = error?.toString?.() ?? String(error);
-                const clean = raw.split("\n")[0].replace(/^.*Error:\s*/, "");
-                return { correct: false, reason: clean || raw };
+                return { correct: false, reason: friendlyError(raw, input.value) };
             });
     };
 
@@ -434,3 +433,4 @@ onAuthStateChanged(auth, async (user) => {
     bootstrap(user, progress);
 });
 // 1791696639
+// 1791696887
