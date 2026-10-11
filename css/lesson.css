@@ -941,3 +941,10 @@
     transform: translateY(0);
 }
 /* 1791752158 */
+
+.editor-input,
+.lesson-code-input {
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+}
+/* 1791752888 */
