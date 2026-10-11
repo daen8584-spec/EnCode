@@ -350,7 +350,9 @@ async function completeLesson() {
     try {
         await addXpAndStreak(gained);
         await markLessonComplete(state.lesson.id);
-    } catch {}
+    } catch (error) {
+        console.error("Falha ao salvar progresso:", error);
+    }
 }
 
 function getNextLessonId(currentId) {
@@ -423,4 +425,3 @@ onAuthStateChanged(auth, async (user) => {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
-// 1791690739
