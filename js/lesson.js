@@ -170,7 +170,7 @@ function renderWriteCode(exercise) {
 
     wrapper._checkAnswer = () => {
         const Sk = window.Sk;
-        if (typeof Sk === "undefined") return Promise.resolve(false);
+        if (typeof Sk === "undefined") return Promise.resolve({ correct: false, reason: "O interpretador ainda não carregou." });
 
         let buffer = "";
         Sk.configure({
@@ -191,11 +191,20 @@ function renderWriteCode(exercise) {
             .then(() => new Promise((resolve) => {
                 setTimeout(() => {
                     const userOut = normalizeOutput(buffer);
-                    if (userOut === expectedOut) return resolve(true);
-                    resolve(collapseWhitespace(userOut) === collapseWhitespace(expectedOut));
+                    if (userOut === expectedOut || collapseWhitespace(userOut) === collapseWhitespace(expectedOut)) {
+                        return resolve({ correct: true });
+                    }
+                    const reason = userOut
+                        ? `Sua saída: ${userOut}`
+                        : "O programa não mostrou nada. Verifique se usou print.";
+                    resolve({ correct: false, reason });
                 }, 80);
             }))
-            .catch(() => false);
+            .catch((error) => {
+                const raw = error?.toString?.() ?? String(error);
+                const clean = raw.split("\n")[0].replace(/^.*Error:\s*/, "");
+                return { correct: false, reason: clean || raw };
+            });
     };
 
     return wrapper;
@@ -306,13 +315,13 @@ function renderStep() {
     }
 }
 
-function handleAnswer(isCorrect) {
+function handleAnswer(isCorrect, reason = "") {
     state.answered = true;
     el.feedback.hidden = false;
     el.feedback.className = `lesson-feedback is-${isCorrect ? "correct" : "wrong"}`;
 
     const icon = createEl("span", "lesson-feedback-icon", isCorrect ? "✓" : "✕");
-    const text = createEl("span", null, isCorrect ? "Correto!" : "Não foi dessa vez. Continue!");
+    const text = createEl("span", null, isCorrect ? "Correto!" : reason || "Não foi dessa vez. Continue!");
     el.feedback.replaceChildren(icon, text);
 
     if (isCorrect) {
@@ -373,12 +382,18 @@ el.action.addEventListener("click", async () => {
         el.action.textContent = "Verificando...";
 
         let correct = false;
+        let reason = "";
         try {
             const result = await node._checkAnswer();
-            correct = result === true;
+            if (typeof result === "object" && result !== null) {
+                correct = result.correct === true;
+                reason = result.reason ?? "";
+            } else {
+                correct = result === true;
+            }
         } catch {}
 
-        handleAnswer(correct);
+        handleAnswer(correct, reason);
         return;
     }
 
@@ -418,3 +433,4 @@ onAuthStateChanged(auth, async (user) => {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
+// 1791696639

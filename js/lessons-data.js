@@ -32,7 +32,7 @@ export const LESSONS = [
             },
             {
                 type: "write-code",
-                question: "Use print para mostrar a mensagem Olá, mundo!",
+                question: "Use print com o texto Olá, mundo! (entre aspas).",
                 starter: "# Digite seu código abaixo\n",
                 expectedOutput: "Olá, mundo!"
             }
@@ -71,7 +71,7 @@ export const LESSONS = [
             },
             {
                 type: "write-code",
-                question: "Crie uma variável chamada nome com o valor Ana e mostre com print.",
+                question: "Crie uma variável chamada nome com o texto Ana (entre aspas) e mostre com print.",
                 starter: "# Digite seu código abaixo\n",
                 expectedOutput: "Ana"
             }
@@ -122,7 +122,7 @@ export const LESSONS = [
             },
             {
                 type: "write-code",
-                question: "Mostre o resultado da soma de 5 com 3.",
+                question: "Mostre o resultado da soma de 5 com 3 usando print.",
                 starter: "# Digite seu código abaixo\n",
                 expectedOutput: "8"
             }
@@ -173,7 +173,7 @@ export const LESSONS = [
             },
             {
                 type: "write-code",
-                question: "Se 10 for maior que 5, mostre a palavra maior.",
+                question: "Se 10 for maior que 5, mostre a palavra maior usando print.",
                 starter: "# Digite seu código abaixo\n",
                 expectedOutput: "maior"
             }
@@ -224,7 +224,7 @@ export const LESSONS = [
             },
             {
                 type: "write-code",
-                question: "Mostre os números 1, 2 e 3, um por linha, usando for.",
+                question: "Use um for com range para mostrar os números 1, 2 e 3, um por linha.",
                 starter: "# Digite seu código abaixo\n",
                 expectedOutput: "1\n2\n3"
             }
@@ -494,3 +494,4 @@ export const LESSON_XP_BASE = 10;
 export const EXERCISE_XP = 2;
 
 
+// 1791696639
