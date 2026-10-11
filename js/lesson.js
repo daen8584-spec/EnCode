@@ -1,5 +1,5 @@
 import { auth } from "./firebase-config.js";
-import { LESSONS, LESSON_XP_BASE, EXERCISE_XP } from "./lessons-data.js";
+import { LESSONS, UNITS, LESSON_XP_BASE, EXERCISE_XP } from "./lessons-data.js";
 import { loadProgress, addXpAndStreak, markLessonComplete } from "./progress-service.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
@@ -501,12 +501,37 @@ function bootstrap(user, progress) {
 
 el.action.addEventListener("click", onActionClick);
 
+function getNextLessonId(currentId) {
+    const unit = UNITS.find(function (u) {
+        return u.lessons.indexOf(currentId) !== -1;
+    });
+    if (!unit) return null;
+    const idx = unit.lessons.indexOf(currentId);
+    if (idx < unit.lessons.length - 1) {
+        return unit.lessons[idx + 1];
+    }
+    const lang = unit.lang || "python";
+    const sameLang = UNITS.filter(function (u) {
+        return (u.lang || "python") === lang;
+    });
+    const unitIdx = sameLang.indexOf(unit);
+    if (unitIdx < sameLang.length - 1) {
+        return sameLang[unitIdx + 1].lessons[0];
+    }
+    return null;
+}
+
 el.close.addEventListener("click", function () {
-    window.location.href = "dashboard.html#licoes";
+    window.location.href = "lessons.html";
 });
 
 el.celebrationContinue.addEventListener("click", function () {
-    window.location.href = "dashboard.html#licoes";
+    const nextId = getNextLessonId(state.lesson.id);
+    if (nextId) {
+        window.location.href = "lesson.html?id=" + nextId;
+    } else {
+        window.location.href = "lessons.html";
+    }
 });
 
 const repeatBtn = document.getElementById("celebration-repeat");
@@ -531,3 +556,4 @@ onAuthStateChanged(auth, async function (user) {
 
 
 // 1791682045
+// 1791683274
