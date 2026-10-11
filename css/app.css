@@ -15,7 +15,6 @@
 .home-hero > * { position: relative; z-index: 1; }
 @keyframes hero-spin { to { transform: rotate(360deg); } }
 .mascot { width: 130px; height: 150px; animation: mascot-bob 3s ease-in-out infinite; }
-.mascot-svg { width: 100%; height: 100%; filter: drop-shadow(0 12px 24px rgba(0,0,0,0.4)); }
 @keyframes mascot-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .xp-panel { padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); margin-bottom: var(--space-md); }
 .xp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
@@ -143,7 +142,6 @@ html body div.background div.background-symbols span.symbol:nth-child(20) { anim
 .profile-info-card { padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 6px; }
 .profile-info-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--color-text-muted); }
 .profile-info-value { font-size: 15px; font-weight: 700; color: var(--color-text); word-break: break-word; }
-.profile-info-small { font-size: 12px; font-family: "JetBrains Mono", monospace; color: var(--color-text-muted); }
 .profile-edit { padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
 .profile-edit-title { font-size: 15px; font-weight: 800; margin-bottom: var(--space-sm); }
 .profile-edit-form { display: flex; flex-direction: column; gap: var(--space-xs); }
@@ -163,7 +161,6 @@ html body div.background div.background-symbols span.symbol:nth-child(20) { anim
 .profile-info-card { padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; gap: 6px; }
 .profile-info-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--color-text-muted); }
 .profile-info-value { font-size: 15px; font-weight: 700; color: var(--color-text); word-break: break-word; }
-.profile-info-small { font-size: 12px; font-family: "JetBrains Mono", monospace; color: var(--color-text-muted); }
 .profile-edit { padding: var(--space-md); background: var(--color-surface); border: 1px solid var(--color-surface-border); border-radius: var(--radius-card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
 .profile-edit-title { font-size: 15px; font-weight: 800; margin-bottom: var(--space-sm); }
 .profile-edit-form { display: flex; flex-direction: column; gap: var(--space-xs); }
@@ -181,3 +178,4 @@ html body div.background div.background-symbols span.symbol:nth-child(20) { anim
 #user-avatar {
     background-repeat: no-repeat;
 }
+/* 1791691035 */
