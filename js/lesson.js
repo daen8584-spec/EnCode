@@ -418,4 +418,3 @@ onAuthStateChanged(auth, async (user) => {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
-// 1791693670

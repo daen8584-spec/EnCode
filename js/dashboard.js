@@ -34,6 +34,10 @@ observeAuthState(async (user) => {
     initAppShell(progress);
     initEditor();
     initProfile(user);
+
+    document.querySelectorAll(".track-start").forEach((btn) => {
+        btn.addEventListener("click", () => { window.location.href = "lessons.html"; });
+    });
 });
 
 signOutButton.addEventListener("click", async () => {

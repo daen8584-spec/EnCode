@@ -494,4 +494,3 @@ export const LESSON_XP_BASE = 10;
 export const EXERCISE_XP = 2;
 
 
-// 1791514593

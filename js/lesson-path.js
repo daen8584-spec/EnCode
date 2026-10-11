@@ -1,5 +1,6 @@
 import { LESSONS, UNITS } from "./lessons-data.js";
 import { loadProgress } from "./progress-service.js";
+import { createEl } from "./utils.js";
 
 const ICONS = {
     completed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M4 12l5 5L20 6"/></svg>',
@@ -8,13 +9,6 @@ const ICONS = {
 };
 
 let currentLang = "python";
-
-const createEl = (tag, className, text) => {
-    const el = document.createElement(tag);
-    if (className) el.className = className;
-    if (text) el.textContent = text;
-    return el;
-};
 
 const findLesson = (id) => LESSONS.find((l) => l.id === id);
 
@@ -115,4 +109,3 @@ export async function initLessonPath() {
 
     await renderPath(container);
 }
-// 1791690739
