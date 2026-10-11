@@ -85,3 +85,37 @@ export const friendlyError = (rawMessage, userCode) => {
     return msg.split("\n")[0];
 };
 // 1791696887
+
+export const insertAtCursor = (textarea, text) => {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const before = textarea.value.substring(0, start);
+    const after = textarea.value.substring(end);
+    textarea.value = before + text + after;
+    const newPos = start + text.length;
+    textarea.setSelectionRange(newPos, newPos);
+    textarea.focus();
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+};
+
+const CODE_SYMBOLS = ["->", "=>", ">=", "<=", "!=", ":", "(", ")", "[", "]", "\"", "'", "_"];
+
+export const createCodeToolbar = (textarea) => {
+    if (!textarea || textarea.dataset.toolbar === "1") return;
+    textarea.dataset.toolbar = "1";
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "code-toolbar";
+
+    CODE_SYMBOLS.forEach((sym) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "code-toolbar-btn";
+        btn.textContent = sym;
+        btn.addEventListener("click", () => insertAtCursor(textarea, sym));
+        toolbar.appendChild(btn);
+    });
+
+    textarea.insertAdjacentElement("afterend", toolbar);
+};
+// 1791752158

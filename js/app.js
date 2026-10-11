@@ -1,30 +1,9 @@
-import { sanitizeInput, createEl } from "./utils.js";
+import { sanitizeInput, createEl, createCodeToolbar } from "./utils.js";
 
 const SNIPPETS = {
     hello: "print('Olá, mundo!')",
     loop: "for i in range(1, 6):\n    print('Contando:', i)",
     "function": "def saudacao(nome):\n    return 'Olá, ' + nome + '!'\n\nprint(saudacao('EnCoder'))"
-};
-
-const attachSanitizer = (textarea) => {
-    let busy = false;
-    const clean = () => {
-        if (busy) return;
-        const current = textarea.value;
-        const cleaned = sanitizeInput(current);
-        if (cleaned === current) return;
-        busy = true;
-        const pos = textarea.selectionStart;
-        textarea.value = cleaned;
-        const newPos = Math.max(0, pos - (current.length - cleaned.length));
-        try { textarea.setSelectionRange(newPos, newPos); } catch {}
-        setTimeout(() => { busy = false; }, 0);
-    };
-    textarea.addEventListener("input", clean);
-    textarea.addEventListener("compositionend", clean);
-    textarea.addEventListener("keyup", clean);
-    textarea.addEventListener("paste", () => setTimeout(clean, 0));
-    setInterval(clean, 80);
 };
 
 const renderXpBar = (progress) => {
@@ -106,7 +85,7 @@ export function initEditor() {
     if (!input || !runButton || !output) return;
 
     input.value = SNIPPETS.hello;
-    attachSanitizer(input);
+    createCodeToolbar(input);
 
     snippetSelect?.addEventListener("change", () => {
         const key = snippetSelect.value;
@@ -117,8 +96,7 @@ export function initEditor() {
     });
 
     runButton.addEventListener("click", async () => {
-        input.value = sanitizeInput(input.value);
-        const code = input.value;
+        const code = sanitizeInput(input.value);
         output.textContent = "";
         if (!code.trim()) { output.textContent = "Escreva algum código Python para executar."; return; }
         if (looksLikeOtherLanguage(code)) { output.textContent = "Este terminal aceita apenas Python."; return; }
@@ -146,3 +124,4 @@ export function initEditor() {
         input.focus();
     });
 }
+// 1791752158
