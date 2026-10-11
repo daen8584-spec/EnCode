@@ -2,7 +2,7 @@ import { auth } from "./firebase-config.js";
 import { LESSONS, UNITS, LESSON_XP_BASE, EXERCISE_XP } from "./lessons-data.js";
 import { loadProgress, addXpAndStreak, markLessonComplete } from "./progress-service.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { sanitizeCode, createEl, createCodeToolbar, friendlyError } from "./utils.js";
+import { sanitizeCode, createEl, friendlyError } from "./utils.js";
 
 const state = {
     lesson: null,
@@ -167,7 +167,6 @@ function renderWriteCode(exercise) {
     });
 
     wrapper.appendChild(input);
-    createCodeToolbar(input);
 
     wrapper._checkAnswer = () => {
         const Sk = window.Sk;
@@ -230,7 +229,6 @@ function renderWriteHtml(exercise) {
     });
 
     wrapper.appendChild(input);
-    createCodeToolbar(input);
 
     wrapper._checkAnswer = () => {
         const clean = (str) => String(str).replace(/\s+/g, "").toLowerCase();
@@ -257,7 +255,6 @@ function renderWriteCss(exercise) {
     });
 
     wrapper.appendChild(input);
-    createCodeToolbar(input);
 
     wrapper._checkAnswer = () => {
         const clean = (str) => String(str).replace(/\s+/g, "").replace(/"/g, "'").toLowerCase();
@@ -438,3 +435,4 @@ onAuthStateChanged(auth, async (user) => {
 // 1791696639
 // 1791696887
 // 1791752158
+// 1791753030
