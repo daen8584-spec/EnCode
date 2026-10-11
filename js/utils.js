@@ -100,6 +100,73 @@ export const insertAtCursor = (textarea, text) => {
 
 const CODE_SYMBOLS = ["->", "=>", ">=", "<=", "!=", ":", "(", ")", "[", "]", "\"", "'", "_"];
 
+const createDebugPanel = () => {
+    let panel = document.getElementById("symbol-debug");
+    if (panel) return panel;
+    panel = document.createElement("div");
+    panel.id = "symbol-debug";
+    panel.style.cssText = "position:fixed;bottom:10px;left:10px;right:10px;max-height:35vh;overflow:auto;padding:10px;background:rgba(0,0,0,0.95);color:#0f0;font-family:monospace;font-size:11px;z-index:999999;border:1px solid #0f0;border-radius:8px;white-space:pre-wrap;";
+    panel.textContent = "=== DEBUG DE SÍMBOLOS ===\nEscribe >= y mira abajo.\n\n";
+    document.body.appendChild(panel);
+    return panel;
+};
+
+const logEvent = (panel, name, detail) => {
+    panel.textContent += `[${name}] ${detail}\n`;
+    panel.scrollTop = panel.scrollHeight;
+};
+
+const describeChar = (ch) => {
+    if (!ch) return "vazio";
+    const code = ch.codePointAt(0);
+    const hex = code.toString(16).toUpperCase().padStart(4, "0");
+    return `"${ch}" U+${hex}`;
+};
+
+const describeLast = (str) => {
+    if (!str) return "vazio";
+    const last = str.charAt(str.length - 1);
+    const code = last.codePointAt(0);
+    const hex = code.toString(16).toUpperCase().padStart(4, "0");
+    return `último char "${last}" U+${hex}`;
+};
+
+export const attachSymbolDebug = (textarea) => {
+    if (!textarea || textarea.dataset.debug === "1") return;
+    textarea.dataset.debug = "1";
+    const panel = createDebugPanel();
+
+    textarea.addEventListener("keydown", (e) => {
+        logEvent(panel, "keydown", `key="${e.key}" code="${e.code}"`);
+    });
+
+    textarea.addEventListener("keypress", (e) => {
+        logEvent(panel, "keypress", `key="${e.key}" ${describeChar(e.key)}`);
+    });
+
+    textarea.addEventListener("beforeinput", (e) => {
+        logEvent(panel, "beforeinput", `inputType="${e.inputType}" data="${e.data ?? "-"}" ${e.data ? describeChar(e.data) : ""}`);
+    });
+
+    textarea.addEventListener("compositionstart", () => {
+        logEvent(panel, "compositionstart", "IME iniciou");
+    });
+
+    textarea.addEventListener("compositionupdate", (e) => {
+        logEvent(panel, "compositionupdate", `data="${e.data}"`);
+    });
+
+    textarea.addEventListener("compositionend", (e) => {
+        logEvent(panel, "compositionend", `data="${e.data}"`);
+    });
+
+    textarea.addEventListener("input", (e) => {
+        logEvent(panel, "input", `inputType="${e.inputType}" data="${e.data ?? "-"}" | ${describeLast(textarea.value)}`);
+    });
+
+    logEvent(panel, "init", "listeners ativos");
+};
+
 export const createCodeToolbar = (textarea) => {
     if (!textarea || textarea.dataset.toolbar === "1") return;
     textarea.dataset.toolbar = "1";
@@ -130,3 +197,4 @@ export const createCodeToolbar = (textarea) => {
 };
 // 1791752158
 // 1791752464
+// 1791752623

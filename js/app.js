@@ -1,4 +1,4 @@
-import { sanitizeInput, createEl, createCodeToolbar } from "./utils.js";
+import { sanitizeInput, createEl, createCodeToolbar, attachSymbolDebug } from "./utils.js";
 
 const SNIPPETS = {
     hello: "print('Olá, mundo!')",
@@ -85,6 +85,7 @@ export function initEditor() {
     if (!input || !runButton || !output) return;
 
     input.value = SNIPPETS.hello;
+    attachSymbolDebug(input);
     createCodeToolbar(input);
 
     snippetSelect?.addEventListener("change", () => {
@@ -125,3 +126,4 @@ export function initEditor() {
     });
 }
 // 1791752158
+// 1791752623
