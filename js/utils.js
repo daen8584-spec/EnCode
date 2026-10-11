@@ -104,6 +104,16 @@ export const createCodeToolbar = (textarea) => {
     if (!textarea || textarea.dataset.toolbar === "1") return;
     textarea.dataset.toolbar = "1";
 
+    textarea.addEventListener("input", () => {
+        const current = textarea.value;
+        const cleaned = sanitizeInput(current);
+        if (cleaned === current) return;
+        const pos = textarea.selectionStart;
+        textarea.value = cleaned;
+        const newPos = Math.max(0, pos + (cleaned.length - current.length));
+        try { textarea.setSelectionRange(newPos, newPos); } catch {}
+    });
+
     const toolbar = document.createElement("div");
     toolbar.className = "code-toolbar";
 
@@ -119,3 +129,4 @@ export const createCodeToolbar = (textarea) => {
     textarea.insertAdjacentElement("afterend", toolbar);
 };
 // 1791752158
+// 1791752464
