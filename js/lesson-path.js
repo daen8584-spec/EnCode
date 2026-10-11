@@ -9,19 +9,105 @@ const ICONS = {
 
 let currentLang = "python";
 
+const createEl = (tag, className, text) => {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text) el.textContent = text;
+    return el;
+};
+
+const findLesson = (id) => LESSONS.find((l) => l.id === id);
+
+function renderNode(lesson, isCompleted, isCurrent, isLocked) {
+    const wrapper = createEl("div", "roadmap-node-wrapper");
+    const node = createEl("button", "roadmap-node");
+    node.type = "button";
+    node.disabled = isLocked;
+
+    if (isCompleted) node.classList.add("is-completed");
+    else if (isCurrent) node.classList.add("is-current");
+    else node.classList.add("is-locked");
+
+    const circle = createEl("span", "roadmap-node-circle");
+    circle.innerHTML = isCompleted ? ICONS.completed : isCurrent ? ICONS.current : ICONS.locked;
+
+    const label = createEl("span", "roadmap-node-label", lesson.title);
+
+    node.appendChild(circle);
+    node.appendChild(label);
+
+    if (!isLocked) {
+        node.addEventListener("click", () => { window.location.href = `lesson.html?id=${lesson.id}`; });
+    }
+
+    wrapper.appendChild(node);
+    return wrapper;
+}
+
+function renderUnit(unit, unitIndex, completed) {
+    const unitEl = createEl("div", "roadmap-unit");
+    const header = createEl("div", "roadmap-unit-header");
+
+    header.appendChild(createEl("span", "roadmap-unit-index", `Unidade ${unitIndex + 1}`));
+    header.appendChild(createEl("h2", "roadmap-unit-title", unit.title));
+    header.appendChild(createEl("p", "roadmap-unit-description", unit.description));
+    unitEl.appendChild(header);
+
+    const path = createEl("div", "roadmap-path");
+
+    unit.lessons.forEach((lessonId, index) => {
+        const lesson = findLesson(lessonId);
+        if (!lesson) return;
+
+        const isCompleted = completed.includes(lessonId);
+        const prevId = index === 0 ? null : unit.lessons[index - 1];
+        const isPrevCompleted = prevId === null || completed.includes(prevId);
+        const isCurrent = !isCompleted && isPrevCompleted;
+        const isLocked = !isCompleted && !isPrevCompleted;
+
+        const nodeWrapper = renderNode(lesson, isCompleted, isCurrent, isLocked);
+        path.appendChild(nodeWrapper);
+
+        if (index < unit.lessons.length - 1) {
+            const connector = createEl("div", "roadmap-connector");
+            if (isCompleted) connector.classList.add("is-completed");
+            nodeWrapper.appendChild(connector);
+        }
+    });
+
+    unitEl.appendChild(path);
+    return unitEl;
+}
+
+async function renderPath(container) {
+    let completed = [];
+    try {
+        completed = (await loadProgress()).completedLessons ?? [];
+    } catch {}
+
+    const units = UNITS.filter((u) => (u.lang ?? "python") === currentLang);
+    container.replaceChildren();
+
+    if (!units.length) {
+        container.appendChild(createEl("div", "roadmap-empty", "Novas lições em breve."));
+        return;
+    }
+
+    units.forEach((unit, index) => container.appendChild(renderUnit(unit, index, completed)));
+}
+
 export async function initLessonPath() {
     const container = document.getElementById("lessons-path-container");
     if (!container) return;
 
-    const tabs = document.querySelectorAll(".language-tab");
-    tabs.forEach(function (tab) {
+    document.querySelectorAll(".language-tab").forEach((tab) => {
         tab.disabled = false;
-        tab.addEventListener("click", function () {
-            const lang = tab.getAttribute("data-lang");
+        tab.addEventListener("click", () => {
+            const lang = tab.dataset.lang;
             if (!lang || lang === currentLang) return;
             currentLang = lang;
-            tabs.forEach(function (t) {
-                t.classList.toggle("is-active", t.getAttribute("data-lang") === lang);
+            document.querySelectorAll(".language-tab").forEach((t) => {
+                t.classList.toggle("is-active", t.dataset.lang === lang);
             });
             renderPath(container);
         });
@@ -29,113 +115,4 @@ export async function initLessonPath() {
 
     await renderPath(container);
 }
-
-async function renderPath(container) {
-    let completed = [];
-    try {
-        const progress = await loadProgress();
-        completed = progress.completedLessons || [];
-    } catch (e) {
-        completed = [];
-    }
-
-    const filteredUnits = UNITS.filter(function (u) {
-        return (u.lang || "python") === currentLang;
-    });
-
-    container.innerHTML = "";
-
-    if (filteredUnits.length === 0) {
-        const empty = document.createElement("div");
-        empty.className = "roadmap-empty";
-        empty.textContent = "Novas lições em breve.";
-        container.appendChild(empty);
-        return;
-    }
-
-    filteredUnits.forEach(function (unit, unitIndex) {
-        const unitEl = document.createElement("div");
-        unitEl.className = "roadmap-unit";
-
-        const header = document.createElement("div");
-        header.className = "roadmap-unit-header";
-
-        const indexSpan = document.createElement("span");
-        indexSpan.className = "roadmap-unit-index";
-        indexSpan.textContent = "Unidade " + (unitIndex + 1);
-
-        const titleEl = document.createElement("h2");
-        titleEl.className = "roadmap-unit-title";
-        titleEl.textContent = unit.title;
-
-        const descEl = document.createElement("p");
-        descEl.className = "roadmap-unit-description";
-        descEl.textContent = unit.description;
-
-        header.appendChild(indexSpan);
-        header.appendChild(titleEl);
-        header.appendChild(descEl);
-        unitEl.appendChild(header);
-
-        const path = document.createElement("div");
-        path.className = "roadmap-path";
-
-        unit.lessons.forEach(function (lessonId, lessonIndex) {
-            const lesson = LESSONS.find(function (l) { return l.id === lessonId; });
-            if (!lesson) return;
-
-            const isCompleted = completed.indexOf(lessonId) !== -1;
-            const prevId = lessonIndex === 0 ? null : unit.lessons[lessonIndex - 1];
-            const isPrevCompleted = prevId === null || completed.indexOf(prevId) !== -1;
-            const isCurrent = !isCompleted && isPrevCompleted;
-            const isLocked = !isCompleted && !isPrevCompleted;
-
-            const wrapper = document.createElement("div");
-            wrapper.className = "roadmap-node-wrapper";
-
-            const node = document.createElement("button");
-            node.type = "button";
-            node.className = "roadmap-node";
-            if (isCompleted) node.classList.add("is-completed");
-            else if (isCurrent) node.classList.add("is-current");
-            else node.classList.add("is-locked");
-            node.disabled = isLocked;
-
-            const circle = document.createElement("span");
-            circle.className = "roadmap-node-circle";
-            if (isCompleted) circle.innerHTML = ICONS.completed;
-            else if (isCurrent) circle.innerHTML = ICONS.current;
-            else circle.innerHTML = ICONS.locked;
-
-            const label = document.createElement("span");
-            label.className = "roadmap-node-label";
-            label.textContent = lesson.title;
-
-            node.appendChild(circle);
-            node.appendChild(label);
-
-            if (!isLocked) {
-                node.addEventListener("click", function () {
-                    window.location.href = "lesson.html?id=" + lessonId;
-                });
-            }
-
-            wrapper.appendChild(node);
-
-            if (lessonIndex < unit.lessons.length - 1) {
-                const connector = document.createElement("div");
-                connector.className = "roadmap-connector";
-                if (isCompleted) connector.classList.add("is-completed");
-                wrapper.appendChild(connector);
-            }
-
-            path.appendChild(wrapper);
-        });
-
-        unitEl.appendChild(path);
-        container.appendChild(unitEl);
-    });
-}
-
-
-// 1791514044
+// 1791690739

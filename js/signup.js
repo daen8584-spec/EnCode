@@ -1,67 +1,59 @@
-import { initPasswordToggles } from "./password-toggle.js";
 import { signUpWithEmail } from "./auth-service.js";
 import { setFieldError, clearFieldError, clearAllErrors, focusFirstInvalid, showToast } from "./form-errors.js";
+import { initPasswordToggles } from "./password-toggle.js";
 
-const signupForm = document.getElementById("signup-form");
-const submitButton = document.getElementById("signup-submit");
-const nameInput = document.getElementById("signup-name");
-const emailInput = document.getElementById("signup-email");
-const passwordInput = document.getElementById("signup-password");
-const confirmInput = document.getElementById("signup-password-confirm");
-const termsInput = document.getElementById("signup-terms");
+const form = document.getElementById("signup-form");
+const submit = document.getElementById("signup-submit");
+const name = document.getElementById("signup-name");
+const email = document.getElementById("signup-email");
+const password = document.getElementById("signup-password");
+const confirm = document.getElementById("signup-password-confirm");
+const terms = document.getElementById("signup-terms");
 const strengthMeter = document.getElementById("signup-strength-meter");
 const strengthLabel = document.getElementById("signup-strength-label");
-const requirementsList = document.getElementById("signup-password-requirements");
+const requirements = document.getElementById("signup-password-requirements");
 
-let isRedirecting = false;
+let redirecting = false;
 
-const STRENGTH_LABELS = {
-    weak: "Fraca",
-    medium: "Média",
-    strong: "Forte"
-};
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const STRENGTH_LABELS = { weak: "Fraca", medium: "Média", strong: "Forte" };
 const PASSWORD_CHECKS = {
-    length: function (value) { return value.length >= 8; },
-    "upper-lower": function (value) { return /[A-Z]/.test(value) && /[a-z]/.test(value); },
-    number: function (value) { return /\d/.test(value); },
-    special: function (value) { return /[^A-Za-z0-9]/.test(value); }
+    length: (v) => v.length >= 8,
+    "upper-lower": (v) => /[A-Z]/.test(v) && /[a-z]/.test(v),
+    number: (v) => /\d/.test(v),
+    special: (v) => /[^A-Za-z0-9]/.test(v)
 };
 
-function setFormLoading(isLoading) {
-    submitButton.disabled = isLoading;
-    submitButton.classList.toggle("is-loading", isLoading);
-}
+const setLoading = (state) => {
+    submit.disabled = state;
+    submit.classList.toggle("is-loading", state);
+};
 
-function triggerShake() {
-    signupForm.classList.remove("is-shaking");
-    void signupForm.offsetWidth;
-    signupForm.classList.add("is-shaking");
-}
+const shake = () => {
+    form.classList.remove("is-shaking");
+    void form.offsetWidth;
+    form.classList.add("is-shaking");
+};
 
-function passwordStrength(value) {
-    let score = 0;
-    Object.values(PASSWORD_CHECKS).forEach(function (check) {
-        if (check(value)) score += 1;
-    });
+const passwordStrength = (value) => {
+    const score = Object.values(PASSWORD_CHECKS).filter((fn) => fn(value)).length;
     if (score <= 1) return "weak";
     if (score <= 3) return "medium";
     return "strong";
-}
+};
 
-function updateRequirements(value) {
-    if (!requirementsList) return;
-    requirementsList.querySelectorAll("li").forEach(function (item) {
-        const key = item.getAttribute("data-requirement");
-        const check = PASSWORD_CHECKS[key];
-        if (!check) return;
-        item.classList.toggle("is-met", check(value));
+const updateRequirements = (value) => {
+    if (!requirements) return;
+    requirements.querySelectorAll("li").forEach((item) => {
+        const check = PASSWORD_CHECKS[item.dataset.requirement];
+        if (check) item.classList.toggle("is-met", check(value));
     });
-}
+};
 
-function updateStrengthMeter(value) {
+const updateStrengthMeter = (value) => {
     if (!strengthMeter || !strengthLabel) return;
-    if (value.length === 0) {
+    if (!value.length) {
         strengthMeter.hidden = true;
         strengthLabel.hidden = true;
         updateRequirements("");
@@ -70,105 +62,62 @@ function updateStrengthMeter(value) {
     const level = passwordStrength(value);
     strengthMeter.hidden = false;
     strengthLabel.hidden = false;
-    strengthMeter.setAttribute("data-strength", level);
-    strengthLabel.setAttribute("data-strength", level);
-    strengthLabel.textContent = "Senha " + STRENGTH_LABELS[level];
+    strengthMeter.dataset.strength = level;
+    strengthLabel.dataset.strength = level;
+    strengthLabel.textContent = `Senha ${STRENGTH_LABELS[level]}`;
     updateRequirements(value);
-}
+};
 
-function validateName() {
-    if (nameInput.value.trim().length < 2) {
-        setFieldError(nameInput, "O nome deve ter pelo menos 2 caracteres.");
-        return false;
-    }
-    clearFieldError(nameInput);
-    return true;
-}
+const validators = {
+    name: () => name.value.trim().length >= 2 || (setFieldError(name, "O nome deve ter pelo menos 2 caracteres."), false),
+    email: () => EMAIL_RE.test(email.value.trim()) || (setFieldError(email, "Digite um email válido."), false),
+    password: () => password.value.length >= 8 || (setFieldError(password, "A senha deve ter pelo menos 8 caracteres."), false),
+    confirm: () => (confirm.value.length > 0 && confirm.value === password.value) || (setFieldError(confirm, "As senhas não coincidem."), false),
+    terms: () => terms.checked || (setFieldError(terms, "Você precisa aceitar os Termos e Condições."), false)
+};
 
-function validateEmail() {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
-        setFieldError(emailInput, "Digite um email válido.");
-        return false;
-    }
-    clearFieldError(emailInput);
-    return true;
-}
+const runValidator = (key) => {
+    const ok = validators[key]();
+    if (ok) clearFieldError({ name, email, password, confirm, terms }[key]);
+    return ok;
+};
 
-function validatePassword() {
-    if (passwordInput.value.length < 8) {
-        setFieldError(passwordInput, "A senha deve ter pelo menos 8 caracteres.");
-        return false;
-    }
-    clearFieldError(passwordInput);
-    return true;
-}
-
-function validateConfirm() {
-    if (confirmInput.value.length === 0 || confirmInput.value !== passwordInput.value) {
-        setFieldError(confirmInput, "As senhas não coincidem.");
-        return false;
-    }
-    clearFieldError(confirmInput);
-    return true;
-}
-
-function validateTerms() {
-    if (!termsInput.checked) {
-        setFieldError(termsInput, "Você precisa aceitar os Termos e Condições.");
-        return false;
-    }
-    clearFieldError(termsInput);
-    return true;
-}
-
-async function handleSignupSubmit(event) {
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (isRedirecting) return;
-    clearAllErrors(signupForm);
-    const results = [validateName(), validateEmail(), validatePassword(), validateConfirm(), validateTerms()];
-    if (results.includes(false)) {
-        triggerShake();
-        focusFirstInvalid(signupForm);
-        return;
-    }
-    setFormLoading(true);
+    if (redirecting) return;
+    clearAllErrors(form);
+    const results = Object.keys(validators).map(runValidator);
+    if (!results.every(Boolean)) { shake(); focusFirstInvalid(form); return; }
+
+    setLoading(true);
     try {
-        await signUpWithEmail(nameInput.value.trim(), emailInput.value.trim(), passwordInput.value);
-        submitButton.classList.remove("is-loading");
-        submitButton.classList.add("is-success");
-        submitButton.disabled = true;
+        await signUpWithEmail(name.value.trim(), email.value.trim(), password.value);
+        submit.classList.remove("is-loading");
+        submit.classList.add("is-success");
+        submit.disabled = true;
         showToast("Conta criada com sucesso!", "success");
-        isRedirecting = true;
-        setTimeout(function () {
-            window.location.href = "dashboard.html";
-        }, 1400);
+        redirecting = true;
+        setTimeout(() => { window.location.href = "dashboard.html"; }, 1400);
     } catch (error) {
-        setFormLoading(false);
+        setLoading(false);
         showToast(error.message, "error");
-        triggerShake();
+        shake();
     }
-}
-
-nameInput.addEventListener("blur", validateName);
-emailInput.addEventListener("blur", validateEmail);
-passwordInput.addEventListener("blur", validatePassword);
-confirmInput.addEventListener("blur", validateConfirm);
-termsInput.addEventListener("change", validateTerms);
-
-nameInput.addEventListener("input", function () {
-    if (nameInput.classList.contains("is-invalid")) validateName();
-});
-emailInput.addEventListener("input", function () {
-    if (emailInput.classList.contains("is-invalid")) validateEmail();
-});
-passwordInput.addEventListener("input", function () {
-    updateStrengthMeter(passwordInput.value);
-    if (passwordInput.classList.contains("is-invalid")) validatePassword();
-    if (confirmInput.classList.contains("is-invalid") && confirmInput.value) validateConfirm();
-});
-confirmInput.addEventListener("input", function () {
-    if (confirmInput.classList.contains("is-invalid")) validateConfirm();
 });
 
-signupForm.addEventListener("submit", handleSignupSubmit);
+name.addEventListener("blur", () => runValidator("name"));
+email.addEventListener("blur", () => runValidator("email"));
+password.addEventListener("blur", () => runValidator("password"));
+confirm.addEventListener("blur", () => runValidator("confirm"));
+terms.addEventListener("change", () => runValidator("terms"));
+
+name.addEventListener("input", () => name.classList.contains("is-invalid") && runValidator("name"));
+email.addEventListener("input", () => email.classList.contains("is-invalid") && runValidator("email"));
+password.addEventListener("input", () => {
+    updateStrengthMeter(password.value);
+    if (password.classList.contains("is-invalid")) runValidator("password");
+    if (confirm.classList.contains("is-invalid") && confirm.value) runValidator("confirm");
+});
+confirm.addEventListener("input", () => confirm.classList.contains("is-invalid") && runValidator("confirm"));
+
 initPasswordToggles();

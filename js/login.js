@@ -1,86 +1,66 @@
-import { initPasswordToggles } from "./password-toggle.js";
 import { signInWithEmail, observeAuthState } from "./auth-service.js";
 import { setFieldError, clearFieldError, clearAllErrors, focusFirstInvalid, showToast } from "./form-errors.js";
+import { initPasswordToggles } from "./password-toggle.js";
 
-const loginForm = document.getElementById("login-form");
-const submitButton = document.getElementById("login-submit");
-const emailInput = document.getElementById("login-email");
-const passwordInput = document.getElementById("login-password");
+const form = document.getElementById("login-form");
+const submit = document.getElementById("login-submit");
+const email = document.getElementById("login-email");
+const password = document.getElementById("login-password");
 
-let isRedirecting = false;
+let redirecting = false;
 
-function setFormLoading(isLoading) {
-    submitButton.disabled = isLoading;
-    submitButton.classList.toggle("is-loading", isLoading);
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function triggerShake() {
-    loginForm.classList.remove("is-shaking");
-    void loginForm.offsetWidth;
-    loginForm.classList.add("is-shaking");
-}
+const setLoading = (state) => {
+    submit.disabled = state;
+    submit.classList.toggle("is-loading", state);
+};
 
-function validateEmail() {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim())) {
-        setFieldError(emailInput, "Digite um email válido.");
-        return false;
-    }
-    clearFieldError(emailInput);
-    return true;
-}
+const shake = () => {
+    form.classList.remove("is-shaking");
+    void form.offsetWidth;
+    form.classList.add("is-shaking");
+};
 
-function validatePassword() {
-    if (passwordInput.value.length < 8) {
-        setFieldError(passwordInput, "A senha deve ter pelo menos 8 caracteres.");
-        return false;
-    }
-    clearFieldError(passwordInput);
-    return true;
-}
+const validateEmail = () => {
+    if (EMAIL_RE.test(email.value.trim())) { clearFieldError(email); return true; }
+    setFieldError(email, "Digite um email válido.");
+    return false;
+};
 
-async function handleLoginSubmit(event) {
+const validatePassword = () => {
+    if (password.value.length >= 8) { clearFieldError(password); return true; }
+    setFieldError(password, "A senha deve ter pelo menos 8 caracteres.");
+    return false;
+};
+
+form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (isRedirecting) return;
-    clearAllErrors(loginForm);
-    const results = [validateEmail(), validatePassword()];
-    if (results.includes(false)) {
-        triggerShake();
-        focusFirstInvalid(loginForm);
-        return;
-    }
-    setFormLoading(true);
+    if (redirecting) return;
+    clearAllErrors(form);
+    if (![validateEmail(), validatePassword()].every(Boolean)) { shake(); focusFirstInvalid(form); return; }
+
+    setLoading(true);
     try {
-        await signInWithEmail(emailInput.value.trim(), passwordInput.value);
-        submitButton.classList.remove("is-loading");
-        submitButton.classList.add("is-success");
-        submitButton.disabled = true;
+        await signInWithEmail(email.value.trim(), password.value);
+        submit.classList.remove("is-loading");
+        submit.classList.add("is-success");
+        submit.disabled = true;
         showToast("Login realizado com sucesso!", "success");
-        isRedirecting = true;
-        setTimeout(function () {
-            window.location.href = "dashboard.html";
-        }, 1400);
+        redirecting = true;
+        setTimeout(() => { window.location.href = "dashboard.html"; }, 1400);
     } catch (error) {
-        setFormLoading(false);
+        setLoading(false);
         showToast(error.message, "error");
-        triggerShake();
-    }
-}
-
-emailInput.addEventListener("blur", validateEmail);
-passwordInput.addEventListener("blur", validatePassword);
-
-emailInput.addEventListener("input", function () {
-    if (emailInput.classList.contains("is-invalid")) validateEmail();
-});
-passwordInput.addEventListener("input", function () {
-    if (passwordInput.classList.contains("is-invalid")) validatePassword();
-});
-
-observeAuthState(function (user) {
-    if (user && !isRedirecting) {
-        window.location.href = "dashboard.html";
+        shake();
     }
 });
 
-loginForm.addEventListener("submit", handleLoginSubmit);
+email.addEventListener("blur", validateEmail);
+password.addEventListener("blur", validatePassword);
+email.addEventListener("input", () => email.classList.contains("is-invalid") && validateEmail());
+password.addEventListener("input", () => password.classList.contains("is-invalid") && validatePassword());
+
+observeAuthState((user) => { if (user && !redirecting) window.location.href = "dashboard.html"; });
+
 initPasswordToggles();

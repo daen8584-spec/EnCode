@@ -8,7 +8,6 @@ const state = {
     steps: [],
     stepIndex: 0,
     user: null,
-    progress: null,
     answered: false,
     correctCount: 0
 };
@@ -26,357 +25,276 @@ const el = {
     celebration: document.getElementById("lesson-celebration"),
     celebrationXp: document.getElementById("celebration-xp"),
     celebrationContinue: document.getElementById("celebration-continue"),
+    celebrationRepeat: document.getElementById("celebration-repeat"),
     close: document.getElementById("lesson-close")
 };
 
-function getLessonIdFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("id") || "";
-}
+const letters = ["A", "B", "C", "D", "E"];
+const EMAIL_RE = null;
 
-function pickLesson(progress) {
-    const idFromUrl = getLessonIdFromUrl();
-    if (idFromUrl) {
-        const found = LESSONS.find(function (l) { return l.id === idFromUrl; });
-        if (found) return found;
-    }
-    const next = LESSONS.find(function (l) {
-        return progress.completedLessons.indexOf(l.id) === -1;
-    });
-    return next || LESSONS[0];
-}
+const createEl = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+};
 
-function buildSteps(lesson) {
-    const steps = [];
-    if (lesson.teach) {
-        lesson.teach.forEach(function (t) {
-            steps.push({ type: "teach", data: t });
-        });
-    }
-    lesson.exercises.forEach(function (ex) {
-        steps.push(ex);
-    });
-    return steps;
-}
+const normalizeOutput = (text) => String(text)
+    .replace(/\r\n/g, "\n")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, "\"")
+    .replace(/\s+$/g, "")
+    .trim();
 
-function setMascot(state_) {
+const collapseWhitespace = (text) => text.replace(/\s+/g, " ").trim();
+
+const sanitizeCode = (code) => code
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, "\"")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u00A0/g, " ")
+    .replace(/\u2192/g, "->")
+    .replace(/\u21D2/g, "=>");
+
+function setMascot(kind) {
     el.mascot.classList.remove("is-idle", "is-happy", "is-sad");
-    if (state_ === "happy") el.mascot.classList.add("is-happy");
-    else if (state_ === "sad") el.mascot.classList.add("is-sad");
-    else el.mascot.classList.add("is-idle");
+    el.mascot.classList.add(`is-${kind}`);
 }
 
 function updateProgressBar() {
     const total = state.steps.length;
-    const current = state.stepIndex;
-    const percent = (current / total) * 100;
-    el.progressFill.style.width = percent + "%";
-    el.counterCurrent.textContent = String(current + 1);
+    const percent = (state.stepIndex / total) * 100;
+    el.progressFill.style.width = `${percent}%`;
+    el.counterCurrent.textContent = String(state.stepIndex + 1);
     el.counterTotal.textContent = String(total);
 }
 
-function normalizeOutput(text) {
-    return String(text)
-        .replace(/\r\n/g, "\n")
-        .replace(/[\u2018\u2019]/g, "'")
-        .replace(/[\u201C\u201D]/g, "\"")
-        .replace(/\s+$/g, "")
-        .trim();
+function buildSteps(lesson) {
+    return [
+        ...(lesson.teach ?? []).map((data) => ({ type: "teach", data })),
+        ...lesson.exercises
+    ];
 }
 
-function normalizeCode(text) {
-    return String(text)
-        .replace(/\r\n/g, "\n")
-        .replace(/"/g, "'")
-        .replace(/[\u2018\u2019]/g, "'")
-        .replace(/[\u201C\u201D]/g, "'")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
+function getLessonIdFromUrl() {
+    return new URLSearchParams(window.location.search).get("id") ?? "";
+}
+
+function pickLesson(progress) {
+    const urlId = getLessonIdFromUrl();
+    const fromUrl = urlId && LESSONS.find((l) => l.id === urlId);
+    if (fromUrl) return fromUrl;
+    const next = LESSONS.find((l) => !progress.completedLessons.includes(l.id));
+    return next ?? LESSONS[0];
 }
 
 function renderTeach(step) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "teach-card";
+    const wrapper = createEl("div", "teach-card");
 
-    const term = document.createElement("span");
-    term.className = "teach-term";
-    term.textContent = step.data.term;
+    wrapper.appendChild(createEl("span", "teach-term", step.data.term));
 
-    const text = document.createElement("div");
-    text.className = "teach-text";
-    step.data.lines.forEach(function (line) {
-        const p = document.createElement("p");
-        p.textContent = line;
-        text.appendChild(p);
-    });
-
-    const example = document.createElement("div");
-    example.className = "teach-example";
-
-    const code = document.createElement("pre");
-    code.className = "teach-code";
-    code.textContent = step.data.example.code;
-
-    const arrow = document.createElement("div");
-    arrow.className = "teach-arrow";
-    arrow.textContent = "↓";
-
-    const out = document.createElement("pre");
-    out.className = "teach-output";
-    out.textContent = step.data.example.output;
-
-    example.appendChild(code);
-    example.appendChild(arrow);
-    example.appendChild(out);
-
-    wrapper.appendChild(term);
+    const text = createEl("div", "teach-text");
+    step.data.lines.forEach((line) => text.appendChild(createEl("p", null, line)));
     wrapper.appendChild(text);
+
+    const example = createEl("div", "teach-example");
+    example.appendChild(createEl("pre", "teach-code", step.data.example.code));
+    example.appendChild(createEl("div", "teach-arrow", "↓"));
+    example.appendChild(createEl("pre", "teach-output", step.data.example.output));
     wrapper.appendChild(example);
 
     return wrapper;
 }
 
 function renderMultipleChoice(exercise) {
-    const container = document.createElement("div");
-    container.className = "lesson-options";
-    const letters = ["A", "B", "C", "D", "E"];
-    exercise.options.forEach(function (option, index) {
-        const btn = document.createElement("button");
+    const container = createEl("div", "lesson-options");
+
+    exercise.options.forEach((option, index) => {
+        const btn = createEl("button", "lesson-option");
         btn.type = "button";
-        btn.className = "lesson-option";
         btn.dataset.index = String(index);
-        btn.innerHTML = '<span class="lesson-option-marker">' + letters[index] + '</span><span>' + option + '</span>';
-        btn.addEventListener("click", function () {
+        btn.innerHTML = `<span class="lesson-option-marker">${letters[index]}</span><span>${option}</span>`;
+
+        btn.addEventListener("click", () => {
             if (state.answered) return;
             state.answered = true;
-            const buttons = container.querySelectorAll(".lesson-option");
-            buttons.forEach(function (b) {
+            container.querySelectorAll(".lesson-option").forEach((b) => {
                 b.disabled = true;
-                const idx = parseInt(b.dataset.index, 10);
-                if (idx === exercise.correct) b.classList.add("is-correct");
-                else if (idx === index) b.classList.add("is-wrong");
+                const i = Number(b.dataset.index);
+                if (i === exercise.correct) b.classList.add("is-correct");
+                else if (i === index) b.classList.add("is-wrong");
             });
-            const isCorrect = index === exercise.correct;
-            handleAnswer(isCorrect);
+            handleAnswer(index === exercise.correct);
         });
+
         container.appendChild(btn);
     });
+
     return container;
 }
 
 function renderFillBlank(exercise) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "lesson-editor";
+    const wrapper = createEl("div", "lesson-editor");
+    const [before, after] = exercise.codeTemplate.split("___");
 
-    const codeBlock = document.createElement("pre");
-    codeBlock.className = "lesson-output";
-    const parts = exercise.codeTemplate.split("___");
-    codeBlock.appendChild(document.createTextNode(parts[0]));
-    const blank = document.createElement("span");
+    const block = createEl("pre", "lesson-output");
+    block.appendChild(document.createTextNode(before));
+    const blank = createEl("span", null, "___");
     blank.style.color = "#fbbf24";
     blank.style.fontWeight = "bold";
-    blank.textContent = "___";
-    codeBlock.appendChild(blank);
-    codeBlock.appendChild(document.createTextNode(parts[1] || ""));
+    block.appendChild(blank);
+    block.appendChild(document.createTextNode(after ?? ""));
 
-    const input = document.createElement("input");
+    const input = createEl("input", "lesson-code-input");
     input.type = "text";
-    input.className = "lesson-code-input";
-    input.style.minHeight = "auto";
-    input.style.fontSize = "15px";
-    input.style.padding = "14px 16px";
-    input.placeholder = exercise.placeholder || "Digite aqui";
+    Object.assign(input.style, { minHeight: "auto", fontSize: "15px", padding: "14px 16px" });
+    input.placeholder = exercise.placeholder ?? "Digite aqui";
     input.autocapitalize = "off";
     input.autocomplete = "off";
     input.spellcheck = false;
 
-    input.addEventListener("input", function () {
-        el.action.disabled = input.value.trim().length === 0;
+    input.addEventListener("input", () => {
+        el.action.disabled = !input.value.trim().length;
     });
 
-    wrapper.appendChild(codeBlock);
+    wrapper.appendChild(block);
+    wrapper.appendChild(input);
+    wrapper._checkAnswer = () => normalizeOutput(input.value).toLowerCase() === normalizeOutput(exercise.answer).toLowerCase();
+
+    return wrapper;
+}
+
+function renderWriteCode(exercise) {
+    const wrapper = createEl("div", "lesson-editor");
+
+    wrapper.appendChild(createEl("div", "lesson-output-header", "Saída esperada"));
+    const expected = createEl("pre", "lesson-output", exercise.expectedOutput);
+    expected.style.minHeight = "auto";
+    wrapper.appendChild(expected);
+
+    const input = createEl("textarea", "lesson-code-input");
+    input.spellcheck = false;
+    input.autocapitalize = "off";
+    input.autocomplete = "off";
+    input.value = exercise.starter ?? "";
+
+    input.addEventListener("input", () => {
+        el.action.disabled = !input.value.trim().length;
+    });
+
     wrapper.appendChild(input);
 
-    wrapper._checkAnswer = function () {
-        const value = normalizeOutput(input.value).toLowerCase();
-        const expected = normalizeOutput(exercise.answer).toLowerCase();
-        return value === expected;
+    wrapper._checkAnswer = () => {
+        const Sk = window.Sk;
+        if (typeof Sk === "undefined") return Promise.resolve(false);
+
+        let buffer = "";
+        Sk.configure({
+            output: (text) => { buffer += text; },
+            read: (x) => {
+                if (!Sk.builtinFiles?.files?.[x]) throw `File not found: '${x}'`;
+                return Sk.builtinFiles.files[x];
+            },
+            __future__: Sk.python3,
+            inputfun: () => "",
+            inputfunTakesPrompt: true
+        });
+
+        const code = sanitizeCode(input.value);
+        const expectedOut = normalizeOutput(exercise.expectedOutput);
+
+        return Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
+            .then(() => new Promise((resolve) => {
+                setTimeout(() => {
+                    const userOut = normalizeOutput(buffer);
+                    if (userOut === expectedOut) return resolve(true);
+                    resolve(collapseWhitespace(userOut) === collapseWhitespace(expectedOut));
+                }, 80);
+            }))
+            .catch(() => false);
     };
 
     return wrapper;
 }
 
 function renderWriteHtml(exercise) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "lesson-editor";
+    const wrapper = createEl("div", "lesson-editor");
 
-    const header = document.createElement("div");
-    header.className = "lesson-output-header";
-    header.textContent = "Escreva seu código HTML";
-    const hint = document.createElement("pre");
-    hint.className = "lesson-output";
-    hint.style.minHeight = "auto";
-    hint.textContent = "Exemplo: " + exercise.expectedPattern.replace(/</g, "<").replace(/>/g, ">");
-    hint.style.color = "var(--color-text-muted)";
+    wrapper.appendChild(createEl("div", "lesson-output-header", "Escreva seu código HTML"));
 
-    const input = document.createElement("textarea");
-    input.className = "lesson-code-input";
+    const hint = createEl("pre", "lesson-output", `Exemplo: ${exercise.expectedPattern}`);
+    Object.assign(hint.style, { minHeight: "auto", color: "var(--color-text-muted)" });
+    wrapper.appendChild(hint);
+
+    const input = createEl("textarea", "lesson-code-input");
     input.spellcheck = false;
     input.autocapitalize = "off";
     input.autocomplete = "off";
-    input.value = exercise.starter || "";
+    input.value = exercise.starter ?? "";
     input.placeholder = "<h1>Olá</h1>";
 
-    input.addEventListener("input", function () {
-        el.action.disabled = input.value.trim().length === 0;
+    input.addEventListener("input", () => {
+        el.action.disabled = !input.value.trim().length;
     });
 
-    wrapper.appendChild(header);
-    wrapper.appendChild(hint);
     wrapper.appendChild(input);
 
-    wrapper._checkAnswer = function () {
-        const codeNorm = String(input.value)
-            .replace(/\s+/g, "")
-            .toLowerCase();
-        const expected = String(exercise.expectedPattern)
-            .replace(/\s+/g, "")
-            .toLowerCase();
-        return codeNorm === expected;
+    wrapper._checkAnswer = () => {
+        const clean = (str) => String(str).replace(/\s+/g, "").toLowerCase();
+        return clean(input.value) === clean(exercise.expectedPattern);
     };
 
     return wrapper;
 }
 
 function renderWriteCss(exercise) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "lesson-editor";
+    const wrapper = createEl("div", "lesson-editor");
 
-    const header = document.createElement("div");
-    header.className = "lesson-output-header";
-    header.textContent = "Escreva seu código CSS";
+    wrapper.appendChild(createEl("div", "lesson-output-header", "Escreva seu código CSS"));
 
-    const input = document.createElement("textarea");
-    input.className = "lesson-code-input";
+    const input = createEl("textarea", "lesson-code-input");
     input.spellcheck = false;
     input.autocapitalize = "off";
     input.autocomplete = "off";
-    input.value = exercise.starter || "";
+    input.value = exercise.starter ?? "";
     input.placeholder = "p { color: red; }";
 
-    input.addEventListener("input", function () {
-        el.action.disabled = input.value.trim().length === 0;
+    input.addEventListener("input", () => {
+        el.action.disabled = !input.value.trim().length;
     });
 
-    wrapper.appendChild(header);
     wrapper.appendChild(input);
 
-    wrapper._checkAnswer = function () {
-        const codeNorm = String(input.value)
-            .replace(/\s+/g, "")
-            .replace(/"/g, "'")
-            .toLowerCase();
-        const expected = String(exercise.expectedPattern)
-            .replace(/\s+/g, "")
-            .replace(/"/g, "'")
-            .toLowerCase();
-        return codeNorm === expected;
+    wrapper._checkAnswer = () => {
+        const clean = (str) => String(str).replace(/\s+/g, "").replace(/"/g, "'").toLowerCase();
+        return clean(input.value) === clean(exercise.expectedPattern);
     };
 
     return wrapper;
 }
 
-function renderWriteCode(exercise) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "lesson-editor";
-
-    const header = document.createElement("div");
-    header.className = "lesson-output-header";
-    header.textContent = "Saída esperada";
-    const expected = document.createElement("pre");
-    expected.className = "lesson-output";
-    expected.style.minHeight = "auto";
-    expected.textContent = exercise.expectedOutput;
-
-    const input = document.createElement("textarea");
-    input.className = "lesson-code-input";
-    input.spellcheck = false;
-    input.autocapitalize = "off";
-    input.autocomplete = "off";
-    input.value = exercise.starter || "";
-
-    input.addEventListener("input", function () {
-        el.action.disabled = input.value.trim().length === 0;
-    });
-
-    wrapper.appendChild(header);
-    wrapper.appendChild(expected);
-    wrapper.appendChild(input);
-
-    wrapper._checkAnswer = function () {
-        const Sk = window.Sk;
-        if (typeof Sk === "undefined") return Promise.resolve(false);
-        let buffer = "";
-        Sk.configure({
-            output: function (text) { buffer += text; },
-            read: function (x) {
-                if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
-                    throw "File not found: '" + x + "'";
-                }
-                return Sk.builtinFiles["files"][x];
-            },
-            __future__: Sk.python3,
-            inputfun: function () { return ""; },
-            inputfunTakesPrompt: true
-        });
-        const codeNorm = normalizeCode(input.value);
-        const expectedCode = exercise.expectedCode ? normalizeCode(exercise.expectedCode) : "";
-        if (expectedCode && codeNorm.indexOf(expectedCode) === -1) {
-            return Promise.resolve(false);
-        }
-        const sanitized = String(input.value)
-            .replace(/[\u2018\u2019]/g, "'")
-            .replace(/[\u201C\u201D]/g, "\"")
-            .replace(/[\u2013\u2014]/g, "-")
-            .replace(/\u00A0/g, " ")
-            .replace(/\u2192/g, "->")
-            .replace(/\u21D2/g, "=>");
-        return Sk.misceval.asyncToPromise(function () {
-            return Sk.importMainWithBody("<stdin>", false, sanitized, true);
-        }).then(function () {
-            return new Promise(function (resolve) {
-                setTimeout(function () {
-                    const userOut = normalizeOutput(buffer);
-                    const expectedOut = normalizeOutput(exercise.expectedOutput);
-                    if (userOut === expectedOut) { resolve(true); return; }
-                    const collapse = function (s) { return s.replace(/\s+/g, " ").trim(); };
-                    resolve(collapse(userOut) === collapse(expectedOut));
-                }, 80);
-            });
-        }).catch(function () { return false; });
-    };
-
-    return wrapper;
-}
+const RENDERERS = {
+    "multiple-choice": renderMultipleChoice,
+    "fill-blank": renderFillBlank,
+    "write-code": renderWriteCode,
+    "write-html": renderWriteHtml,
+    "write-css": renderWriteCss
+};
 
 function renderStep() {
     state.answered = false;
     el.feedback.hidden = true;
     el.feedback.className = "lesson-feedback";
     el.action.classList.remove("is-success", "is-error");
-    el.body.innerHTML = "";
+    el.body.replaceChildren();
 
     const step = state.steps[state.stepIndex];
     updateProgressBar();
 
     if (step.type === "teach") {
-        el.title.textContent = "";
-        el.instruction.textContent = "";
         el.title.style.display = "none";
         el.instruction.style.display = "none";
-        const node = renderTeach(step);
-        el.body.appendChild(node);
+        el.body.appendChild(renderTeach(step));
         el.action.textContent = "Entendi";
         el.action.disabled = false;
         setMascot("idle");
@@ -386,17 +304,12 @@ function renderStep() {
     el.title.style.display = "";
     el.instruction.style.display = "";
     el.title.textContent = state.lesson.title;
-    el.instruction.textContent = step.question || "";
+    el.instruction.textContent = step.question ?? "";
     el.action.textContent = "Verificar";
     el.action.disabled = step.type !== "multiple-choice";
 
-    let node;
-    if (step.type === "multiple-choice") node = renderMultipleChoice(step);
-    else if (step.type === "fill-blank") node = renderFillBlank(step);
-    else if (step.type === "write-html") node = renderWriteHtml(step);
-    else if (step.type === "write-css") node = renderWriteCss(step);
-    else node = renderWriteCode(step);
-
+    const renderer = RENDERERS[step.type] ?? renderWriteCode;
+    const node = renderer(step);
     el.body.appendChild(node);
     el.body._currentExercise = node;
 
@@ -404,8 +317,8 @@ function renderStep() {
         const input = node.querySelector("input, textarea");
         if (input) {
             if (step.type === "fill-blank") input.value = "";
-            el.action.disabled = input.value.trim().length === 0;
-            setTimeout(function () { input.focus(); }, 100);
+            el.action.disabled = !input.value.trim().length;
+            setTimeout(() => input.focus(), 100);
         }
     }
 }
@@ -413,15 +326,11 @@ function renderStep() {
 function handleAnswer(isCorrect) {
     state.answered = true;
     el.feedback.hidden = false;
-    el.feedback.className = "lesson-feedback is-" + (isCorrect ? "correct" : "wrong");
-    const icon = document.createElement("span");
-    icon.className = "lesson-feedback-icon";
-    icon.textContent = isCorrect ? "✓" : "✕";
-    const text = document.createElement("span");
-    text.textContent = isCorrect ? "Correto!" : "Não foi dessa vez. Continue!";
-    el.feedback.innerHTML = "";
-    el.feedback.appendChild(icon);
-    el.feedback.appendChild(text);
+    el.feedback.className = `lesson-feedback is-${isCorrect ? "correct" : "wrong"}`;
+
+    const icon = createEl("span", "lesson-feedback-icon", isCorrect ? "✓" : "✕");
+    const text = createEl("span", null, isCorrect ? "Correto!" : "Não foi dessa vez. Continue!");
+    el.feedback.replaceChildren(icon, text);
 
     if (isCorrect) {
         state.correctCount += 1;
@@ -435,48 +344,13 @@ function handleAnswer(isCorrect) {
     el.action.textContent = "Continuar";
 }
 
-async function onActionClick() {
-    const step = state.steps[state.stepIndex];
-
-    if (step.type === "teach") {
-        advanceStep();
-        return;
-    }
-
-    if (!state.answered) {
-        const node = el.body._currentExercise;
-        if (!node) return;
-
-        el.action.disabled = true;
-        el.action.textContent = "Verificando...";
-
-        let isCorrect = false;
-        if (step.type === "write-code") {
-            try {
-                const result = await node._checkAnswer();
-                isCorrect = result === true;
-            } catch (e) {
-                isCorrect = false;
-            }
-        } else {
-            isCorrect = node._checkAnswer();
-        }
-
-        handleAnswer(isCorrect);
-        return;
-    }
-
-    setMascot("idle");
-    advanceStep();
-}
-
 async function advanceStep() {
     state.stepIndex += 1;
     if (state.stepIndex >= state.steps.length) {
         await completeLesson();
-    } else {
-        renderStep();
+        return;
     }
+    renderStep();
 }
 
 async function completeLesson() {
@@ -486,12 +360,64 @@ async function completeLesson() {
     try {
         await addXpAndStreak(gained);
         await markLessonComplete(state.lesson.id);
-    } catch (e) {}
+    } catch {}
 }
+
+function getNextLessonId(currentId) {
+    const unit = UNITS.find((u) => u.lessons.includes(currentId));
+    if (!unit) return null;
+
+    const index = unit.lessons.indexOf(currentId);
+    if (index < unit.lessons.length - 1) return unit.lessons[index + 1];
+
+    const lang = unit.lang ?? "python";
+    const sameLang = UNITS.filter((u) => (u.lang ?? "python") === lang);
+    const unitIndex = sameLang.indexOf(unit);
+    if (unitIndex < sameLang.length - 1) return sameLang[unitIndex + 1].lessons[0];
+    return null;
+}
+
+el.action.addEventListener("click", async () => {
+    const step = state.steps[state.stepIndex];
+    if (step.type === "teach") { advanceStep(); return; }
+
+    if (!state.answered) {
+        const node = el.body._currentExercise;
+        if (!node) return;
+        el.action.disabled = true;
+        el.action.textContent = "Verificando...";
+
+        let correct = false;
+        try {
+            const result = await node._checkAnswer();
+            correct = result === true;
+        } catch {}
+
+        handleAnswer(correct);
+        return;
+    }
+
+    setMascot("idle");
+    advanceStep();
+});
+
+el.close.addEventListener("click", () => { window.location.href = "lessons.html"; });
+
+el.celebrationContinue.addEventListener("click", () => {
+    const nextId = getNextLessonId(state.lesson.id);
+    window.location.href = nextId ? `lesson.html?id=${nextId}` : "lessons.html";
+});
+
+el.celebrationRepeat?.addEventListener("click", () => {
+    state.stepIndex = 0;
+    state.correctCount = 0;
+    state.answered = false;
+    el.celebration.hidden = true;
+    renderStep();
+});
 
 function bootstrap(user, progress) {
     state.user = user;
-    state.progress = progress;
     state.lesson = pickLesson(progress);
     state.steps = buildSteps(state.lesson);
     state.stepIndex = 0;
@@ -499,53 +425,7 @@ function bootstrap(user, progress) {
     renderStep();
 }
 
-el.action.addEventListener("click", onActionClick);
-
-function getNextLessonId(currentId) {
-    const unit = UNITS.find(function (u) {
-        return u.lessons.indexOf(currentId) !== -1;
-    });
-    if (!unit) return null;
-    const idx = unit.lessons.indexOf(currentId);
-    if (idx < unit.lessons.length - 1) {
-        return unit.lessons[idx + 1];
-    }
-    const lang = unit.lang || "python";
-    const sameLang = UNITS.filter(function (u) {
-        return (u.lang || "python") === lang;
-    });
-    const unitIdx = sameLang.indexOf(unit);
-    if (unitIdx < sameLang.length - 1) {
-        return sameLang[unitIdx + 1].lessons[0];
-    }
-    return null;
-}
-
-el.close.addEventListener("click", function () {
-    window.location.href = "lessons.html";
-});
-
-el.celebrationContinue.addEventListener("click", function () {
-    const nextId = getNextLessonId(state.lesson.id);
-    if (nextId) {
-        window.location.href = "lesson.html?id=" + nextId;
-    } else {
-        window.location.href = "lessons.html";
-    }
-});
-
-const repeatBtn = document.getElementById("celebration-repeat");
-if (repeatBtn) {
-    repeatBtn.addEventListener("click", function () {
-        state.stepIndex = 0;
-        state.correctCount = 0;
-        state.answered = false;
-        el.celebration.hidden = true;
-        renderStep();
-    });
-}
-
-onAuthStateChanged(auth, async function (user) {
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "login.html";
         return;
@@ -553,7 +433,4 @@ onAuthStateChanged(auth, async function (user) {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
-
-
-// 1791682045
-// 1791683274
+// 1791690739

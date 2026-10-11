@@ -18,37 +18,27 @@ const AUTH_ERROR_MESSAGES = {
     "auth/network-request-failed": "Falha de conexão. Verifique sua internet."
 };
 
-function mapAuthError(error) {
-    const message = AUTH_ERROR_MESSAGES[error.code];
-    if (message) {
-        return new Error(message);
-    }
-    return new Error("Erro inesperado. Tente novamente.");
-}
+const mapError = ({ code }) => new Error(AUTH_ERROR_MESSAGES[code] ?? "Erro inesperado. Tente novamente.");
 
-export async function signInWithEmail(email, password) {
+export const signInWithEmail = async (email, password) => {
     try {
-        const credential = await signInWithEmailAndPassword(auth, email, password);
-        return credential.user;
+        const { user } = await signInWithEmailAndPassword(auth, email, password);
+        return user;
     } catch (error) {
-        throw mapAuthError(error);
+        throw mapError(error);
     }
-}
+};
 
-export async function signUpWithEmail(name, email, password) {
+export const signUpWithEmail = async (name, email, password) => {
     try {
-        const credential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(credential.user, { displayName: name });
-        return credential.user;
+        const { user } = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(user, { displayName: name });
+        return user;
     } catch (error) {
-        throw mapAuthError(error);
+        throw mapError(error);
     }
-}
+};
 
-export function observeAuthState(callback) {
-    return onAuthStateChanged(auth, callback);
-}
+export const observeAuthState = (callback) => onAuthStateChanged(auth, callback);
 
-export async function signOutUser() {
-    await signOut(auth);
-}
+export const signOutUser = () => signOut(auth);

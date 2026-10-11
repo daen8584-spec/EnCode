@@ -9,20 +9,18 @@ const userAvatar = document.getElementById("user-avatar");
 const greeting = document.getElementById("dashboard-greeting");
 const signOutButton = document.getElementById("signout-button");
 
-function getUserDisplayName(user) {
-    if (user.displayName && user.displayName.trim().length > 0) return user.displayName.trim();
-    if (user.email && user.email.includes("@")) return user.email.split("@")[0];
-    return "Usuário";
-}
+const displayName = (user) =>
+    user.displayName?.trim() ||
+    (user.email?.includes("@") ? user.email.split("@")[0] : "Usuário");
 
-function populateUser(user) {
-    const displayName = getUserDisplayName(user);
-    userName.textContent = displayName;
-    userAvatar.textContent = displayName.charAt(0).toUpperCase();
-    greeting.textContent = "Olá, " + displayName.split(" ")[0];
-}
+const populateUser = (user) => {
+    const name = displayName(user);
+    userName.textContent = name;
+    userAvatar.textContent = name.charAt(0).toUpperCase();
+    greeting.textContent = `Olá, ${name.split(" ")[0]}`;
+};
 
-observeAuthState(function (user) {
+observeAuthState((user) => {
     if (!user) {
         window.location.href = "login.html";
         return;
@@ -33,22 +31,9 @@ observeAuthState(function (user) {
     initAppShell();
     initEditor();
     initProfile(user);
-    const trackButtons = document.querySelectorAll(".track-start[data-go]");
-    trackButtons.forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            window.location.href = btn.getAttribute("data-go");
-        });
-    });
 });
 
-signOutButton.addEventListener("click", async function () {
-    try {
-        await signOutUser();
-    } catch (error) {
-        console.error("Sign-out failed", error);
-    }
+signOutButton.addEventListener("click", async () => {
+    try { await signOutUser(); } catch (error) { console.error("Sign-out failed", error); }
     window.location.href = "login.html";
 });
-
-
-

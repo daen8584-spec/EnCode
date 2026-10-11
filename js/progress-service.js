@@ -1,143 +1,93 @@
 import { auth } from "./firebase-config.js";
 
 const PROJECT_ID = "proyect-af2be";
+const BASE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/users`;
 
-function docUrl(uid) {
-    return "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents/users/" + uid;
-}
+const docUrl = (uid) => `${BASE_URL}/${uid}`;
 
-async function getToken() {
-    if (!auth.currentUser) throw new Error("Usuário não autenticado");
-    return await auth.currentUser.getIdToken();
-}
+const getToken = () => auth.currentUser?.getIdToken() ?? Promise.reject(new Error("Usuário não autenticado"));
 
-function fieldsToObject(fields) {
-    const result = {};
-    if (!fields) return result;
-    Object.keys(fields).forEach(function (k) {
-        const f = fields[k];
-        if (f.stringValue !== undefined) result[k] = f.stringValue;
-        else if (f.integerValue !== undefined) result[k] = parseInt(f.integerValue, 10);
-        else if (f.booleanValue !== undefined) result[k] = f.booleanValue;
-        else if (f.arrayValue !== undefined) {
-            result[k] = (f.arrayValue.values || []).map(function (v) {
-                return v.stringValue !== undefined ? v.stringValue : v;
-            });
-        }
-    });
-    return result;
-}
+const defaultProgress = () => ({ xp: 0, streak: 0, lastPlayed: "", completedLessons: [] });
 
-function objectToFields(obj) {
-    const fields = {};
-    Object.keys(obj).forEach(function (k) {
-        const v = obj[k];
-        if (typeof v === "number") fields[k] = { integerValue: String(Math.round(v)) };
-        else if (typeof v === "boolean") fields[k] = { booleanValue: v };
-        else if (Array.isArray(v)) {
-            fields[k] = {
-                arrayValue: {
-                    values: v.map(function (item) {
-                        return { stringValue: String(item) };
-                    })
-                }
-            };
-        } else {
-            fields[k] = { stringValue: String(v) };
-        }
-    });
-    return fields;
-}
+const parseValue = (field) => {
+    if (field.stringValue !== undefined) return field.stringValue;
+    if (field.integerValue !== undefined) return parseInt(field.integerValue, 10);
+    if (field.booleanValue !== undefined) return field.booleanValue;
+    if (field.arrayValue !== undefined) return (field.arrayValue.values ?? []).map((v) => v.stringValue ?? v);
+    return undefined;
+};
+
+const parseFields = (fields = {}) =>
+    Object.entries(fields).reduce((acc, [key, value]) => { acc[key] = parseValue(value); return acc; }, {});
+
+const toField = (value) => {
+    if (typeof value === "number") return { integerValue: String(Math.round(value)) };
+    if (typeof value === "boolean") return { booleanValue: value };
+    if (Array.isArray(value)) return { arrayValue: { values: value.map((v) => ({ stringValue: String(v) })) } };
+    return { stringValue: String(value) };
+};
+
+const toFields = (obj) =>
+    Object.entries(obj).reduce((acc, [key, value]) => { acc[key] = toField(value); return acc; }, {});
+
+const normalize = (data) => ({
+    xp: typeof data.xp === "number" ? data.xp : 0,
+    streak: typeof data.streak === "number" ? data.streak : 0,
+    lastPlayed: data.lastPlayed || "",
+    completedLessons: Array.isArray(data.completedLessons) ? data.completedLessons : []
+});
 
 export async function loadProgress() {
     try {
         const user = auth.currentUser;
         if (!user) return defaultProgress();
         const token = await getToken();
-        const res = await fetch(docUrl(user.uid), {
-            headers: { "Authorization": "Bearer " + token }
-        });
-        if (res.status === 404) return defaultProgress();
-        if (!res.ok) return defaultProgress();
+        const res = await fetch(docUrl(user.uid), { headers: { Authorization: `Bearer ${token}` } });
+        if (res.status === 404 || !res.ok) return defaultProgress();
         const json = await res.json();
-        const data = fieldsToObject(json.fields);
-        return normalizeProgress(data);
-    } catch (e) {
+        return normalize(parseFields(json.fields));
+    } catch {
         return defaultProgress();
     }
-}
-
-function defaultProgress() {
-    return {
-        xp: 0,
-        streak: 0,
-        lastPlayed: "",
-        completedLessons: []
-    };
-}
-
-function normalizeProgress(data) {
-    return {
-        xp: typeof data.xp === "number" ? data.xp : 0,
-        streak: typeof data.streak === "number" ? data.streak : 0,
-        lastPlayed: data.lastPlayed || "",
-        completedLessons: Array.isArray(data.completedLessons) ? data.completedLessons : []
-    };
 }
 
 export async function saveProgress(progress) {
     const user = auth.currentUser;
     if (!user) return;
     const token = await getToken();
-    const fields = objectToFields({
+    const fields = toFields({
         xp: progress.xp,
         streak: progress.streak,
         lastPlayed: progress.lastPlayed,
         completedLessons: progress.completedLessons
     });
-    const mask = ["xp", "streak", "lastPlayed", "completedLessons"].map(function (k) {
-        return "updateMask.fieldPaths=" + k;
-    }).join("&");
-    const url = docUrl(user.uid) + "?" + mask;
-    const res = await fetch(url, {
+    const mask = ["xp", "streak", "lastPlayed", "completedLessons"]
+        .map((k) => `updateMask.fieldPaths=${k}`).join("&");
+    const res = await fetch(`${docUrl(user.uid)}?${mask}`, {
         method: "PATCH",
-        headers: {
-            "Authorization": "Bearer " + token,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ fields: fields })
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ fields })
     });
-    if (!res.ok) throw new Error("Erro ao salvar progresso: HTTP " + res.status);
-    return await res.json();
+    if (!res.ok) throw new Error(`Erro ao salvar progresso: HTTP ${res.status}`);
+    return res.json();
 }
 
-export function todayString() {
-    const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return year + "-" + month + "-" + day;
-}
+const dateString = (date) => date.toISOString().slice(0, 10);
 
-export function yesterdayString() {
+export const todayString = () => dateString(new Date());
+
+export const yesterdayString = () => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return year + "-" + month + "-" + day;
-}
+    return dateString(d);
+};
 
 export async function addXpAndStreak(amount) {
     const progress = await loadProgress();
-    progress.xp = progress.xp + amount;
+    progress.xp += amount;
     const today = todayString();
     if (progress.lastPlayed !== today) {
-        if (progress.lastPlayed === yesterdayString()) {
-            progress.streak = progress.streak + 1;
-        } else {
-            progress.streak = 1;
-        }
+        progress.streak = progress.lastPlayed === yesterdayString() ? progress.streak + 1 : 1;
         progress.lastPlayed = today;
     }
     await saveProgress(progress);
@@ -146,9 +96,7 @@ export async function addXpAndStreak(amount) {
 
 export async function markLessonComplete(lessonId) {
     const progress = await loadProgress();
-    if (progress.completedLessons.indexOf(lessonId) === -1) {
-        progress.completedLessons.push(lessonId);
-    }
+    if (!progress.completedLessons.includes(lessonId)) progress.completedLessons.push(lessonId);
     await saveProgress(progress);
     return progress;
 }
