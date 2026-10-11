@@ -41,13 +41,6 @@ const normalizeOutput = (text) => String(text)
 
 const collapseWhitespace = (text) => text.replace(/\s+/g, " ").trim();
 
-const sanitizeCode = (code) => code
-    .replace(/[\u2018\u2019]/g, "'")
-    .replace(/[\u201C\u201D]/g, "\"")
-    .replace(/[\u2013\u2014]/g, "-")
-    .replace(/\u00A0/g, " ")
-    .replace(/\u2192/g, "->")
-    .replace(/\u21D2/g, "=>");
 
 function setMascot(kind) {
     el.mascot.classList.remove("is-idle", "is-happy", "is-sad");
@@ -425,3 +418,4 @@ onAuthStateChanged(auth, async (user) => {
     const progress = await loadProgress();
     bootstrap(user, progress);
 });
+// 1791693670
