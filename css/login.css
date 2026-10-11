@@ -1,24 +1,3 @@
-:root {
-    --color-background: #0f1222;
-    --color-surface: rgba(255, 255, 255, 0.06);
-    --color-surface-border: rgba(255, 255, 255, 0.12);
-    --color-text: #eef0ff;
-    --color-text-muted: #9aa1c0;
-    --color-input-border: rgba(255, 255, 255, 0.16);
-    --color-accent-start: #7c5cff;
-    --color-accent-end: #22d3ee;
-    --color-error: #ff6b6b;
-    --color-success: #34d399;
-    --radius-input: 12px;
-    --radius-button: 14px;
-    --radius-card: 24px;
-    --space-xs: 8px;
-    --space-sm: 16px;
-    --space-md: 24px;
-    --space-lg: 36px;
-    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 * {
     margin: 0;
     padding: 0;

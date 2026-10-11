@@ -1,7 +1,3 @@
-:root {
-    --color-warning: #fbbf24;
-}
-
 .page-signup .form-group:nth-of-type(3) {
     animation-delay: 0.56s;
 }
