@@ -867,13 +867,13 @@
 }
 
 .lesson-action-secondary {
-    background: rgba(255, 255, 255, 0.08) !important;
-    box-shadow: none !important;
-    color: var(--color-text) !important;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+    color: var(--color-text);
 }
 
 .lesson-action-secondary:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(255, 255, 255, 0.15);
 }
 
 
@@ -887,3 +887,19 @@
 }
 
 /* 1791691261 */
+
+.lesson-code-input--inline {
+    min-height: auto;
+    font-size: 15px;
+    padding: 14px 16px;
+}
+
+.lesson-output--hint {
+    min-height: auto;
+    color: var(--color-text-muted);
+}
+
+.lesson-blank-marker {
+    color: #fbbf24;
+    font-weight: bold;
+}

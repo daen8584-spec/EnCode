@@ -1,6 +1,7 @@
 import { observeAuthState, signOutUser } from "./auth-service.js";
 import { initAppShell, initEditor } from "./app.js";
 import { initProfile } from "./profile.js";
+import { loadProgress } from "./progress-service.js";
 
 const topbar = document.querySelector(".topbar");
 const appShell = document.getElementById("app-shell");
@@ -20,7 +21,7 @@ const populateUser = (user) => {
     greeting.textContent = `Olá, ${name.split(" ")[0]}`;
 };
 
-observeAuthState((user) => {
+observeAuthState(async (user) => {
     if (!user) {
         window.location.href = "login.html";
         return;
@@ -28,7 +29,9 @@ observeAuthState((user) => {
     populateUser(user);
     topbar.hidden = false;
     appShell.hidden = false;
-    initAppShell();
+
+    const progress = await loadProgress();
+    initAppShell(progress);
     initEditor();
     initProfile(user);
 });

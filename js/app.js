@@ -1,22 +1,10 @@
+import { sanitizeInput, createEl } from "./utils.js";
+
 const SNIPPETS = {
     hello: "print('Olá, mundo!')",
     loop: "for i in range(1, 6):\n    print('Contando:', i)",
     "function": "def saudacao(nome):\n    return 'Olá, ' + nome + '!'\n\nprint(saudacao('EnCoder'))"
 };
-
-const SYMBOL_MAP = {
-    "\u2192": "->", "\u21D2": "=>", "\u2190": "<-", "\u21D0": "<=",
-    "\u21D4": "<=>", "\u2265": ">=", "\u2267": ">=", "\u226B": ">>",
-    "\u2264": "<=", "\u2266": "<=", "\u226A": "<<", "\u2260": "!=",
-    "\u2212": "-", "\u2013": "-", "\u2014": "--", "\u2015": "--",
-    "\u00D7": "*", "\u00F7": "/", "\u2018": "'", "\u2019": "'",
-    "\u201A": "'", "\u201C": "\"", "\u201D": "\"", "\u201E": "\"",
-    "\u2026": "...", "\u00AB": "<<", "\u00BB": ">>", "\u00A0": " ",
-    "\uFF1C": "<", "\uFF1E": ">", "\uFF1D": "=", "\uFF0B": "+",
-    "\uFF0D": "-", "\uFF0A": "*", "\uFF0F": "/"
-};
-
-const sanitizeInput = (text) => [...text].map((ch) => SYMBOL_MAP[ch] ?? ch).join("");
 
 const attachSanitizer = (textarea) => {
     let busy = false;
@@ -39,7 +27,21 @@ const attachSanitizer = (textarea) => {
     setInterval(clean, 80);
 };
 
-export function initAppShell() {
+const renderXpBar = (progress) => {
+    const fill = document.getElementById("xp-fill");
+    if (!fill) return;
+    const xp = progress?.xp ?? 0;
+    const level = Math.floor(xp / 1000) + 1;
+    const xpInLevel = xp % 1000;
+    const percent = Math.min((xpInLevel / 1000) * 100, 100);
+    setTimeout(() => { fill.style.width = `${percent}%`; }, 200);
+    const levelEl = document.getElementById("xp-level");
+    const currentEl = document.getElementById("xp-current");
+    if (levelEl) levelEl.textContent = String(level);
+    if (currentEl) currentEl.textContent = String(xpInLevel);
+};
+
+export function initAppShell(progress = null) {
     const navItems = document.querySelectorAll(".nav-item");
     const views = document.querySelectorAll(".view");
     navItems.forEach((item) => item.addEventListener("click", () => {
@@ -50,18 +52,15 @@ export function initAppShell() {
         item.classList.add("is-active");
         views.forEach((v) => v.classList.toggle("is-active", v.id === `view-${target}`));
     }));
-    const xpFill = document.getElementById("xp-fill");
-    if (xpFill) setTimeout(() => { xpFill.style.width = "45%"; }, 200);
+    renderXpBar(progress);
 }
 
 const fireConfetti = () => {
     const colors = ["#7c5cff", "#22d3ee", "#34d399", "#fbbf24", "#ff6b6b"];
-    const container = document.createElement("div");
-    container.className = "confetti-container";
+    const container = createEl("div", "confetti-container");
     document.body.appendChild(container);
     for (let i = 0; i < 40; i++) {
-        const piece = document.createElement("span");
-        piece.className = "confetti-piece";
+        const piece = createEl("span", "confetti-piece");
         piece.style.left = `${Math.random() * 100}%`;
         piece.style.background = colors[Math.floor(Math.random() * colors.length)];
         piece.style.animationDelay = `${Math.random() * 0.3}s`;
@@ -98,8 +97,6 @@ const setupSkulpt = () => {
     return Sk;
 };
 
-const formatOutput = (lines) => lines.join("\n");
-
 export function initEditor() {
     const input = document.getElementById("code-input");
     const output = document.getElementById("code-output");
@@ -135,9 +132,8 @@ export function initEditor() {
 
         try {
             await Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true));
-            const elapsed = Date.now() - start;
-            buffer.push("", `Concluído em ${elapsed}ms`);
-            output.textContent = formatOutput(buffer);
+            buffer.push("", `Concluído em ${Date.now() - start}ms`);
+            output.textContent = buffer.join("");
             fireConfetti();
         } catch (error) {
             output.textContent = `Erro: ${error?.toString?.() ?? error}`;

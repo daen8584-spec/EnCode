@@ -2,6 +2,7 @@ import { auth } from "./firebase-config.js";
 import { LESSONS, UNITS, LESSON_XP_BASE, EXERCISE_XP } from "./lessons-data.js";
 import { loadProgress, addXpAndStreak, markLessonComplete } from "./progress-service.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { sanitizeCode, createEl } from "./utils.js";
 
 const state = {
     lesson: null,
@@ -30,14 +31,6 @@ const el = {
 };
 
 const letters = ["A", "B", "C", "D", "E"];
-const EMAIL_RE = null;
-
-const createEl = (tag, className, text) => {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-};
 
 const normalizeOutput = (text) => String(text)
     .replace(/\r\n/g, "\n")
@@ -140,14 +133,13 @@ function renderFillBlank(exercise) {
     const block = createEl("pre", "lesson-output");
     block.appendChild(document.createTextNode(before));
     const blank = createEl("span", null, "___");
-    blank.style.color = "#fbbf24";
-    blank.style.fontWeight = "bold";
+    blank.classList.add("lesson-blank-marker");
     block.appendChild(blank);
     block.appendChild(document.createTextNode(after ?? ""));
 
     const input = createEl("input", "lesson-code-input");
     input.type = "text";
-    Object.assign(input.style, { minHeight: "auto", fontSize: "15px", padding: "14px 16px" });
+    input.classList.add("lesson-code-input--inline");
     input.placeholder = exercise.placeholder ?? "Digite aqui";
     input.autocapitalize = "off";
     input.autocomplete = "off";
@@ -168,8 +160,7 @@ function renderWriteCode(exercise) {
     const wrapper = createEl("div", "lesson-editor");
 
     wrapper.appendChild(createEl("div", "lesson-output-header", "Saída esperada"));
-    const expected = createEl("pre", "lesson-output", exercise.expectedOutput);
-    expected.style.minHeight = "auto";
+    const expected = createEl("pre", "lesson-output lesson-output--hint", exercise.expectedOutput);
     wrapper.appendChild(expected);
 
     const input = createEl("textarea", "lesson-code-input");
@@ -222,8 +213,7 @@ function renderWriteHtml(exercise) {
 
     wrapper.appendChild(createEl("div", "lesson-output-header", "Escreva seu código HTML"));
 
-    const hint = createEl("pre", "lesson-output", `Exemplo: ${exercise.expectedPattern}`);
-    Object.assign(hint.style, { minHeight: "auto", color: "var(--color-text-muted)" });
+    const hint = createEl("pre", "lesson-output lesson-output--hint", `Exemplo: ${exercise.expectedPattern}`);
     wrapper.appendChild(hint);
 
     const input = createEl("textarea", "lesson-code-input");
