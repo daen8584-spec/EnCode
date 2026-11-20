@@ -6,7 +6,8 @@ import { loadUserData } from "./progress.js";
 const ICONS = {
     done: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>',
     current: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>',
-    locked: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'
+    locked: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+    challenge: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/></svg>'
 };
 
 await requireUser();
@@ -18,11 +19,12 @@ const stateOf = (lesson) => completed.has(lesson.id) ? "done"
 
 function renderLesson(lesson) {
     const state = stateOf(lesson);
+    const icon = lesson.challenge && state === "current" ? ICONS.challenge : ICONS[state];
     const content = [
-        h("span", { className: "node-circle", innerHTML: ICONS[state] }),
+        h("span", { className: "node-circle", innerHTML: icon }),
         h("span", { className: "node-label", textContent: lesson.title })
     ];
-    return h("li", { className: `node is-${state}` }, state === "locked"
+    return h("li", { className: `node is-${state}${lesson.challenge ? " is-challenge" : ""}` }, state === "locked"
         ? h("span", { className: "node-link", ariaDisabled: "true" }, content)
         : h("a", { className: "node-link", href: `lesson.html?id=${lesson.id}` }, content));
 }

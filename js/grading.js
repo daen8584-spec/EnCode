@@ -8,6 +8,8 @@ const fail = (message) => ({ ok: false, message });
 
 export const checkBlank = (value, answer) => collapse(normalizeCode(value)).toLowerCase() === answer.toLowerCase();
 
+export const checkOrder = (picked, lines) => picked.length === lines.length && picked.every((line, i) => line === lines[i]);
+
 async function checkPython(code, { expected, mustInclude = [] }) {
     const { output, error } = await runPython(code);
     if (error) return fail(error);
@@ -18,18 +20,24 @@ async function checkPython(code, { expected, mustInclude = [] }) {
     return missing ? fail(`A saída está certa, mas use ${missing} como o exercício pede.`) : pass;
 }
 
-// Compares element structure and text, so formatting and letter case don't matter.
+// Compares elements, attributes and text, so formatting, quotes and letter case don't matter.
+const attributes = (element) => [...element.attributes]
+    .map(({ name, value }) => ` ${name}="${collapse(value).toLowerCase()}"`)
+    .sort()
+    .join("");
+
 const canonical = (node) => {
     if (node.nodeType === Node.TEXT_NODE) return collapse(node.data).toLowerCase();
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
-    return `<${node.localName}>${[...node.childNodes].map(canonical).join("")}</${node.localName}>`;
+    return `<${node.localName}${attributes(node)}>${[...node.childNodes].map(canonical).join("")}</${node.localName}>`;
 };
 const parseHtml = (markup) => canonical(new DOMParser().parseFromString(normalizeCode(markup), "text/html").body);
 
 function checkHtml(code, { expected }) {
-    const unclosed = expected.match(/<\/\w+>/g).find((tag) => !code.toLowerCase().includes(tag));
+    const closingTags = expected.match(/<\/\w+>/g) ?? [];
+    const unclosed = closingTags.find((tag) => !code.toLowerCase().includes(tag));
     if (unclosed) return fail(`Não esqueça de fechar a tag com ${unclosed}.`);
-    return parseHtml(code) === parseHtml(expected) ? pass : fail("Confira as tags e o texto pedido.");
+    return parseHtml(code) === parseHtml(expected) ? pass : fail("Confira as tags, os atributos e o texto pedido.");
 }
 
 const parseCss = (css) => {
@@ -40,7 +48,9 @@ const parseCss = (css) => {
 
 // Values are compared after the browser resolves them, so "red" and "#f00" both pass.
 function checkCss(code, { expected }) {
-    const probe = document.body.appendChild(Object.assign(document.createElement("div"), { hidden: true }));
+    // The probe sits inside a hidden parent so its own `display` can still be compared.
+    const container = document.body.appendChild(Object.assign(document.createElement("div"), { hidden: true }));
+    const probe = container.appendChild(document.createElement("div"));
     const resolve = (style, property) => {
         probe.style.cssText = style?.cssText ?? "";
         return getComputedStyle(probe).getPropertyValue(property);
@@ -56,7 +66,7 @@ function checkCss(code, { expected }) {
         }
         return pass;
     } finally {
-        probe.remove();
+        container.remove();
     }
 }
 

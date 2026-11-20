@@ -1,5 +1,5 @@
 import { logOut, requireUser } from "./auth.js";
-import { TRACKS } from "./content.js";
+import { ALL_LESSONS, TRACKS } from "./content.js";
 import { $, h } from "./dom.js";
 import { initProfile } from "./profile.js";
 import { currentStreak, LEVEL_XP, levelOf, loadUserData } from "./progress.js";
@@ -33,9 +33,15 @@ function renderHome() {
         ? `${streak} ${streak === 1 ? "dia seguido" : "dias seguidos"}`
         : "Complete uma lição para começar sua sequência";
 
-    const next = TRACKS.flatMap((track) => track.lessons).find((lesson) => !completed.has(lesson.id));
+    const next = ALL_LESSONS.find((lesson) => !completed.has(lesson.id));
     $("continue").href = next ? `lesson.html?id=${next.id}` : "lessons.html";
     $("continue").textContent = next ? `Continuar: ${next.title}` : "Revisar lições";
+
+    const mistakes = data.mistakes.length;
+    $("practice-card").hidden = completed.size === 0;
+    $("practice-text").textContent = mistakes
+        ? `${mistakes} ${mistakes === 1 ? "exercício que você errou espera" : "exercícios que você errou esperam"} revisão.`
+        : "Revise exercícios das lições que você já fez e ganhe XP.";
 
     $("tracks").append(...TRACKS.map((track) => h("a", { className: `track card is-${track.id}`, href: `lessons.html?track=${track.id}` },
         h("span", { className: "track-icon", textContent: track.icon }),
@@ -46,6 +52,34 @@ function renderHome() {
             textContent: `${track.lessons.filter((lesson) => completed.has(lesson.id)).length} de ${track.lessons.length} lições`
         })
     )));
+}
+
+const fold = (text) => text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
+function renderGlossary() {
+    const entries = TRACKS.flatMap((track) => track.lessons.flatMap((lesson) => lesson.teach
+        .filter((card) => card.meaning)
+        .map((card) => ({ ...card, track, unlocked: completed.has(lesson.id) }))));
+    const unlocked = entries.filter((entry) => entry.unlocked);
+    const locked = entries.length - unlocked.length;
+
+    const show = (query = "") => {
+        const matches = unlocked.filter((entry) => fold(`${entry.term} ${entry.meaning}`).includes(fold(query)));
+        $("glossary").replaceChildren(...matches.map((entry) => h("article", { className: `word card is-${entry.track.id}` },
+            h("span", { className: "word-track", textContent: entry.track.name }),
+            h("code", { className: "word-term", textContent: entry.term }),
+            h("p", { className: "word-meaning", textContent: entry.meaning }),
+            h("p", { className: "word-detail", textContent: entry.lines.slice(1).join(" ") })
+        )));
+        $("glossary-empty").hidden = matches.length > 0 || unlocked.length === 0;
+    };
+
+    $("glossary-count").textContent = unlocked.length
+        ? `${unlocked.length} ${unlocked.length === 1 ? "palavra aprendida" : "palavras aprendidas"}${locked ? `, ${locked} para desbloquear` : ""}.`
+        : `Complete lições para desbloquear ${locked} palavras.`;
+    $("glossary-search").hidden = unlocked.length === 0;
+    $("glossary-search").addEventListener("input", ({ target }) => show(target.value));
+    show();
 }
 
 function initEditor() {
@@ -97,6 +131,7 @@ $("sign-out").addEventListener("click", async () => {
 addEventListener("hashchange", showView);
 showView();
 renderHome();
+renderGlossary();
 initEditor();
 initProfile(user, data);
 document.body.classList.remove("is-loading");

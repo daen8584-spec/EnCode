@@ -187,9 +187,9 @@
     box-shadow: 0 20px 44px rgb(0 0 0 / 45%);
 }
 
-.track.is-python { --track: #ffd43b; }
-.track.is-html { --track: #e34f26; }
-.track.is-css { --track: #3b9ae8; }
+.is-python { --track: #ffd43b; }
+.is-html { --track: #f06a3f; }
+.is-css { --track: #3b9ae8; }
 
 .track-icon {
     display: grid;
@@ -219,6 +219,57 @@
     color: var(--track);
     font-size: 13px;
     font-weight: 700;
+}
+
+.practice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+}
+
+.practice h2 {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.glossary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.word {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding: 20px;
+    border-top: 3px solid var(--track);
+}
+
+.word-track {
+    color: var(--track);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.word-term {
+    font-family: var(--mono);
+    font-size: 22px;
+}
+
+.word-meaning {
+    color: var(--accent-2);
+    font-weight: 800;
+}
+
+.word-detail {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 .snippet {
@@ -381,6 +432,11 @@
 
     .mascot {
         width: 90px;
+    }
+
+    .practice {
+        flex-direction: column;
+        align-items: stretch;
     }
 
     .profile {

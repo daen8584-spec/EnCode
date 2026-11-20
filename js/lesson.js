@@ -1,12 +1,15 @@
 import { requireUser } from "./auth.js";
-import { findLesson, TRACKS } from "./content.js";
+import { ALL_LESSONS, findLesson } from "./content.js";
 import { $, h, shuffle, toast } from "./dom.js";
-import { checkBlank, checkCode } from "./grading.js";
-import { completeLesson, loadUserData } from "./progress.js";
-import { loadPython } from "./python.js";
+import { checkBlank, checkCode, checkOrder } from "./grading.js";
+import { loadUserData, recordSession } from "./progress.js";
+import { loadPython, normalizeCode } from "./python.js";
 
 const LESSON_XP = 10;
+const REVIEW_XP = 5;
 const EXERCISE_XP = 2;
+const REVIEW_SIZE = 6;
+const PREVIEW_BASE = "<style>body{margin:12px;font:16px system-ui,sans-serif;color:#1a1a2e;background:#fff}</style>";
 
 const ui = {
     title: $("title"),
@@ -20,10 +23,24 @@ const ui = {
 
 await requireUser();
 const data = await loadUserData();
-const lesson = findLesson(new URLSearchParams(location.search).get("id"))
-    ?? TRACKS[0].lessons.find(({ id }) => !data.completedLessons.includes(id))
-    ?? TRACKS[0].lessons[0];
-const language = lesson.track.id;
+const params = new URLSearchParams(location.search);
+
+// Review mode practises earlier mistakes first, then random exercises from finished lessons.
+function buildReview() {
+    const done = ALL_LESSONS.filter((lesson) => data.completedLessons.includes(lesson.id)).flatMap((lesson) => lesson.exercises);
+    const mistakes = shuffle(done.filter((exercise) => data.mistakes.includes(exercise.id)));
+    const others = shuffle(done.filter((exercise) => !data.mistakes.includes(exercise.id)));
+    return { title: "Revisão", teach: [], exercises: shuffle([...mistakes, ...others].slice(0, REVIEW_SIZE)) };
+}
+
+const review = params.has("review");
+const lesson = review ? buildReview()
+    : findLesson(params.get("id")) ?? ALL_LESSONS.find(({ id }) => !data.completedLessons.includes(id)) ?? ALL_LESSONS[0];
+
+if (!lesson.exercises.length) {
+    location.replace("lessons.html");
+    await new Promise(() => {}); // nothing to practise yet; stop while the page unloads
+}
 
 const queue = [...lesson.teach.map((card) => ({ type: "teach", ...card })), ...lesson.exercises];
 const missed = new Set();
@@ -41,13 +58,20 @@ function codeField(tag, props) {
     return field;
 }
 
+const previewDocument = (language, code, sample = "") =>
+    PREVIEW_BASE + (language === "css" ? `<style>${normalizeCode(code)}</style>${sample}` : normalizeCode(code));
+
+const preview = (srcdoc) => h("iframe", { className: "preview", sandbox: "", title: "Resultado", srcdoc });
+
 const RENDERERS = {
-    teach: ({ term, lines, example }) => ({
+    teach: ({ term, lines, example, language, sample }) => ({
         node: h("div", { className: "teach card" },
             h("span", { className: "teach-term", textContent: term }),
             lines.map((line) => h("p", { textContent: line })),
             h("pre", { className: "code-block", textContent: example.code }),
-            h("pre", { className: "code-block is-output", textContent: example.output })
+            language === "python"
+                ? h("pre", { className: "code-block is-output", textContent: example.output })
+                : preview(previewDocument(language, example.code, sample))
         )
     }),
 
@@ -92,15 +116,46 @@ const RENDERERS = {
         };
     },
 
+    order: ({ lines }) => {
+        const answer = h("div", { className: "order-answer code-block" });
+        const bank = h("div", { className: "order-bank" });
+        let mixed = shuffle(lines);
+        while (lines.length > 1 && checkOrder(mixed, lines)) mixed = shuffle(lines);
+
+        const move = ({ currentTarget: chip }) => {
+            (chip.parentElement === bank ? answer : bank).append(chip);
+            setReady(bank.children.length === 0);
+        };
+        bank.append(...mixed.map((line) => h("button", { type: "button", className: "chip", textContent: line, onclick: move })));
+
+        return {
+            node: h("div", { className: "stack" }, answer, bank),
+            check: () => {
+                const chips = [...answer.children];
+                chips.forEach((chip, i) => {
+                    chip.disabled = true;
+                    chip.classList.add(chip.textContent === lines[i] ? "is-correct" : "is-wrong");
+                });
+                const ok = checkOrder(chips.map((chip) => chip.textContent), lines);
+                return ok ? { ok } : { ok, message: "As linhas em vermelho estão fora do lugar." };
+            }
+        };
+    },
+
     code: (exercise) => {
+        const { language, expected, sample } = exercise;
         const editor = codeField("textarea", { className: "code-input", placeholder: "Digite seu código aqui", rows: 6 });
+        const live = language !== "python" && preview(previewDocument(language, "", sample));
+        if (live) editor.addEventListener("input", () => { live.srcdoc = previewDocument(language, editor.value, sample); });
+
         return {
             node: h("div", { className: "stack" },
                 language === "python" && [
                     h("span", { className: "label", textContent: "Saída esperada" }),
-                    h("pre", { className: "code-block is-output", textContent: exercise.expected })
+                    h("pre", { className: "code-block is-output", textContent: expected })
                 ],
-                editor
+                editor,
+                live && [h("span", { className: "label", textContent: "Seu resultado" }), live]
             ),
             focus: editor,
             check: () => checkCode(language, editor.value, exercise)
@@ -133,7 +188,7 @@ function showResult({ ok, message }) {
     }
     answered = true;
     ui.feedback.className = `feedback ${ok ? "is-correct" : "is-wrong"}`;
-    ui.feedback.textContent = ok ? "Correto!" : `${message ?? "Resposta incorreta."} Você vai tentar de novo no fim da lição.`;
+    ui.feedback.textContent = ok ? "Correto!" : `${message ?? "Resposta incorreta."} Você vai tentar de novo no fim.`;
     ui.feedback.hidden = false;
     ui.action.classList.add(ok ? "is-success" : "is-error");
     ui.action.textContent = "Continuar";
@@ -142,17 +197,25 @@ function showResult({ ok, message }) {
 }
 
 async function finish() {
-    const xp = LESSON_XP + EXERCISE_XP * (lesson.exercises.length - missed.size);
+    const base = review ? REVIEW_XP : LESSON_XP * (lesson.challenge ? 2 : 1);
+    const xp = base + EXERCISE_XP * (lesson.exercises.length - missed.size);
+    const ids = (exercises) => exercises.map((exercise) => exercise.id);
+
     ui.progress.style.width = "100%";
     ui.action.disabled = true;
     $("xp-gained").textContent = xp;
-    $("repeat").href = `lesson.html?id=${lesson.id}`;
-    $("next").href = lesson.next ? `lesson.html?id=${lesson.next.id}` : `lessons.html?track=${language}`;
-    $("next").textContent = lesson.next ? "Próxima lição" : "Ver trilha";
+    $("repeat").href = review ? "lesson.html?review" : `lesson.html?id=${lesson.id}`;
+    $("next").href = review ? "dashboard.html" : lesson.next ? `lesson.html?id=${lesson.next.id}` : `lessons.html?track=${lesson.track.id}`;
+    $("next").textContent = review ? "Voltar ao início" : lesson.next ? "Próxima lição" : "Ver trilha";
     $("celebration").showModal();
 
     try {
-        await completeLesson(data, lesson.id, xp);
+        await recordSession(data, {
+            lessonId: lesson.id,
+            xp,
+            missed: ids([...missed]),
+            passed: ids(lesson.exercises.filter((exercise) => !missed.has(exercise)))
+        });
     } catch (error) {
         console.error("Could not save progress", error);
         toast("Não foi possível salvar seu progresso.", "error");
@@ -172,8 +235,9 @@ ui.action.addEventListener("click", async () => {
 });
 
 $("celebration").addEventListener("cancel", (event) => event.preventDefault());
-$("close").href = `lessons.html?track=${language}`;
+$("close").href = review ? "dashboard.html" : `lessons.html?track=${lesson.track.id}`;
+$("celebration-title").textContent = review ? "Revisão completa!" : lesson.challenge ? "Desafio vencido!" : "Lição completa!";
 ui.title.textContent = lesson.title;
 document.title = `${lesson.title} · EnCoder`;
-if (language === "python") loadPython().catch(() => {});
+if (queue.some((step) => step.language === "python")) loadPython().catch(() => {});
 render();

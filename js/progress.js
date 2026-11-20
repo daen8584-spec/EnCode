@@ -14,7 +14,7 @@ const yesterday = () => {
 };
 
 export async function loadUserData() {
-    const defaults = { xp: 0, streak: 0, lastPlayed: "", completedLessons: [], photoUrl: "" };
+    const defaults = { xp: 0, streak: 0, lastPlayed: "", completedLessons: [], mistakes: [], photoUrl: "" };
     try {
         const snapshot = await getDoc(userDoc());
         return { ...defaults, ...snapshot.data() };
@@ -32,16 +32,19 @@ export function currentStreak({ streak, lastPlayed }) {
     return lastPlayed === localDate(new Date()) || lastPlayed === yesterday() ? streak : 0;
 }
 
-export function completeLesson(data, lessonId, xp) {
+// `missed` exercises join the review list; `passed` ones (right on the first try) leave it.
+export function recordSession(data, { lessonId, xp, missed, passed }) {
     const today = localDate(new Date());
     const streak = data.lastPlayed === today ? data.streak
         : data.lastPlayed === yesterday() ? data.streak + 1
         : 1;
+    const mistakes = [...new Set([...data.mistakes, ...missed])].filter((id) => !passed.includes(id));
 
     return saveUserData({
         xp: increment(xp),
         streak,
         lastPlayed: today,
-        completedLessons: arrayUnion(lessonId)
+        mistakes,
+        ...(lessonId && { completedLessons: arrayUnion(lessonId) })
     });
 }
