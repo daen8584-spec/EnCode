@@ -87,7 +87,7 @@ form.addEventListener("submit", async (event) => {
         return;
     }
     guide.rest("think");
-    guide.say(isSignup ? "Preparando sua sala de aula…" : "Abrindo sua sala de aula…");
+    guide.say(isSignup ? "Preparando sua sala de aula..." : "Abrindo sua sala de aula...");
 
     const { name, email, password } = form.elements;
     submitting = true;

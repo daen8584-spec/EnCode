@@ -87,7 +87,7 @@ export default {
                     teach: [
                         {
                             term: "string",
-                            meaning: "texto (literalmente, um “fio” de letras)",
+                            meaning: "texto (literalmente, um \"fio\" de letras)",
                             lines: [
                                 "string é o nome que damos para texto.",
                                 "Em Python, string fica entre aspas.",

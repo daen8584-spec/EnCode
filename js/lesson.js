@@ -67,7 +67,7 @@ const ui = {
 
 const pick = (items) => items[Math.floor(Math.random() * items.length)];
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const short = (text) => text.length > 28 ? `${text.slice(0, 26)}…` : text;
+const short = (text) => text.length > 28 ? `${text.slice(0, 26)}...` : text;
 const list = (items) => items.length > 1 ? `${items.slice(0, -1).join(", ")} e ${items.at(-1)}` : items.join("");
 
 await requireUser();
@@ -204,7 +204,7 @@ function pythonConsole(editor) {
     const run = h("button", { type: "button", className: "button is-success is-small", innerHTML: `${ICONS.play}Executar` });
     run.addEventListener("click", async () => {
         run.disabled = true;
-        output.textContent = "Executando…";
+        output.textContent = "Executando...";
         try {
             const { output: text, error } = await runPython(editor.field.value);
             output.textContent = [text.trimEnd(), error].filter(Boolean).join("\n") || "(sem saída)";
@@ -230,7 +230,7 @@ function sandbox({ example, language, sample }) {
 function hintFor({ language, mustInclude = [], expected, hint }) {
     if (hint) return `Dica: ${hint}`;
     if (language === "python") {
-        return mustInclude.length ? `Dica: seu código precisa usar ${list(mustInclude.map((part) => `“${part}”`))}.` : "Dica: compare sua saída com a saída esperada.";
+        return mustInclude.length ? `Dica: seu código precisa usar ${list(mustInclude.map((part) => `"${part}"`))}.` : "Dica: compare sua saída com a saída esperada.";
     }
     if (language === "html") {
         const tags = [...new Set([...expected.matchAll(/<([a-z0-9]+)/g)].map((match) => `<${match[1]}>`))];
@@ -265,8 +265,8 @@ const RENDERERS = {
     intro: () => {
         const minutes = Math.max(2, Math.round((lesson.teach.length * 40 + lesson.exercises.length * 50) / 60));
         const maxXp = baseXp + EXERCISE_XP * lesson.exercises.length;
-        const badge = review ? "Revisão" : lesson.challenge ? `${lesson.track.name} · Desafio`
-            : lesson.machine ? `${lesson.track.name} · Máquina quebrada` : lesson.track.name;
+        const badge = review ? "Revisão" : lesson.challenge ? `${lesson.track.name}: Desafio`
+            : lesson.machine ? `${lesson.track.name}: Máquina quebrada` : lesson.track.name;
         const meta = [
             lesson.teach.length && [ICONS.teach, `${lesson.teach.length} ${lesson.teach.length === 1 ? "explicação" : "explicações"}`],
             [ICONS.code, `${lesson.exercises.length} exercícios`],
@@ -334,7 +334,7 @@ const RENDERERS = {
                 setReady(true);
                 play("tap");
                 mascot.pointAt(currentTarget);
-                mascot.say(`“${short(option)}”? Toque em Verificar se tiver certeza.`);
+                mascot.say(`"${short(option)}"? Toque em Verificar se tiver certeza.`);
             }
         }, h("kbd", { textContent: i + 1 }), h("span", { textContent: option }))));
 
@@ -642,9 +642,9 @@ async function finish() {
 ui.action.addEventListener("click", async () => {
     if (view.check && !answered) {
         setReady(false);
-        ui.action.textContent = "Verificando…";
+        ui.action.textContent = "Verificando...";
         mascot.rest("think");
-        mascot.say("Deixa eu ver…");
+        mascot.say("Deixa eu ver...");
         const [result] = await Promise.all([view.check(), wait(600)]);
         showResult(result);
         return;
@@ -680,6 +680,6 @@ $("close").href = review ? "dashboard.html" : `lessons.html?track=${lesson.track
 $("celebration-title").textContent = review ? "Revisão completa!" : lesson.challenge ? "Desafio vencido!"
     : lesson.machine ? "Máquinas consertadas!" : "Lição completa!";
 ui.title.textContent = lesson.title;
-document.title = `${lesson.title} · EnCoder`;
+document.title = `${lesson.title} | EnCoder`;
 if (queue.some((step) => step.language === "python")) loadPython().catch(() => {});
 render();

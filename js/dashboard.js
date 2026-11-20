@@ -60,7 +60,7 @@ function nextStep(mission) {
             say: mistakes ? `Guardei ${mistakes} ${mistakes === 1 ? "exercício que você errou" : "exercícios que você errou"}. Vamos treinar?` : "Hoje a missão é treinar o que você já aprendeu!" };
     }
     if (next) {
-        return { eyebrow: completed.size ? "Sua próxima aula" : "Sua primeira aula", title: `${next.track.name} · ${next.title}`,
+        return { eyebrow: completed.size ? "Sua próxima aula" : "Sua primeira aula", title: `${next.track.name}: ${next.title}`,
             action: completed.size ? "Continuar" : "Começar agora", href: `lesson.html?id=${next.id}`,
             say: mission.done ? `Missão cumprida! Quer aprender mais, ${firstName}?` : `Oi, ${firstName}! Missão do dia: ${mission.title.toLowerCase()}.` };
     }
@@ -138,7 +138,7 @@ async function openTodaysChest() {
     data.xp += reward;
     data.chestOpened = localDate();
     const after = rankOf(data.xp);
-    if (after.index > before.index) $("chest-reward").textContent += ` · Nova patente: ${after.name}!`;
+    if (after.index > before.index) $("chest-reward").textContent += `. Nova patente: ${after.name}!`;
     renderStatus();
 }
 

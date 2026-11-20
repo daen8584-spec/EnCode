@@ -1,10 +1,10 @@
 // Exercise types:
-//   choice — options[0] is the correct answer; options are shuffled when shown.
-//   blank  — fill each ___ in `code` with `answer`.
-//   order  — tap `lines` into the order they are listed in.
-//   code   — write code from scratch. Python compares printed output with `expected`;
+//   choice: options[0] is the correct answer; options are shuffled when shown.
+//   blank:  fill each ___ in `code` with `answer`.
+//   order:  tap `lines` into the order they are listed in.
+//   code:   write code from scratch. Python compares printed output with `expected`;
 //            HTML and CSS compare the result with `expected`. `mustInclude` lists code that must appear.
-//   fix    — a broken machine: like `code`, but the editor starts with `broken` code to repair.
+//   fix:    a broken machine. Like `code`, but the editor starts with `broken` code to repair.
 //            `machine` and `story` describe it; `hint` is the first hint.
 // Python code and fix exercises carry a `solution`; for HTML and CSS the solution is `expected`.
 // Lessons marked `machine` or `challenge` have no teach cards and appear differently on the map.

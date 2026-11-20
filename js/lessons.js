@@ -40,13 +40,13 @@ function preview(lesson, state) {
         lesson.teach.length && plural(lesson.teach.length, "explicação", "explicações"),
         plural(lesson.exercises.length, "exercício", "exercícios"),
         `+${xpOf(lesson)} XP`
-    ].filter(Boolean).join(" · ");
+    ].filter(Boolean).join(", ");
     return h("div", { className: "node-pop", onclick: (event) => event.stopPropagation() },
         h("strong", { textContent: lesson.title }),
         h("span", { className: "pop-meta", textContent: meta }),
         words.length > 0 && h("ul", { className: "pop-words" }, words.map((card) => h("li", {}, h("code", { textContent: card.term }), card.meaning))),
         state === "locked"
-            ? h("p", { className: "pop-locked", textContent: `Termine “${lesson.previous.title}” para desbloquear.` })
+            ? h("p", { className: "pop-locked", textContent: `Termine "${lesson.previous.title}" para desbloquear.` })
             : h("a", {
                 className: `button is-small${state === "done" ? " is-ghost" : ""}`,
                 href: `lesson.html?id=${lesson.id}`,
@@ -142,7 +142,7 @@ function renderSide(track) {
         h("section", { className: "side-card side-next" },
             h("span", { className: "eyebrow", textContent: next ? "Próxima aula" : "Trilha concluída" }),
             h("strong", { textContent: next ? next.title : "Você terminou todas as aulas!" }),
-            next && h("p", { className: "muted", textContent: plural(next.exercises.length, "exercício", "exercícios") + ` · +${xpOf(next)} XP` }),
+            next && h("p", { className: "muted", textContent: plural(next.exercises.length, "exercício", "exercícios") + `, +${xpOf(next)} XP` }),
             h("a", { className: "button", href: next ? `lesson.html?id=${next.id}` : "lesson.html?review", textContent: next ? (done ? "Continuar" : "Começar") : "Praticar" })
         ),
         h("section", { className: "side-card side-words" },
@@ -152,7 +152,7 @@ function renderSide(track) {
             ),
             h("ul", {}, words.map((word) => word.learned
                 ? h("li", { className: "is-learned", title: word.meaning }, h("code", { textContent: word.term }), h("span", { textContent: word.meaning }))
-                : h("li", { className: "is-hidden" }, h("code", { textContent: "•".repeat(Math.min(word.term.length, 6)) }), h("span", { textContent: "bloqueada" }))))
+                : h("li", { className: "is-hidden" }, h("code", { textContent: "?".repeat(Math.min(word.term.length, 6)) }), h("span", { textContent: "bloqueada" }))))
         )
     );
 }
@@ -168,7 +168,7 @@ function show(trackId) {
         const words = wordsOf(unit.lessons);
         return h("section", { className: "unit" },
             h("header", { className: "unit-banner" },
-                h("span", { className: "unit-index", textContent: `Unidade ${i + 1} · ${done}/${unit.lessons.length}` }),
+                h("span", { className: "unit-index", textContent: `Unidade ${i + 1}: ${done}/${unit.lessons.length}` }),
                 h("h2", { textContent: unit.title }),
                 h("p", { textContent: unit.description }),
                 words.length > 0 && h("ul", { className: "unit-words" }, words.map((word) => h("li", { textContent: word.term })))
