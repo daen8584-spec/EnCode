@@ -20,7 +20,7 @@
 .mascot-pose {
     position: relative;
     transform-origin: 50% 95%;
-    filter: drop-shadow(0 14px 22px rgb(0 0 0 / 45%));
+    filter: drop-shadow(0 10px 14px rgb(23 32 56 / 22%));
     animation: breathe 3.6s ease-in-out infinite;
 }
 
@@ -126,24 +126,25 @@
     animation: sweat 1.4s ease-in 0.3s forwards;
 }
 
-/* Speech bubble */
+/* Speech bubble: above the mascot by default; .bubble-left / .bubble-right on an ancestor put it beside. */
 
 .mascot-bubble {
     position: absolute;
-    bottom: calc(100% + 6px);
+    bottom: calc(100% + 10px);
     left: 50%;
     z-index: 2;
     width: max-content;
     max-width: min(250px, 70vw);
     padding: 10px 14px;
+    border: 2px solid var(--border);
     border-radius: 16px;
-    background: #fff;
-    color: #1a1a2e;
+    background: var(--surface);
+    color: var(--text);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1.45;
     text-align: left;
-    box-shadow: 0 12px 30px rgb(0 0 0 / 35%);
+    box-shadow: var(--shadow);
     translate: -50% 0;
     cursor: pointer;
 }
@@ -151,11 +152,46 @@
 .mascot-bubble::after {
     content: "";
     position: absolute;
-    top: 100%;
-    left: 50%;
-    border: 9px solid transparent;
-    border-top-color: #fff;
-    translate: -50% -1px;
+    top: calc(100% - 7px);
+    left: calc(50% - 7px);
+    width: 13px;
+    height: 13px;
+    border: 2px solid var(--border);
+    border-top: 0;
+    border-left: 0;
+    background: var(--surface);
+    rotate: 45deg;
+}
+
+.bubble-left .mascot-bubble,
+.bubble-right .mascot-bubble {
+    top: 8%;
+    bottom: auto;
+    translate: none;
+}
+
+.bubble-left .mascot-bubble {
+    left: auto;
+    right: calc(100% + 12px);
+}
+
+.bubble-right .mascot-bubble {
+    left: calc(100% + 12px);
+}
+
+.bubble-left .mascot-bubble::after,
+.bubble-right .mascot-bubble::after {
+    top: 14px;
+}
+
+.bubble-left .mascot-bubble::after {
+    left: calc(100% - 7px);
+    rotate: -45deg;
+}
+
+.bubble-right .mascot-bubble::after {
+    left: -8px;
+    rotate: 135deg;
 }
 
 .mascot-pending {

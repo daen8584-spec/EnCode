@@ -40,7 +40,8 @@ export default {
                             type: "code",
                             question: "Use print com o texto Olá, mundo! (entre aspas).",
                             expected: "Olá, mundo!",
-                            mustInclude: ["print("]
+                            mustInclude: ["print("],
+                            solution: "print(\"Olá, mundo!\")"
                         }
                     ]
                 },
@@ -75,7 +76,8 @@ export default {
                             type: "code",
                             question: "Crie uma variável chamada nome com o texto Ana (entre aspas) e mostre com print.",
                             expected: "Ana",
-                            mustInclude: ["nome =", "print(nome)"]
+                            mustInclude: ["nome =", "print(nome)"],
+                            solution: "nome = \"Ana\"\nprint(nome)"
                         }
                     ]
                 },
@@ -121,7 +123,8 @@ export default {
                             type: "code",
                             question: "Mostre o resultado da soma de 5 com 3 usando print.",
                             expected: "8",
-                            mustInclude: ["+"]
+                            mustInclude: ["+"],
+                            solution: "print(5 + 3)"
                         }
                     ]
                 },
@@ -175,7 +178,8 @@ export default {
                             type: "code",
                             question: "Se 10 for maior que 5, mostre a palavra maior usando print.",
                             expected: "maior",
-                            mustInclude: ["if"]
+                            mustInclude: ["if"],
+                            solution: "if 10 > 5:\n    print(\"maior\")"
                         }
                     ]
                 },
@@ -221,7 +225,8 @@ export default {
                             type: "code",
                             question: "Use um for com range para mostrar os números 1, 2 e 3, um por linha.",
                             expected: "1\n2\n3",
-                            mustInclude: ["for", "range("]
+                            mustInclude: ["for", "range("],
+                            solution: "for i in range(1, 4):\n    print(i)"
                         }
                     ]
                 }
@@ -271,7 +276,8 @@ export default {
                             type: "code",
                             question: "Crie uma lista numeros com 10, 20 e 30 e mostre o segundo item.",
                             expected: "20",
-                            mustInclude: ["numeros = [", "numeros[1]"]
+                            mustInclude: ["numeros = [", "numeros[1]"],
+                            solution: "numeros = [10, 20, 30]\nprint(numeros[1])"
                         }
                     ]
                 },
@@ -320,7 +326,8 @@ export default {
                             type: "code",
                             question: "Crie uma lista vazia chamada tarefas, adicione \"estudar\" com append e mostre quantos itens ela tem.",
                             expected: "1",
-                            mustInclude: ["append(", "len("]
+                            mustInclude: ["append(", "len("],
+                            solution: "tarefas = []\ntarefas.append(\"estudar\")\nprint(len(tarefas))"
                         }
                     ]
                 },
@@ -357,7 +364,8 @@ export default {
                             type: "code",
                             question: "Use while para mostrar 5, 4, 3, 2 e 1, um por linha.",
                             expected: "5\n4\n3\n2\n1",
-                            mustInclude: ["while"]
+                            mustInclude: ["while"],
+                            solution: "n = 5\nwhile n > 0:\n    print(n)\n    n = n - 1"
                         }
                     ]
                 },
@@ -408,7 +416,8 @@ export default {
                             type: "code",
                             question: "Crie uma função triplo que retorna o número vezes 3 e mostre triplo(5).",
                             expected: "15",
-                            mustInclude: ["def triplo(", "return"]
+                            mustInclude: ["def triplo(", "return"],
+                            solution: "def triplo(n):\n    return n * 3\n\nprint(triplo(5))"
                         }
                     ]
                 },
@@ -427,13 +436,15 @@ export default {
                             type: "code",
                             question: "Use for e range para mostrar a tabuada do 3, de 1 a 5, no formato 3 x 1 = 3. Dica: print aceita vários valores separados por vírgula.",
                             expected: "3 x 1 = 3\n3 x 2 = 6\n3 x 3 = 9\n3 x 4 = 12\n3 x 5 = 15",
-                            mustInclude: ["for", "range("]
+                            mustInclude: ["for", "range("],
+                            solution: "for i in range(1, 6):\n    print(3, \"x\", i, \"=\", 3 * i)"
                         },
                         {
                             type: "code",
                             question: "Crie a lista notas com 7, 9 e 8. Use for para somar todas as notas e mostre o total.",
                             expected: "24",
-                            mustInclude: ["notas = [", "for"]
+                            mustInclude: ["notas = [", "for"],
+                            solution: "notas = [7, 9, 8]\ntotal = 0\nfor n in notas:\n    total = total + n\nprint(total)"
                         }
                     ]
                 }

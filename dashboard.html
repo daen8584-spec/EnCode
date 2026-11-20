@@ -4,129 +4,189 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Aprenda HTML, CSS e Python com lições interativas.">
-    <meta name="theme-color" content="#0f1222">
+    <meta name="theme-color" content="#f3f6fc">
     <title>Painel · EnCoder</title>
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Nunito:wght@600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/mascot.css">
     <link rel="stylesheet" href="css/app.css">
     <script type="module" src="js/dashboard.js"></script>
 </head>
 <body class="is-loading">
-    <div class="backdrop" aria-hidden="true"><span>&lt;/&gt;</span><span>{ }</span><span>( )</span><span>;</span><span>=&gt;</span><span>#</span></div>
-
     <header class="topbar">
         <a class="brand" href="#home"><span class="logo">&lt;/&gt;</span>EnCoder</a>
-        <a class="user-chip" href="#profile"><span class="avatar" id="user-avatar"></span><span id="user-name"></span></a>
-        <button class="button is-danger is-small" id="sign-out" type="button">Sair</button>
+        <div class="hud">
+            <span class="hud-chip is-rank" id="hud-rank" title="Sua patente"></span>
+            <span class="hud-chip is-streak" title="Dias seguidos">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/></svg>
+                <b id="hud-streak">0</b><span class="visually-hidden">dias seguidos</span>
+            </span>
+            <span class="hud-chip is-xp" title="XP total">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+                <b id="hud-xp">0</b><span class="visually-hidden">XP</span>
+            </span>
+            <a class="user-chip" href="#profile"><span class="avatar" id="user-avatar"></span><span class="user-name" id="user-name"></span></a>
+            <button class="icon-button" id="sign-out" type="button" aria-label="Sair" title="Sair">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>
+            </button>
+        </div>
     </header>
 
     <div class="shell">
-        <nav class="sidebar card" aria-label="Navegação principal">
+        <nav class="sidebar" aria-label="Navegação principal">
             <a class="nav-link" href="#home">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>Início
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg><span>Início</span>
             </a>
             <a class="nav-link" href="#lessons">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg>Lições
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h11"/></svg><span>Trilhas</span>
             </a>
             <a class="nav-link" href="#glossary">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h8M8 3v2M5 13c3-2 5-5 5-8M6 9c1 2 3 4 5 5M13 21l4-10 4 10M14.5 18h5"/></svg>Dicionário
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h8M8 3v2M5 13c3-2 5-5 5-8M6 9c1 2 3 4 5 5M13 21l4-10 4 10M14.5 18h5"/></svg><span>Dicionário</span>
             </a>
             <a class="nav-link" href="#editor">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg>Editor
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5"/></svg><span>Editor</span>
             </a>
             <a class="nav-link" href="#profile">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Perfil
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Perfil</span>
             </a>
         </nav>
 
-        <main>
+        <main class="content">
             <section class="view" id="view-home">
-                <div class="hero">
-                    <div class="hero-text">
-                        <h1 id="greeting">Olá!</h1>
-                        <p class="muted">Pronto para programar hoje?</p>
-                        <p class="streak" id="streak"></p>
-                        <a class="button is-pushable" id="continue" href="lessons.html">Começar</a>
+                <div class="home">
+                    <div class="hero bubble-left">
+                        <div class="hero-text">
+                            <p class="eyebrow" id="hero-eyebrow">Sua próxima aula</p>
+                            <h1 id="greeting">Olá!</h1>
+                            <p class="hero-next" id="next-title"></p>
+                            <p class="streak" id="streak"></p>
+                            <a class="button" id="continue" href="lessons.html">Começar</a>
+                        </div>
+                        <button class="hero-mascot" id="hero-mascot" type="button" aria-label="Pedir uma dica ao professor"></button>
                     </div>
-                    <button class="hero-mascot" id="hero-mascot" type="button" aria-label="Pedir uma dica ao professor"></button>
-                </div>
-                <ul class="stats">
-                    <li class="stat-tile is-streak">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/></svg>
-                        <b id="stat-streak">0</b><span>dias seguidos</span>
-                    </li>
-                    <li class="stat-tile is-xp">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
-                        <b id="stat-xp">0</b><span>XP total</span>
-                    </li>
-                    <li class="stat-tile is-lessons">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>
-                        <b id="stat-lessons">0</b><span>lições feitas</span>
-                    </li>
-                    <li class="stat-tile is-words">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h8M8 3v2M5 13c3-2 5-5 5-8M6 9c1 2 3 4 5 5M13 21l4-10 4 10M14.5 18h5"/></svg>
-                        <b id="stat-words">0</b><span>palavras</span>
-                    </li>
-                </ul>
-                <div class="xp card">
-                    <div class="xp-header">
-                        <span>Nível <b id="level">1</b></span>
-                        <span class="mono"><span id="xp">0</span> / 100 XP</span>
+
+                    <div class="home-main">
+                        <div class="section-head">
+                            <h2>Suas trilhas</h2>
+                            <a href="#lessons">Ver todas</a>
+                        </div>
+                        <div class="tracks" id="home-tracks"></div>
                     </div>
-                    <div class="bar"><div class="bar-fill" id="xp-fill"></div></div>
-                </div>
-                <div class="practice card" id="practice-card" hidden>
-                    <div>
-                        <h2>Praticar</h2>
-                        <p class="muted" id="practice-text"></p>
-                    </div>
-                    <a class="button is-ghost" href="lesson.html?review">Começar revisão</a>
+
+                    <aside class="home-side">
+                        <div class="rank card" id="rank-card">
+                            <span class="rank-badge" id="rank-badge"></span>
+                            <div class="rank-text">
+                                <span class="eyebrow">Sua patente</span>
+                                <strong id="rank-name">Filhote</strong>
+                                <div class="bar"><div class="bar-fill" id="rank-fill"></div></div>
+                                <span class="muted" id="rank-next"></span>
+                            </div>
+                        </div>
+
+                        <div class="mission card" id="mission-card">
+                            <div class="mission-head">
+                                <span class="eyebrow">Missão do dia</span>
+                                <span class="muted" id="mission-count"></span>
+                            </div>
+                            <strong id="mission-title"></strong>
+                            <div class="mission-row">
+                                <div class="bar"><div class="bar-fill" id="mission-fill"></div></div>
+                                <button class="chest-button" id="chest-button" type="button" aria-label="Baú do dia" disabled></button>
+                            </div>
+                            <p class="muted" id="mission-hint"></p>
+                        </div>
+
+                        <div class="practice card" id="practice-card" hidden>
+                            <div>
+                                <h3>Praticar</h3>
+                                <p class="muted" id="practice-text"></p>
+                            </div>
+                            <a class="button is-ghost is-small" href="lesson.html?review">Começar revisão</a>
+                        </div>
+
+                        <ul class="stats card">
+                            <li class="stat is-streak">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/></svg>
+                                <span>Dias seguidos</span><b id="stat-streak">0</b>
+                            </li>
+                            <li class="stat is-xp">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+                                <span>XP total</span><b id="stat-xp">0</b>
+                            </li>
+                            <li class="stat is-lessons">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>
+                                <span>Lições feitas</span><b id="stat-lessons">0</b>
+                            </li>
+                            <li class="stat is-words">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h8M8 3v2M5 13c3-2 5-5 5-8M6 9c1 2 3 4 5 5M13 21l4-10 4 10M14.5 18h5"/></svg>
+                                <span>Palavras aprendidas</span><b id="stat-words">0</b>
+                            </li>
+                        </ul>
+                    </aside>
                 </div>
             </section>
 
+            <section class="view" id="view-lessons" hidden>
+                <header class="view-head">
+                    <h1>Trilhas</h1>
+                    <p class="muted">Escolha uma linguagem. Cada trilha começa do zero.</p>
+                </header>
+                <div class="tracks" id="tracks"></div>
+            </section>
+
             <section class="view" id="view-glossary" hidden>
-                <h1>Dicionário</h1>
-                <p class="muted">As palavras em inglês que você aprendeu e o que elas significam. <span id="glossary-count"></span></p>
-                <input class="input" id="glossary-search" type="search" placeholder="Buscar palavra ou significado" aria-label="Buscar no dicionário">
+                <header class="view-head">
+                    <h1>Dicionário</h1>
+                    <p class="muted">As palavras em inglês que você aprendeu e o que elas significam. <span id="glossary-count"></span></p>
+                </header>
+                <label class="search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+                    <input class="input" id="glossary-search" type="search" placeholder="Buscar palavra ou significado" aria-label="Buscar no dicionário">
+                </label>
                 <div class="glossary" id="glossary"></div>
                 <p class="muted" id="glossary-empty" hidden>Nenhuma palavra encontrada.</p>
             </section>
 
-            <section class="view" id="view-lessons" hidden>
-                <h1>Lições</h1>
-                <p class="muted">Escolha uma linguagem para começar sua jornada.</p>
-                <div class="tracks" id="tracks"></div>
-            </section>
-
             <section class="view" id="view-editor" hidden>
-                <h1>Editor Python</h1>
-                <p class="muted">Escreva seu código Python e clique em Executar.</p>
-                <label class="snippet">Exemplo
-                    <select id="snippet">
-                        <option value="hello">Olá, mundo</option>
-                        <option value="loop">Laço de repetição</option>
-                        <option value="function">Função</option>
-                    </select>
-                </label>
-                <textarea class="code-input" id="code" rows="10" aria-label="Código Python"
-                    spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" data-gramm="false"></textarea>
-                <div class="actions">
-                    <button class="button" id="run" type="button">Executar</button>
-                    <button class="button is-ghost" id="clear" type="button">Limpar</button>
-                </div>
-                <div class="console card">
-                    <div class="console-header">Saída</div>
-                    <pre id="output" aria-live="polite"></pre>
+                <header class="view-head">
+                    <h1>Editor Python</h1>
+                    <p class="muted">Teste qualquer código. Ele roda aqui mesmo, no navegador.</p>
+                </header>
+                <div class="editor card">
+                    <div class="editor-bar">
+                        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <label class="snippet">Exemplo
+                            <select id="snippet">
+                                <option value="hello">Olá, mundo</option>
+                                <option value="loop">Laço de repetição</option>
+                                <option value="function">Função</option>
+                            </select>
+                        </label>
+                    </div>
+                    <textarea class="code-input" id="code" rows="10" aria-label="Código Python"
+                        spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" data-gramm="false"></textarea>
+                    <div class="console">
+                        <div class="console-head">
+                            <span>Saída</span>
+                            <div class="actions">
+                                <button class="button is-ghost is-small" id="clear" type="button">Limpar</button>
+                                <button class="button is-success is-small" id="run" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Executar</button>
+                            </div>
+                        </div>
+                        <pre id="output" aria-live="polite"></pre>
+                    </div>
                 </div>
             </section>
 
             <section class="view" id="view-profile" hidden>
-                <h1>Perfil</h1>
-                <p class="muted">Gerencie suas informações de conta.</p>
+                <header class="view-head">
+                    <h1>Perfil</h1>
+                    <p class="muted">Seu nome e sua foto aparecem no topo do painel.</p>
+                </header>
                 <div class="profile card">
                     <label class="photo-picker">
                         <span class="avatar is-large" id="profile-avatar"></span>
@@ -142,11 +202,46 @@
                 </div>
                 <form class="name-form card" id="name-form">
                     <label for="name-input">Nome</label>
-                    <input class="input" id="name-input" type="text" minlength="2" autocomplete="name" required>
-                    <button class="button" type="submit">Salvar</button>
+                    <div class="name-row">
+                        <input class="input" id="name-input" type="text" minlength="2" autocomplete="name" required>
+                        <button class="button" type="submit">Salvar</button>
+                    </div>
                 </form>
             </section>
         </main>
     </div>
+
+    <dialog class="game-dialog chest-dialog" id="chest-dialog" aria-labelledby="chest-title">
+        <div class="chest-stage" id="chest-stage"></div>
+        <h2 id="chest-title">Baú do dia</h2>
+        <p class="chest-reward" id="chest-reward"></p>
+        <p class="muted">Volte amanhã para uma nova missão.</p>
+        <button class="button is-gold" id="chest-close" type="button">Que demais!</button>
+    </dialog>
+
+    <dialog class="game-dialog welcome" id="welcome" aria-labelledby="welcome-title">
+        <div class="welcome-mascot" id="welcome-mascot"></div>
+        <div class="welcome-step" data-step="0">
+            <h2 id="welcome-title">Oi!</h2>
+            <p>Eu vou ser seu professor. A gente aprende junto, no seu ritmo, um pouquinho por dia. Errar faz parte, e eu estou sempre aqui para ajudar.</p>
+        </div>
+        <div class="welcome-step" data-step="1" hidden>
+            <h2>Como funciona</h2>
+            <ul class="welcome-list">
+                <li><b>Aulas curtas</b> Eu explico na lousa e você pratica logo em seguida.</li>
+                <li><b>Missão do dia</b> Cumpra a missão e abra o baú de recompensa.</li>
+                <li><b>Patentes</b> Ganhe XP e suba de Filhote até Mestre.</li>
+            </ul>
+        </div>
+        <div class="welcome-step" data-step="2" hidden>
+            <h2>Sua primeira aula</h2>
+            <p>Vamos começar pelo comando mais famoso de todos. Em poucos minutos você vai fazer o computador falar.</p>
+        </div>
+        <div class="welcome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="welcome-actions">
+            <button class="button is-ghost" id="welcome-skip" type="button">Explorar sozinho</button>
+            <button class="button" id="welcome-next" type="button" autofocus>Continuar</button>
+        </div>
+    </dialog>
 </body>
 </html>

@@ -20,9 +20,9 @@ const rules = document.querySelector(".password-rules");
 let submitting = false;
 
 const isSignup = form.dataset.mode === "signup";
-const guide = createMascot({ className: "auth-mascot" });
+const guide = createMascot();
 const greeting = isSignup ? "Oi! Vamos criar sua conta?" : "Que bom te ver de novo!";
-document.querySelector(".auth-card").append(guide.root);
+document.querySelector(".auth-mascot-slot").append(guide.root);
 guide.say(greeting);
 
 for (const input of form.querySelectorAll("input[type=password]")) {

@@ -1,11 +1,9 @@
 import { arrayUnion, auth, db, doc, getDoc, increment, setDoc } from "./firebase.js";
 
-export const LEVEL_XP = 100;
-
 const userDoc = () => doc(db, "users", auth.currentUser.uid);
 
 // YYYY-MM-DD in the user's time zone, so streaks follow their calendar day.
-const localDate = (date) => date.toLocaleDateString("en-CA");
+export const localDate = (date = new Date()) => date.toLocaleDateString("en-CA");
 
 const yesterday = () => {
     const date = new Date();
@@ -26,15 +24,29 @@ export async function loadUserData() {
 
 export const saveUserData = (data) => setDoc(userDoc(), data, { merge: true });
 
-export const levelOf = (xp) => ({ level: Math.floor(xp / LEVEL_XP) + 1, progress: xp % LEVEL_XP });
-
 export function currentStreak({ streak, lastPlayed }) {
-    return lastPlayed === localDate(new Date()) || lastPlayed === yesterday() ? streak : 0;
+    return lastPlayed === localDate() || lastPlayed === yesterday() ? streak : 0;
+}
+
+// Today's counters drive the daily mission. The mission is picked once per day and kept with them.
+const MISSION_POOL = ["xp", "lessons", "review"];
+
+export function todayCounts(data) {
+    const date = localDate();
+    if (data.today?.date === date) return data.today;
+    const seed = [...date].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const mission = data.completedLessons.length ? MISSION_POOL[seed % MISSION_POOL.length] : "first";
+    return { date, mission, xp: 0, lessons: 0, reviews: 0 };
+}
+
+export function afterSession(data, { lessonId, xp }) {
+    const counts = todayCounts(data);
+    return { ...counts, xp: counts.xp + xp, lessons: counts.lessons + (lessonId ? 1 : 0), reviews: counts.reviews + (lessonId ? 0 : 1) };
 }
 
 // `missed` exercises join the review list; `passed` ones (right on the first try) leave it.
 export function recordSession(data, { lessonId, xp, missed, passed }) {
-    const today = localDate(new Date());
+    const today = localDate();
     const streak = data.lastPlayed === today ? data.streak
         : data.lastPlayed === yesterday() ? data.streak + 1
         : 1;
@@ -45,6 +57,7 @@ export function recordSession(data, { lessonId, xp, missed, passed }) {
         streak,
         lastPlayed: today,
         mistakes,
+        today: afterSession(data, { lessonId, xp }),
         ...(lessonId && { completedLessons: arrayUnion(lessonId) })
     });
 }
