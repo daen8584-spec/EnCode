@@ -24,6 +24,7 @@ const ICONS = {
     code: svg('<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13 6l-2 12"/>'),
     clock: svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'),
     bolt: svg('<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'),
+    fix: svg('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'),
     bulb: svg('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>'),
     play: svg('<path d="M8 5v14l11-7z" fill="currentColor"/>')
 };
@@ -32,7 +33,8 @@ const TASK_LABELS = {
     choice: "Escolha a resposta",
     blank: "Complete o código",
     order: "Monte o código",
-    code: "Escreva o código"
+    code: "Escreva o código",
+    fix: "Conserte a máquina"
 };
 const PROMPTS = {
     choice: "Qual destas é a resposta certa?",
@@ -40,7 +42,8 @@ const PROMPTS = {
     order: "Toque nas linhas na ordem certa.",
     python: "Escreva o código. Você pode executar antes de verificar!",
     html: "Escreva o HTML e compare com o objetivo.",
-    css: "Escreva o CSS e deixe igual ao objetivo."
+    css: "Escreva o CSS e deixe igual ao objetivo.",
+    fix: "Esta máquina está quebrada. Encontre o erro e conserte!"
 };
 const FILE_NAMES = { python: "main.py", html: "index.html", css: "style.css" };
 const KEYS = {
@@ -92,7 +95,7 @@ const mascot = createMascot();
 $("mascot-slot").append(mascot.root);
 
 const words = lesson.teach.filter((card) => card.meaning);
-const baseXp = review ? REVIEW_XP : LESSON_XP * (lesson.challenge ? 2 : 1);
+const baseXp = review ? REVIEW_XP : LESSON_XP * (lesson.challenge ? 2 : lesson.machine ? 1.5 : 1);
 const queue = [{ type: "intro" }, ...lesson.teach.map((card) => ({ type: "teach", ...card })), ...lesson.exercises];
 const results = [];
 const missed = new Set();
@@ -224,7 +227,8 @@ function sandbox({ example, language, sample }) {
     return h("div", { className: "sandbox" }, editor.node, live);
 }
 
-function hintFor({ language, mustInclude = [], expected }) {
+function hintFor({ language, mustInclude = [], expected, hint }) {
+    if (hint) return `Dica: ${hint}`;
     if (language === "python") {
         return mustInclude.length ? `Dica: seu código precisa usar ${list(mustInclude.map((part) => `“${part}”`))}.` : "Dica: compare sua saída com a saída esperada.";
     }
@@ -261,7 +265,8 @@ const RENDERERS = {
     intro: () => {
         const minutes = Math.max(2, Math.round((lesson.teach.length * 40 + lesson.exercises.length * 50) / 60));
         const maxXp = baseXp + EXERCISE_XP * lesson.exercises.length;
-        const badge = review ? "Revisão" : lesson.challenge ? `${lesson.track.name} · Desafio` : lesson.track.name;
+        const badge = review ? "Revisão" : lesson.challenge ? `${lesson.track.name} · Desafio`
+            : lesson.machine ? `${lesson.track.name} · Máquina quebrada` : lesson.track.name;
         const meta = [
             lesson.teach.length && [ICONS.teach, `${lesson.teach.length} ${lesson.teach.length === 1 ? "explicação" : "explicações"}`],
             [ICONS.code, `${lesson.exercises.length} exercícios`],
@@ -275,6 +280,10 @@ const RENDERERS = {
                 words.length > 0 && h("div", { className: "intro-words" },
                     h("span", { className: "label", textContent: "Palavras em inglês desta aula" }),
                     h("ul", {}, words.map((card) => h("li", {}, h("code", { textContent: card.term }), h("span", { textContent: card.meaning }))))
+                ),
+                lesson.reuses?.length > 0 && h("div", { className: "intro-reuses" },
+                    h("span", { className: "label", textContent: words.length ? "Junto com palavras que você já sabe" : "Palavras que você já sabe" }),
+                    h("ul", {}, lesson.reuses.map((card) => h("li", { title: card.meaning }, h("code", { textContent: card.term }))))
                 ),
                 h("ul", { className: "intro-meta" }, meta.map(([icon, text]) => h("li", { innerHTML: icon }, text)))
             )
@@ -397,54 +406,72 @@ const RENDERERS = {
         };
     },
 
-    code: (exercise) => {
-        const { language, expected, sample } = exercise;
-        let hints = 0;
-        const hint = h("button", { type: "button", className: "hint-button", innerHTML: `${ICONS.bulb}<span>Dica</span>` });
-        const editor = codeEditor(language, { tools: hint });
-        editor.field.addEventListener("input", () => setReady(editor.field.value.trim() !== ""));
-
-        hint.addEventListener("click", () => {
-            hints += 1;
-            play("tap");
-            if (hints === 1) {
-                mascot.mood("idle");
-                mascot.say(hintFor(exercise));
-                hint.lastChild.textContent = "Ver solução";
-                return;
-            }
-            editor.set(language === "python" ? exercise.solution : expected);
-            missed.add(exercise);
-            hint.disabled = true;
-            mascot.pointAt(editor.field);
-            mascot.say("Aqui está uma solução. Leia com calma e depois toque em Verificar.");
-        });
-
-        let goal;
-        let extra = null;
-        if (language === "python") {
-            goal = h("div", { className: "goal" },
-                h("span", { className: "label", textContent: "Saída esperada" }),
-                h("pre", { className: "code-block is-output", textContent: expected })
-            );
-            extra = pythonConsole(editor);
-        } else {
-            const live = preview(previewDocument(language, "", sample), "Seu resultado");
-            editor.field.addEventListener("input", () => { live.srcdoc = previewDocument(language, editor.field.value, sample); });
-            goal = h("div", { className: "compare" },
-                h("figure", {}, h("figcaption", { className: "label", textContent: "Objetivo" }), preview(previewDocument(language, expected, sample), "Objetivo")),
-                h("figure", {}, h("figcaption", { className: "label", textContent: "Seu resultado" }), live)
-            );
-        }
-
-        return {
-            node: h("div", { className: "stack" }, language === "python" && goal, editor.node, extra, language !== "python" && goal),
-            focus: editor.field,
-            check: () => checkCode(language, editor.field.value, exercise),
-            onResult: (result) => editor.markError(result.message)
-        };
-    }
+    code: (exercise) => codeTask(exercise),
+    fix: (exercise) => codeTask(exercise, { broken: true })
 };
+
+// Writing code from scratch and fixing a broken machine share one layout. A machine starts with its broken code.
+function codeTask(exercise, { broken = false } = {}) {
+    const { language, expected, sample } = exercise;
+    let hints = 0;
+    const hint = h("button", { type: "button", className: "hint-button", innerHTML: `${ICONS.bulb}<span>Dica</span>` });
+    const editor = codeEditor(language, { tools: hint, value: broken ? exercise.broken : "" });
+    editor.field.addEventListener("input", () => setReady(editor.field.value.trim() !== "" && editor.field.value !== exercise.broken));
+    const machine = broken && h("div", { className: "machine is-broken" },
+        h("div", { className: "machine-head" },
+            h("span", { className: "machine-light", ariaHidden: "true" }),
+            h("strong", { textContent: exercise.machine }),
+            h("span", { className: "machine-status", textContent: "Quebrada" })
+        ),
+        h("p", { textContent: exercise.story })
+    );
+
+    hint.addEventListener("click", () => {
+        hints += 1;
+        play("tap");
+        if (hints === 1) {
+            mascot.mood("idle");
+            mascot.say(hintFor(exercise));
+            hint.lastChild.textContent = "Ver solução";
+            return;
+        }
+        editor.set(language === "python" ? exercise.solution : expected);
+        missed.add(exercise);
+        hint.disabled = true;
+        mascot.pointAt(editor.field);
+        mascot.say("Aqui está uma solução. Leia com calma e depois toque em Verificar.");
+    });
+
+    let goal;
+    let extra = null;
+    if (language === "python") {
+        goal = h("div", { className: "goal" },
+            h("span", { className: "label", textContent: broken ? "A máquina deveria mostrar" : "Saída esperada" }),
+            h("pre", { className: "code-block is-output", textContent: expected })
+        );
+        extra = pythonConsole(editor);
+    } else {
+        const live = preview(previewDocument(language, broken ? exercise.broken : "", sample), "Seu resultado");
+        editor.field.addEventListener("input", () => { live.srcdoc = previewDocument(language, editor.field.value, sample); });
+        goal = h("div", { className: "compare" },
+            h("figure", {}, h("figcaption", { className: "label", textContent: "Objetivo" }), preview(previewDocument(language, expected, sample), "Objetivo")),
+            h("figure", {}, h("figcaption", { className: "label", textContent: "Seu resultado" }), live)
+        );
+    }
+
+    return {
+        node: h("div", { className: "stack" }, machine, language === "python" && goal, editor.node, extra, language !== "python" && goal),
+        focus: broken ? null : editor.field,
+        check: () => checkCode(language, editor.field.value, exercise),
+        onResult: (result) => {
+            editor.markError(result.message);
+            if (machine && result.ok) {
+                machine.className = "machine is-fixed";
+                machine.querySelector(".machine-status").textContent = "Consertada!";
+            }
+        }
+    };
+}
 
 function renderSteps() {
     ui.steps.replaceChildren(...queue.flatMap((step, i) => {
@@ -476,6 +503,7 @@ function render() {
         mascot.rest();
         const mistakes = lesson.exercises.filter((exercise) => data.mistakes.includes(exercise.id)).length;
         mascot.say(review ? `Vamos revisar ${lesson.exercises.length} exercícios${mistakes ? `, ${mistakes} deles você errou antes` : ""}.`
+            : lesson.machine ? "Ih, umas máquinas quebraram! Vamos descobrir o que aconteceu e consertar juntos?"
             : lesson.challenge ? "Hora do desafio! Sem explicação, só você e o código. Use as dicas se precisar."
             : words.length ? `Hoje vamos aprender ${list(words.map((card) => card.term))}!` : "Vamos praticar!");
         return;
@@ -591,6 +619,7 @@ async function finish() {
     host.mood("cheer");
     host.say(rankedUp ? `Agora você é ${after.name}!`
         : review ? "Revisão feita! Seus erros estão sumindo."
+        : lesson.machine ? "Tudo funcionando de novo! Você é demais!"
         : lesson.challenge ? "Desafio vencido! Que orgulho!"
         : pick(["Você arrasou!", "Aula concluída! Bora para a próxima?"]));
     countUp($("xp-gained"), xp);
@@ -648,7 +677,8 @@ syncSound();
 
 $("celebration").addEventListener("cancel", (event) => event.preventDefault());
 $("close").href = review ? "dashboard.html" : `lessons.html?track=${lesson.track.id}`;
-$("celebration-title").textContent = review ? "Revisão completa!" : lesson.challenge ? "Desafio vencido!" : "Lição completa!";
+$("celebration-title").textContent = review ? "Revisão completa!" : lesson.challenge ? "Desafio vencido!"
+    : lesson.machine ? "Máquinas consertadas!" : "Lição completa!";
 ui.title.textContent = lesson.title;
 document.title = `${lesson.title} · EnCoder`;
 if (queue.some((step) => step.language === "python")) loadPython().catch(() => {});

@@ -384,6 +384,27 @@ body::before {
     text-align: right;
 }
 
+.is-machine .node-circle {
+    border-radius: 22px;
+    rotate: 8deg;
+}
+
+.is-machine .node-circle svg {
+    rotate: -8deg;
+}
+
+.is-machine:not(.is-done) .node-circle {
+    --fill: color-mix(in srgb, var(--track) 18%, var(--surface-2));
+    --edge: color-mix(in srgb, var(--track-edge) 40%, var(--border-strong));
+    color: var(--track-edge);
+}
+
+.is-machine.is-current .node-circle {
+    --fill: var(--track);
+    --edge: var(--track-edge);
+    color: #fff;
+}
+
 .is-locked .node-label {
     color: var(--muted);
 }

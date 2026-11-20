@@ -9,6 +9,7 @@ const ICONS = {
     done: svg('<path d="M4 12l5 5L20 6"/>'),
     current: svg('<path d="M8 5v14l11-7z" fill="currentColor"/>'),
     locked: svg('<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'),
+    machine: svg('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'),
     challenge: svg('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/>')
 };
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -49,7 +50,7 @@ function preview(lesson, state) {
             : h("a", {
                 className: `button is-small${state === "done" ? " is-ghost" : ""}`,
                 href: `lesson.html?id=${lesson.id}`,
-                textContent: state === "done" ? "Revisar aula" : lesson.challenge ? "Aceitar desafio" : "Começar aula"
+                textContent: state === "done" ? "Revisar aula" : lesson.challenge ? "Aceitar desafio" : lesson.machine ? "Consertar máquinas" : "Começar aula"
             })
     );
 }
@@ -58,12 +59,13 @@ function preview(lesson, state) {
 function renderLesson(lesson, i) {
     const state = stateOf(lesson);
     const offset = Math.round(Math.sin(i * 0.95) * 90);
-    const icon = lesson.challenge && state !== "done" ? ICONS.challenge : ICONS[state];
+    const special = lesson.challenge ? "challenge" : lesson.machine ? "machine" : null;
+    const icon = special && state !== "done" ? ICONS[special] : ICONS[state];
     const button = h("button", { type: "button", className: "node-button", ariaExpanded: "false" },
         h("span", { className: "node-circle", innerHTML: icon }),
         h("span", { className: "node-label", textContent: lesson.title })
     );
-    const classes = ["node", `is-${state}`, lesson.challenge && "is-challenge", offset > 0 && "is-label-left"].filter(Boolean).join(" ");
+    const classes = ["node", `is-${state}`, special && `is-${special}`, offset > 0 && "is-label-left"].filter(Boolean).join(" ");
     const node = h("li", { className: classes, style: `--x: ${offset}px; --i: ${i}` },
         state === "current" && h("span", { className: "node-start", textContent: completed.size ? "Continuar" : "Começar" }),
         button,

@@ -283,10 +283,29 @@ body::before {
     font-weight: 700;
 }
 
-.intro-words span,
+.intro-words li span,
 .celebration-words li span {
     color: var(--muted);
     font-size: 14px;
+}
+
+.intro-reuses {
+    display: grid;
+    gap: 8px;
+}
+
+.intro-reuses ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.intro-reuses li {
+    padding: 4px 10px;
+    border: 1.5px dashed var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font: 600 14px var(--mono);
 }
 
 .intro-meta {
@@ -658,6 +677,69 @@ body::before {
 
 .compare .preview {
     height: 150px;
+}
+
+/* Broken machine: a status light that turns from red to green */
+
+.machine {
+    display: grid;
+    gap: 8px;
+    padding: 16px 18px;
+    border: 2px solid var(--machine);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--machine) 9%, var(--surface));
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.machine.is-broken { --machine: var(--error); }
+.machine.is-fixed { --machine: var(--success); }
+
+.machine-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.machine-head strong {
+    font-family: var(--display);
+    font-size: 19px;
+}
+
+.machine-light {
+    width: 14px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--machine);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--machine) 25%, transparent);
+}
+
+.machine.is-broken .machine-light {
+    animation: blink-light 1.2s steps(2, jump-none) infinite;
+}
+
+.machine.is-fixed .machine-light {
+    animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.machine-status {
+    margin-left: auto;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--machine);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.machine p {
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+@keyframes blink-light {
+    50% { opacity: 0.35; }
 }
 
 /* Answers */

@@ -3,9 +3,16 @@ import { h } from "./dom.js";
 
 // Words that appear in code before they get their own lesson.
 const EXTRA = {
-    python: { in: "em, dentro de", str: "converte para texto (de string)", True: "verdadeiro", False: "falso", input: "entrada" },
+    python: {
+        in: "em, dentro de", str: "converte para texto (de string)", True: "verdadeiro", False: "falso",
+        input: "entrada", lower: "de baixo (letras minúsculas)", min: "mínimo"
+    },
     html: { li: "item de lista (de list item)", src: "origem do arquivo (de source)", h2: "título nível 2 (de heading 2)" },
-    css: { solid: "contínuo", dashed: "tracejado", flex: "flexível", red: "vermelho", blue: "azul", green: "verde", yellow: "amarelo", black: "preto", white: "branco", orange: "laranja", gray: "cinza", purple: "roxo" }
+    css: {
+        solid: "contínuo", dashed: "tracejado", flex: "flexível", bold: "negrito", center: "centro", left: "esquerda",
+        right: "direita", red: "vermelho", blue: "azul", green: "verde", yellow: "amarelo", black: "preto",
+        white: "branco", orange: "laranja", gray: "cinza", purple: "roxo", lightblue: "azul-claro"
+    }
 };
 
 const MEANINGS = Object.fromEntries(TRACKS.map((track) => [track.id, {
