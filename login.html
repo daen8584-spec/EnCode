@@ -1,63 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Website description here">
-    <title>Login  EnCoder</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Entre no EnCoder e continue aprendendo HTML, CSS e Python.">
+    <meta name="theme-color" content="#0f1222">
+    <title>Entrar · EnCoder</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link rel="stylesheet" href="css/errors.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Nunito:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <script type="module" src="js/auth-page.js"></script>
 </head>
 <body>
-    <div class="background" aria-hidden="true">
-        <div class="background-orb background-orb-left"></div>
-        <div class="background-orb background-orb-right"></div>
-        <div class="background-symbols">
-            <span class="symbol">&lt;/&gt;</span>
-            <span class="symbol">{ }</span>
-            <span class="symbol">( )</span>
-            <span class="symbol">;</span>
-            <span class="symbol">=&gt;</span>
-            <span class="symbol">#</span>
-        </div>
-    </div>
-    <main class="login-page">
-        <header class="login-header">
-            <span class="login-logo">&lt;/&gt;</span>
-            <h1 class="login-brand">EnCoder</h1>
-        </header>
-        <section class="login-card" aria-labelledby="login-title">
-            <h2 id="login-title" class="login-title">Login</h2>
-            <p class="login-subtitle">Acesse sua conta para continuar seus estudos.</p>
-            <form id="login-form" class="login-form" novalidate>
-                <div class="form-group">
-                    <label class="login-label" for="login-email">Email</label>
-                    <input class="login-input" id="login-email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" required>
+    <div class="backdrop" aria-hidden="true"><span>&lt;/&gt;</span><span>{ }</span><span>( )</span><span>;</span><span>=&gt;</span><span>#</span></div>
+
+    <main class="auth">
+        <p class="brand is-large"><span class="logo">&lt;/&gt;</span>EnCoder</p>
+
+        <section class="auth-card card" aria-labelledby="title">
+            <h1 id="title">Entrar</h1>
+            <p class="muted">Acesse sua conta para continuar seus estudos.</p>
+
+            <form class="auth-form" data-mode="login" novalidate>
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com"
+                        required pattern="[^@\s]+@[^@\s]+\.[^@\s]+" data-error="Digite um email válido." aria-describedby="email-error">
+                    <small class="field-error" id="email-error"></small>
                 </div>
-                <div class="form-group">
-                    <label class="login-label" for="login-password">Senha</label>
-                    <input class="login-input" id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="••••••••" required>
+                <div class="field">
+                    <label for="password">Senha</label>
+                    <div class="password">
+                        <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••"
+                            required data-error="Digite sua senha." aria-describedby="password-error">
+                    </div>
+                    <small class="field-error" id="password-error"></small>
                 </div>
-                <button class="login-button" type="submit" id="login-submit">
-                    <span class="login-button-text">Entrar</span>
-                    <span class="login-button-loader"></span>
-                    <span class="login-button-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 12.5l5 5L20 6.5"></path>
-                        </svg>
-                    </span>
-                </button>
+                <button class="button" type="submit">Entrar</button>
             </form>
-            <p class="login-switch">Não tem uma conta? <a href="signup.html">Criar Conta</a></p>
+
+            <p class="auth-switch">Não tem uma conta? <a href="signup.html">Criar conta</a></p>
         </section>
     </main>
-    <script type="module" src="js/login.js"></script>
 </body>
 </html>
-
-
-

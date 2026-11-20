@@ -1,0 +1,149 @@
+.auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    min-height: 100dvh;
+    padding: 24px 16px;
+}
+
+.auth > .brand {
+    animation: rise-in 0.6s var(--ease) both;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 36px;
+    text-align: center;
+    box-shadow: 0 24px 64px rgb(0 0 0 / 45%);
+    animation: rise-in 0.7s var(--ease) 0.1s both;
+}
+
+.auth-card h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.auth-card > .muted {
+    margin-bottom: 24px;
+}
+
+.auth-card > .button {
+    margin-top: 24px;
+}
+
+.auth-form {
+    display: grid;
+    gap: 16px;
+    text-align: left;
+}
+
+.auth-form > .button {
+    margin-top: 8px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.field-error {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--error);
+}
+
+.field-error:not(:empty) {
+    margin-top: 6px;
+}
+
+.password {
+    position: relative;
+}
+
+.password .input {
+    padding-right: 48px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    display: grid;
+    padding: 6px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--muted);
+    translate: 0 -50%;
+}
+
+.password-toggle:hover {
+    color: var(--text);
+    background: var(--surface);
+}
+
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+.password-rules {
+    display: grid;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.password-rules li::before {
+    content: "○";
+    display: inline-block;
+    width: 18px;
+}
+
+.password-rules .is-met {
+    color: var(--success);
+}
+
+.password-rules .is-met::before {
+    content: "✓";
+}
+
+.field .checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.checkbox input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+.auth-switch {
+    margin-top: 24px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.auth-switch a {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}

@@ -1,72 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lição - EnCoder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/login.css">
-<link rel="stylesheet" href="css/lesson.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0f1222">
+    <title>Lição · EnCoder</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Nunito:wght@600;700;800&display=swap">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/lesson.css">
+    <script type="module" src="js/lesson.js"></script>
 </head>
-<body class="lesson-body">
-<div class="background" aria-hidden="true">
-<div class="background-orb background-orb-left"></div>
-<div class="background-orb background-orb-right"></div>
-</div>
+<body>
+    <div class="backdrop" aria-hidden="true"></div>
 
-<header class="lesson-header">
-<button class="lesson-close" id="lesson-close" type="button" aria-label="Sair">
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-</button>
-<div class="lesson-progress">
-<div class="lesson-progress-fill" id="lesson-progress-fill"></div>
-</div>
-<span class="lesson-counter"><span id="lesson-current">1</span>/<span id="lesson-total">5</span></span>
-</header>
+    <header class="lesson-header">
+        <a class="icon-button" id="close" href="lessons.html" aria-label="Sair da lição">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </a>
+        <div class="bar" aria-hidden="true"><div class="bar-fill" id="progress"></div></div>
+    </header>
 
-<main class="lesson-main">
-<div class="lesson-content">
-<div class="lesson-text-col">
-<h1 class="lesson-title" id="lesson-title">Carregando...</h1>
-<p class="lesson-instruction" id="lesson-instruction"></p>
-<div class="lesson-body" id="lesson-body"></div>
-</div>
-<div class="lesson-mascot-col">
-<div class="lesson-mascot is-idle" id="lesson-mascot" aria-hidden="true">
-<img src="assets/mascot.png" class="lesson-mascot-img" alt="">
-</div>
-</div>
-</div>
-</main>
+    <main class="lesson">
+        <div class="lesson-content">
+            <h1 id="title">Carregando…</h1>
+            <p class="lesson-question" id="question"></p>
+            <div id="step"></div>
+        </div>
+        <img class="lesson-mascot is-idle" id="mascot" src="assets/mascot.webp" width="440" height="536" alt="">
+    </main>
 
-<footer class="lesson-footer" id="lesson-footer">
-<div class="lesson-feedback" id="lesson-feedback" hidden></div>
-<button class="lesson-action" id="lesson-action" type="button" disabled>Verificar</button>
-</footer>
+    <footer class="lesson-footer">
+        <p class="feedback" id="feedback" role="status" hidden></p>
+        <button class="button lesson-action" id="action" type="button" disabled>Verificar</button>
+    </footer>
 
-<div class="lesson-celebration" id="lesson-celebration" hidden>
-<div class="lesson-celebration-content">
-<div class="lesson-celebration-emoji">
-<svg viewBox="0 0 80 80" fill="none" stroke="#fbbf24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M40 8l8 18h20l-16 12 6 20-18-12-18 12 6-20L12 26h20z"/></svg>
-</div>
-<h2 class="lesson-celebration-title">Lição completa!</h2>
-<p class="lesson-celebration-xp">+<span id="celebration-xp">10</span> XP</p>
-<div class="celebration-actions">
-<button class="lesson-action lesson-action-secondary" id="celebration-repeat" type="button">Repetir</button>
-<button class="lesson-action" id="celebration-continue" type="button">Próxima lição</button>
-</div>
-</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
-<script type="module" src="js/lesson.js"></script>
+    <dialog class="celebration" id="celebration" aria-labelledby="celebration-title">
+        <svg class="celebration-star" viewBox="0 0 80 80" aria-hidden="true"><path d="M40 8l8 18h20l-16 12 6 20-18-12-18 12 6-20L12 26h20z"/></svg>
+        <h2 id="celebration-title">Lição completa!</h2>
+        <p class="celebration-xp">+<span id="xp-gained">0</span> XP</p>
+        <div class="celebration-actions">
+            <a class="button is-ghost" id="repeat" href="lessons.html">Repetir</a>
+            <a class="button is-gold" id="next" href="lessons.html">Próxima lição</a>
+        </div>
+    </dialog>
 </body>
 </html>
-
-
-
-

@@ -1,438 +1,179 @@
-import { auth } from "./firebase-config.js";
-import { LESSONS, UNITS, LESSON_XP_BASE, EXERCISE_XP } from "./lessons-data.js";
-import { loadProgress, addXpAndStreak, markLessonComplete } from "./progress-service.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { sanitizeCode, createEl, friendlyError } from "./utils.js";
+import { requireUser } from "./auth.js";
+import { findLesson, TRACKS } from "./content.js";
+import { $, h, shuffle, toast } from "./dom.js";
+import { checkBlank, checkCode } from "./grading.js";
+import { completeLesson, loadUserData } from "./progress.js";
+import { loadPython } from "./python.js";
 
-const state = {
-    lesson: null,
-    steps: [],
-    stepIndex: 0,
-    user: null,
-    answered: false,
-    correctCount: 0
+const LESSON_XP = 10;
+const EXERCISE_XP = 2;
+
+const ui = {
+    title: $("title"),
+    question: $("question"),
+    step: $("step"),
+    progress: $("progress"),
+    feedback: $("feedback"),
+    action: $("action"),
+    mascot: $("mascot")
 };
 
-const el = {
-    title: document.getElementById("lesson-title"),
-    instruction: document.getElementById("lesson-instruction"),
-    body: document.getElementById("lesson-body"),
-    feedback: document.getElementById("lesson-feedback"),
-    action: document.getElementById("lesson-action"),
-    progressFill: document.getElementById("lesson-progress-fill"),
-    counterCurrent: document.getElementById("lesson-current"),
-    counterTotal: document.getElementById("lesson-total"),
-    mascot: document.getElementById("lesson-mascot"),
-    celebration: document.getElementById("lesson-celebration"),
-    celebrationXp: document.getElementById("celebration-xp"),
-    celebrationContinue: document.getElementById("celebration-continue"),
-    celebrationRepeat: document.getElementById("celebration-repeat"),
-    close: document.getElementById("lesson-close")
-};
+await requireUser();
+const data = await loadUserData();
+const lesson = findLesson(new URLSearchParams(location.search).get("id"))
+    ?? TRACKS[0].lessons.find(({ id }) => !data.completedLessons.includes(id))
+    ?? TRACKS[0].lessons[0];
+const language = lesson.track.id;
 
-const letters = ["A", "B", "C", "D", "E"];
+const queue = [...lesson.teach.map((card) => ({ type: "teach", ...card })), ...lesson.exercises];
+const missed = new Set();
+let index = 0;
+let check = null;
+let answered = false;
 
-const normalizeOutput = (text) => String(text)
-    .replace(/\r\n/g, "\n")
-    .replace(/[\u2018\u2019]/g, "'")
-    .replace(/[\u201C\u201D]/g, "\"")
-    .replace(/\s+$/g, "")
-    .trim();
+const setReady = (ready) => { ui.action.disabled = !ready; };
+const setMood = (mood) => { ui.mascot.className = `lesson-mascot is-${mood}`; };
 
-const collapseWhitespace = (text) => text.replace(/\s+/g, " ").trim();
-
-
-function setMascot(kind) {
-    el.mascot.classList.remove("is-idle", "is-happy", "is-sad");
-    el.mascot.classList.add(`is-${kind}`);
-}
-
-function updateProgressBar() {
-    const total = state.steps.length;
-    const percent = (state.stepIndex / total) * 100;
-    el.progressFill.style.width = `${percent}%`;
-    el.counterCurrent.textContent = String(state.stepIndex + 1);
-    el.counterTotal.textContent = String(total);
-}
-
-function buildSteps(lesson) {
-    return [
-        ...(lesson.teach ?? []).map((data) => ({ type: "teach", data })),
-        ...lesson.exercises
-    ];
-}
-
-function getLessonIdFromUrl() {
-    return new URLSearchParams(window.location.search).get("id") ?? "";
-}
-
-function pickLesson(progress) {
-    const urlId = getLessonIdFromUrl();
-    const fromUrl = urlId && LESSONS.find((l) => l.id === urlId);
-    if (fromUrl) return fromUrl;
-    const next = LESSONS.find((l) => !progress.completedLessons.includes(l.id));
-    return next ?? LESSONS[0];
-}
-
-function renderTeach(step) {
-    const wrapper = createEl("div", "teach-card");
-
-    wrapper.appendChild(createEl("span", "teach-term", step.data.term));
-
-    const text = createEl("div", "teach-text");
-    step.data.lines.forEach((line) => text.appendChild(createEl("p", null, line)));
-    wrapper.appendChild(text);
-
-    const example = createEl("div", "teach-example");
-    example.appendChild(createEl("pre", "teach-code", step.data.example.code));
-    example.appendChild(createEl("div", "teach-arrow", "↓"));
-    example.appendChild(createEl("pre", "teach-output", step.data.example.output));
-    wrapper.appendChild(example);
-
-    return wrapper;
-}
-
-function renderMultipleChoice(exercise) {
-    const container = createEl("div", "lesson-options");
-
-    exercise.options.forEach((option, index) => {
-        const btn = createEl("button", "lesson-option");
-        btn.type = "button";
-        btn.dataset.index = String(index);
-        btn.innerHTML = `<span class="lesson-option-marker">${letters[index]}</span><span>${option}</span>`;
-
-        btn.addEventListener("click", () => {
-            if (state.answered) return;
-            state.answered = true;
-            container.querySelectorAll(".lesson-option").forEach((b) => {
-                b.disabled = true;
-                const i = Number(b.dataset.index);
-                if (i === exercise.correct) b.classList.add("is-correct");
-                else if (i === index) b.classList.add("is-wrong");
-            });
-            handleAnswer(index === exercise.correct);
-        });
-
-        container.appendChild(btn);
-    });
-
-    return container;
-}
-
-function renderFillBlank(exercise) {
-    const wrapper = createEl("div", "lesson-editor");
-    const [before, after] = exercise.codeTemplate.split("___");
-
-    const block = createEl("pre", "lesson-output");
-    block.appendChild(document.createTextNode(before));
-    const blank = createEl("span", null, "___");
-    blank.classList.add("lesson-blank-marker");
-    block.appendChild(blank);
-    block.appendChild(document.createTextNode(after ?? ""));
-
-    const input = createEl("input", "lesson-code-input");
-    input.type = "text";
-    input.classList.add("lesson-code-input--inline");
-    input.placeholder = exercise.placeholder ?? "Digite aqui";
-    input.autocapitalize = "off";
-    input.autocomplete = "off";
-    input.spellcheck = false;
-
-    input.addEventListener("input", () => {
-        el.action.disabled = !input.value.trim().length;
-    });
-
-    wrapper.appendChild(block);
-    wrapper.appendChild(input);
-    wrapper._checkAnswer = () => normalizeOutput(input.value).toLowerCase() === normalizeOutput(exercise.answer).toLowerCase();
-
-    return wrapper;
-}
-
-function renderWriteCode(exercise) {
-    const wrapper = createEl("div", "lesson-editor");
-
-    wrapper.appendChild(createEl("div", "lesson-output-header", "Saída esperada"));
-    const expected = createEl("pre", "lesson-output lesson-output--hint", exercise.expectedOutput);
-    wrapper.appendChild(expected);
-
-    const input = createEl("textarea", "lesson-code-input");
-    input.spellcheck = false;
-    input.autocapitalize = "off";
-    input.autocomplete = "off";
-    input.value = exercise.starter ?? "";
-
-    input.addEventListener("input", () => {
-        el.action.disabled = !input.value.trim().length;
-    });
-
-    wrapper.appendChild(input);
-
-    wrapper._checkAnswer = () => {
-        const Sk = window.Sk;
-        if (typeof Sk === "undefined") return Promise.resolve({ correct: false, reason: "O interpretador ainda não carregou." });
-
-        let buffer = "";
-        Sk.configure({
-            output: (text) => { buffer += text; },
-            read: (x) => {
-                if (!Sk.builtinFiles?.files?.[x]) throw `File not found: '${x}'`;
-                return Sk.builtinFiles.files[x];
-            },
-            __future__: Sk.python3,
-            inputfun: () => "",
-            inputfunTakesPrompt: true
-        });
-
-        const code = sanitizeCode(input.value);
-        const expectedOut = normalizeOutput(exercise.expectedOutput);
-
-        return Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, code, true))
-            .then(() => new Promise((resolve) => {
-                setTimeout(() => {
-                    const userOut = normalizeOutput(buffer);
-                    if (userOut === expectedOut || collapseWhitespace(userOut) === collapseWhitespace(expectedOut)) {
-                        return resolve({ correct: true });
-                    }
-                    const reason = userOut
-                        ? `Sua saída: ${userOut}`
-                        : "O programa não mostrou nada. Verifique se usou print.";
-                    resolve({ correct: false, reason });
-                }, 80);
-            }))
-            .catch((error) => {
-                const raw = error?.toString?.() ?? String(error);
-                return { correct: false, reason: friendlyError(raw, input.value) };
-            });
-    };
-
-    return wrapper;
-}
-
-function renderWriteHtml(exercise) {
-    const wrapper = createEl("div", "lesson-editor");
-
-    wrapper.appendChild(createEl("div", "lesson-output-header", "Escreva seu código HTML"));
-
-    const hint = createEl("pre", "lesson-output lesson-output--hint", `Exemplo: ${exercise.expectedPattern}`);
-    wrapper.appendChild(hint);
-
-    const input = createEl("textarea", "lesson-code-input");
-    input.spellcheck = false;
-    input.autocapitalize = "off";
-    input.autocomplete = "off";
-    input.value = exercise.starter ?? "";
-    input.placeholder = "<h1>Olá</h1>";
-
-    input.addEventListener("input", () => {
-        el.action.disabled = !input.value.trim().length;
-    });
-
-    wrapper.appendChild(input);
-
-    wrapper._checkAnswer = () => {
-        const clean = (str) => String(str).replace(/\s+/g, "").toLowerCase();
-        return clean(input.value) === clean(exercise.expectedPattern);
-    };
-
-    return wrapper;
-}
-
-function renderWriteCss(exercise) {
-    const wrapper = createEl("div", "lesson-editor");
-
-    wrapper.appendChild(createEl("div", "lesson-output-header", "Escreva seu código CSS"));
-
-    const input = createEl("textarea", "lesson-code-input");
-    input.spellcheck = false;
-    input.autocapitalize = "off";
-    input.autocomplete = "off";
-    input.value = exercise.starter ?? "";
-    input.placeholder = "p { color: red; }";
-
-    input.addEventListener("input", () => {
-        el.action.disabled = !input.value.trim().length;
-    });
-
-    wrapper.appendChild(input);
-
-    wrapper._checkAnswer = () => {
-        const clean = (str) => String(str).replace(/\s+/g, "").replace(/"/g, "'").toLowerCase();
-        return clean(input.value) === clean(exercise.expectedPattern);
-    };
-
-    return wrapper;
+function codeField(tag, props) {
+    const field = h(tag, { spellcheck: false, autocomplete: "off", autocapitalize: "off", ...props });
+    field.setAttribute("autocorrect", "off");
+    field.addEventListener("input", () => setReady(field.value.trim() !== ""));
+    return field;
 }
 
 const RENDERERS = {
-    "multiple-choice": renderMultipleChoice,
-    "fill-blank": renderFillBlank,
-    "write-code": renderWriteCode,
-    "write-html": renderWriteHtml,
-    "write-css": renderWriteCss
+    teach: ({ term, lines, example }) => ({
+        node: h("div", { className: "teach card" },
+            h("span", { className: "teach-term", textContent: term }),
+            lines.map((line) => h("p", { textContent: line })),
+            h("pre", { className: "code-block", textContent: example.code }),
+            h("pre", { className: "code-block is-output", textContent: example.output })
+        )
+    }),
+
+    choice: ({ options }) => {
+        const [answer] = options;
+        let picked = null;
+        const list = h("div", { className: "options" }, shuffle(options).map((option, i) => h("button", {
+            type: "button",
+            className: "option",
+            value: option,
+            onclick: ({ currentTarget }) => {
+                picked = option;
+                for (const button of list.children) button.ariaPressed = button === currentTarget;
+                setReady(true);
+            }
+        }, h("kbd", { textContent: "ABCD"[i] }), option)));
+
+        return {
+            node: list,
+            check: () => {
+                for (const button of list.children) {
+                    button.disabled = true;
+                    button.classList.toggle("is-correct", button.value === answer);
+                    button.classList.toggle("is-wrong", button.value === picked && picked !== answer);
+                }
+                return picked === answer ? { ok: true } : { ok: false, message: "A resposta certa está destacada." };
+            }
+        };
+    },
+
+    blank: ({ code, answer, placeholder }) => {
+        const input = codeField("input", { className: "input is-code", placeholder });
+        input.addEventListener("keydown", (event) => event.key === "Enter" && !ui.action.disabled && ui.action.click());
+        const parts = code.split("___");
+        return {
+            node: h("div", { className: "stack" },
+                h("pre", { className: "code-block" }, parts.flatMap((part, i) => i ? [h("mark", { textContent: "___" }), part] : part)),
+                input
+            ),
+            focus: input,
+            check: () => ({ ok: checkBlank(input.value, answer) })
+        };
+    },
+
+    code: (exercise) => {
+        const editor = codeField("textarea", { className: "code-input", placeholder: "Digite seu código aqui", rows: 6 });
+        return {
+            node: h("div", { className: "stack" },
+                language === "python" && [
+                    h("span", { className: "label", textContent: "Saída esperada" }),
+                    h("pre", { className: "code-block is-output", textContent: exercise.expected })
+                ],
+                editor
+            ),
+            focus: editor,
+            check: () => checkCode(language, editor.value, exercise)
+        };
+    }
 };
 
-function renderStep() {
-    state.answered = false;
-    el.feedback.hidden = true;
-    el.feedback.className = "lesson-feedback";
-    el.action.classList.remove("is-success", "is-error");
-    el.body.replaceChildren();
+function render() {
+    const step = queue[index];
+    const view = RENDERERS[step.type](step);
+    check = view.check ?? null;
+    answered = false;
 
-    const step = state.steps[state.stepIndex];
-    updateProgressBar();
-
-    if (step.type === "teach") {
-        el.title.style.display = "none";
-        el.instruction.style.display = "none";
-        el.body.appendChild(renderTeach(step));
-        el.action.textContent = "Entendi";
-        el.action.disabled = false;
-        setMascot("idle");
-        return;
-    }
-
-    el.title.style.display = "";
-    el.instruction.style.display = "";
-    el.title.textContent = state.lesson.title;
-    el.instruction.textContent = step.question ?? "";
-    el.action.textContent = "Verificar";
-    el.action.disabled = step.type !== "multiple-choice";
-
-    const renderer = RENDERERS[step.type] ?? renderWriteCode;
-    const node = renderer(step);
-    el.body.appendChild(node);
-    el.body._currentExercise = node;
-
-    if (step.type !== "multiple-choice") {
-        const input = node.querySelector("input, textarea");
-        if (input) {
-            if (step.type === "fill-blank") input.value = "";
-            el.action.disabled = !input.value.trim().length;
-            setTimeout(() => input.focus(), 100);
-        }
-    }
+    ui.progress.style.width = `${(index / queue.length) * 100}%`;
+    ui.question.textContent = step.question ?? "";
+    ui.step.replaceChildren(view.node);
+    ui.feedback.hidden = true;
+    ui.action.className = "button lesson-action";
+    ui.action.textContent = check ? "Verificar" : "Entendi";
+    setReady(!check);
+    setMood("idle");
+    view.focus?.focus();
 }
 
-function handleAnswer(isCorrect, reason = "") {
-    state.answered = true;
-    el.feedback.hidden = false;
-    el.feedback.className = `lesson-feedback is-${isCorrect ? "correct" : "wrong"}`;
-
-    const icon = createEl("span", "lesson-feedback-icon", isCorrect ? "✓" : "✕");
-    const text = createEl("span", null, isCorrect ? "Correto!" : reason || "Não foi dessa vez. Continue!");
-    el.feedback.replaceChildren(icon, text);
-
-    if (isCorrect) {
-        state.correctCount += 1;
-        setMascot("happy");
-    } else {
-        setMascot("sad");
+function showResult({ ok, message }) {
+    const step = queue[index];
+    if (!ok) {
+        missed.add(step);
+        queue.push(step);
     }
-
-    el.action.disabled = false;
-    el.action.classList.add(isCorrect ? "is-success" : "is-error");
-    el.action.textContent = "Continuar";
+    answered = true;
+    ui.feedback.className = `feedback ${ok ? "is-correct" : "is-wrong"}`;
+    ui.feedback.textContent = ok ? "Correto!" : `${message ?? "Resposta incorreta."} Você vai tentar de novo no fim da lição.`;
+    ui.feedback.hidden = false;
+    ui.action.classList.add(ok ? "is-success" : "is-error");
+    ui.action.textContent = "Continuar";
+    setReady(true);
+    setMood(ok ? "happy" : "sad");
 }
 
-async function advanceStep() {
-    state.stepIndex += 1;
-    if (state.stepIndex >= state.steps.length) {
-        await completeLesson();
-        return;
-    }
-    renderStep();
-}
+async function finish() {
+    const xp = LESSON_XP + EXERCISE_XP * (lesson.exercises.length - missed.size);
+    ui.progress.style.width = "100%";
+    ui.action.disabled = true;
+    $("xp-gained").textContent = xp;
+    $("repeat").href = `lesson.html?id=${lesson.id}`;
+    $("next").href = lesson.next ? `lesson.html?id=${lesson.next.id}` : `lessons.html?track=${language}`;
+    $("next").textContent = lesson.next ? "Próxima lição" : "Ver trilha";
+    $("celebration").showModal();
 
-async function completeLesson() {
-    const gained = LESSON_XP_BASE + state.correctCount * EXERCISE_XP;
-    el.celebrationXp.textContent = String(gained);
-    el.celebration.hidden = false;
     try {
-        await addXpAndStreak(gained);
-        await markLessonComplete(state.lesson.id);
+        await completeLesson(data, lesson.id, xp);
     } catch (error) {
-        console.error("Falha ao salvar progresso:", error);
+        console.error("Could not save progress", error);
+        toast("Não foi possível salvar seu progresso.", "error");
     }
 }
 
-function getNextLessonId(currentId) {
-    const unit = UNITS.find((u) => u.lessons.includes(currentId));
-    if (!unit) return null;
-
-    const index = unit.lessons.indexOf(currentId);
-    if (index < unit.lessons.length - 1) return unit.lessons[index + 1];
-
-    const lang = unit.lang ?? "python";
-    const sameLang = UNITS.filter((u) => (u.lang ?? "python") === lang);
-    const unitIndex = sameLang.indexOf(unit);
-    if (unitIndex < sameLang.length - 1) return sameLang[unitIndex + 1].lessons[0];
-    return null;
-}
-
-el.action.addEventListener("click", async () => {
-    const step = state.steps[state.stepIndex];
-    if (step.type === "teach") { advanceStep(); return; }
-
-    if (!state.answered) {
-        const node = el.body._currentExercise;
-        if (!node) return;
-        el.action.disabled = true;
-        el.action.textContent = "Verificando...";
-
-        let correct = false;
-        let reason = "";
-        try {
-            const result = await node._checkAnswer();
-            if (typeof result === "object" && result !== null) {
-                correct = result.correct === true;
-                reason = result.reason ?? "";
-            } else {
-                correct = result === true;
-            }
-        } catch {}
-
-        handleAnswer(correct, reason);
+ui.action.addEventListener("click", async () => {
+    if (check && !answered) {
+        setReady(false);
+        ui.action.textContent = "Verificando…";
+        showResult(await check());
         return;
     }
-
-    setMascot("idle");
-    advanceStep();
+    index += 1;
+    if (index < queue.length) render();
+    else finish();
 });
 
-el.close.addEventListener("click", () => { window.location.href = "lessons.html"; });
-
-el.celebrationContinue.addEventListener("click", () => {
-    const nextId = getNextLessonId(state.lesson.id);
-    window.location.href = nextId ? `lesson.html?id=${nextId}` : "lessons.html";
-});
-
-el.celebrationRepeat?.addEventListener("click", () => {
-    state.stepIndex = 0;
-    state.correctCount = 0;
-    state.answered = false;
-    el.celebration.hidden = true;
-    renderStep();
-});
-
-function bootstrap(user, progress) {
-    state.user = user;
-    state.lesson = pickLesson(progress);
-    state.steps = buildSteps(state.lesson);
-    state.stepIndex = 0;
-    state.correctCount = 0;
-    renderStep();
-}
-
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = "login.html";
-        return;
-    }
-    const progress = await loadProgress();
-    bootstrap(user, progress);
-});
-// 1791696639
-// 1791696887
-// 1791752158
-// 1791753030
+$("celebration").addEventListener("cancel", (event) => event.preventDefault());
+$("close").href = `lessons.html?track=${language}`;
+ui.title.textContent = lesson.title;
+document.title = `${lesson.title} · EnCoder`;
+if (language === "python") loadPython().catch(() => {});
+render();
