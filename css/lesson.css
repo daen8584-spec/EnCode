@@ -104,7 +104,7 @@ body::before {
 
 .lesson-mascot {
     position: sticky;
-    top: 150px;
+    top: 260px; /* leaves room for a long speech bubble below the top bar */
 }
 
 .lesson-mascot .mascot {
