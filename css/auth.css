@@ -12,7 +12,37 @@
     animation: rise-in 0.6s var(--ease) both;
 }
 
+.auth-mascot {
+    position: absolute;
+    top: -96px;
+    right: 18px;
+    width: 104px;
+}
+
+.auth-mascot .mascot-bubble {
+    top: 12%;
+    bottom: auto;
+    left: auto;
+    right: calc(100% + 8px);
+    max-width: 210px;
+    translate: none;
+    text-align: left;
+}
+
+.auth-mascot .mascot-bubble::after {
+    top: 14px;
+    left: 100%;
+    border-top-color: transparent;
+    border-left-color: #fff;
+    translate: -1px 0;
+}
+
+.auth-card:has(.auth-mascot) {
+    margin-top: 76px;
+}
+
 .auth-card {
+    position: relative;
     width: 100%;
     max-width: 420px;
     padding: 36px;

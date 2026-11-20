@@ -1,6 +1,7 @@
 import { requireUser } from "./auth.js";
 import { findTrack, TRACKS } from "./content.js";
 import { $, h } from "./dom.js";
+import { createMascot } from "./mascot.js";
 import { loadUserData } from "./progress.js";
 
 const ICONS = {
@@ -17,16 +18,27 @@ const stateOf = (lesson) => completed.has(lesson.id) ? "done"
     : !lesson.previous || completed.has(lesson.previous.id) ? "current"
     : "locked";
 
-function renderLesson(lesson) {
+// Nodes wind left and right along the path; the mascot waits beside the current lesson.
+function renderLesson(lesson, i) {
     const state = stateOf(lesson);
+    const offset = Math.round(Math.sin(i * 0.9) * 80);
     const icon = lesson.challenge && state === "current" ? ICONS.challenge : ICONS[state];
     const content = [
         h("span", { className: "node-circle", innerHTML: icon }),
         h("span", { className: "node-label", textContent: lesson.title })
     ];
-    return h("li", { className: `node is-${state}${lesson.challenge ? " is-challenge" : ""}` }, state === "locked"
-        ? h("span", { className: "node-link", ariaDisabled: "true" }, content)
-        : h("a", { className: "node-link", href: `lesson.html?id=${lesson.id}` }, content));
+    const node = h("li", { className: `node is-${state}${lesson.challenge ? " is-challenge" : ""}`, style: `--x: ${offset}px; --i: ${i}` },
+        state === "current" && h("span", { className: "node-start", textContent: completed.size ? "Continuar" : "Começar" }),
+        state === "locked"
+            ? h("span", { className: "node-link", ariaDisabled: "true" }, content)
+            : h("a", { className: "node-link", href: `lesson.html?id=${lesson.id}` }, content));
+
+    if (state === "current") {
+        const guide = createMascot({ className: `roadmap-mascot ${offset > 0 ? "is-left" : "is-right"}` });
+        guide.mood("point");
+        node.append(guide.root);
+    }
+    return node;
 }
 
 function show(trackId) {

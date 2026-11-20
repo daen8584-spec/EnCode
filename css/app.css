@@ -118,32 +118,136 @@
 }
 
 .hero {
+    position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
+    grid-template-columns: 1fr 170px;
+    align-items: end;
     gap: 24px;
-    padding: 24px;
-    background: linear-gradient(135deg, rgb(124 92 255 / 18%), rgb(34 211 238 / 12%));
+    min-height: 230px;
+    padding: 28px 28px 0;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 85% 20%, rgb(34 211 238 / 25%), transparent 45%),
+        linear-gradient(135deg, rgb(124 92 255 / 28%), rgb(34 211 238 / 10%));
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
 }
 
+.hero::after {
+    content: "";
+    position: absolute;
+    right: 40px;
+    bottom: -40px;
+    width: 220px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 25%);
+    filter: blur(14px);
+}
+
+.hero-text {
+    align-self: center;
+    padding-bottom: 28px;
+}
+
+.hero h1 {
+    font-size: 32px;
+    font-weight: 900;
+}
+
 .hero .muted {
     margin: 6px 0 12px;
+    font-size: 16px;
 }
 
 .streak {
     margin-bottom: 20px;
     color: var(--gold);
+    font-weight: 800;
+}
+
+.hero-mascot {
+    position: relative;
+    z-index: 1;
+    padding: 70px 0 0;
+    border: 0;
+    background: none;
+}
+
+.hero-mascot .mascot-bubble {
+    top: 6%;
+    bottom: auto;
+    left: auto;
+    right: calc(100% + 8px);
+    max-width: 230px;
+    translate: none;
+    text-align: left;
+}
+
+.hero-mascot .mascot-bubble::after {
+    top: 16px;
+    left: 100%;
+    border-top-color: transparent;
+    border-left-color: #fff;
+    translate: -1px 0;
+}
+
+.button.is-pushable {
+    box-shadow: 0 5px 0 #4c35b5, 0 10px 24px rgb(124 92 255 / 30%);
+}
+
+.button.is-pushable:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #4c35b5;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.stat-tile {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom: 3px solid var(--tone);
+    border-radius: var(--radius);
+    animation: rise-in 0.45s var(--ease) both;
+}
+
+.stat-tile:nth-child(2) { animation-delay: 60ms; }
+.stat-tile:nth-child(3) { animation-delay: 120ms; }
+.stat-tile:nth-child(4) { animation-delay: 180ms; }
+
+.stat-tile svg {
+    grid-row: span 2;
+    width: 30px;
+    height: 30px;
+    color: var(--tone);
+}
+
+.stat-tile b {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.stat-tile span {
+    color: var(--muted);
+    font-size: 12px;
     font-weight: 700;
 }
 
-.mascot {
-    width: 130px;
-    height: auto;
-    filter: drop-shadow(0 12px 24px rgb(0 0 0 / 40%));
-    animation: bob 3s ease-in-out infinite;
-}
+.stat-tile.is-streak { --tone: #ff9f43; }
+.stat-tile.is-streak svg { fill: currentColor; stroke: none; }
+.stat-tile.is-xp { --tone: var(--gold); }
+.stat-tile.is-lessons { --tone: var(--success); }
+.stat-tile.is-words { --tone: var(--accent-2); }
 
 .xp {
     display: grid;
@@ -212,6 +316,21 @@
     color: var(--muted);
     font-size: 14px;
     line-height: 1.5;
+}
+
+.track {
+    animation: rise-in 0.45s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 80ms);
+}
+
+.track .bar {
+    flex: none;
+    height: 8px;
+    margin-top: 10px;
+}
+
+.track .bar-fill {
+    background: var(--track);
 }
 
 .track-count {
@@ -392,10 +511,6 @@
     justify-self: start;
 }
 
-@keyframes bob {
-    50% { translate: 0 -10px; }
-}
-
 @media (max-width: 760px) {
     .topbar {
         padding: 10px 16px;
@@ -430,8 +545,26 @@
         font-size: 11px;
     }
 
-    .mascot {
-        width: 90px;
+    .hero {
+        grid-template-columns: 1fr 96px;
+        min-height: 0;
+        padding: 20px 16px 0;
+    }
+
+    .hero h1 {
+        font-size: 26px;
+    }
+
+    .hero-mascot {
+        padding-top: 0;
+    }
+
+    .hero-mascot .mascot-bubble {
+        display: none;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
     }
 
     .practice {

@@ -1,6 +1,7 @@
 import { signIn, signUp } from "./auth.js";
 import { auth, onAuthStateChanged } from "./firebase.js";
 import { toast } from "./dom.js";
+import { createMascot } from "./mascot.js";
 
 const PASSWORD_RULES = {
     length: /.{8,}/,
@@ -17,6 +18,20 @@ const submit = form.querySelector("[type=submit]");
 const fields = [...form.querySelectorAll("[data-error]")];
 const rules = document.querySelector(".password-rules");
 let submitting = false;
+
+const isSignup = form.dataset.mode === "signup";
+const guide = createMascot({ className: "auth-mascot" });
+const greeting = isSignup ? "Oi! Vamos criar sua conta?" : "Que bom te ver de novo!";
+document.querySelector(".auth-card").append(guide.root);
+guide.say(greeting);
+
+for (const input of form.querySelectorAll("input[type=password]")) {
+    input.addEventListener("focus", () => {
+        guide.mood("shy");
+        guide.say("Pode digitar, não estou olhando!");
+    });
+    input.addEventListener("blur", () => guide.rest());
+}
 
 const isInvalid = (field) => field.getAttribute("aria-invalid") === "true";
 
@@ -66,9 +81,13 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!fields.map(validate).every(Boolean)) {
         shake();
+        guide.mood("sad");
+        guide.say("Confira os campos em vermelho.");
         fields.find(isInvalid).focus();
         return;
     }
+    guide.rest("think");
+    guide.say(isSignup ? "Preparando sua sala de aula…" : "Abrindo sua sala de aula…");
 
     const { name, email, password } = form.elements;
     submitting = true;
@@ -77,12 +96,16 @@ form.addEventListener("submit", async (event) => {
     try {
         if (form.dataset.mode === "signup") await signUp(name.value.trim(), email.value.trim(), password.value);
         else await signIn(email.value.trim(), password.value);
+        guide.mood("happy");
+        guide.say("Vamos lá!");
         location.replace("dashboard.html");
     } catch (error) {
         submitting = false;
         submit.disabled = false;
         submit.ariaBusy = "false";
         toast(error.message, "error");
+        guide.mood("sad");
+        guide.say(error.message);
         shake();
     }
 });
