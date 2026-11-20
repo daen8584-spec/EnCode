@@ -1,0 +1,62 @@
+rules_version = '2';
+
+// Each student has one document, users/{uid}, that only they can read and write.
+// Anything not matched below is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(FIELDS())
+        && isValid(request.resource.data, request.resource.data.keys().toSet())
+        && request.resource.data.get('xp', 0) <= MAX_XP_PER_SAVE();
+      // Only the fields a save changes are checked, so documents with older data keep working.
+      allow update: if isOwner(userId)
+        && changedFields().hasOnly(FIELDS())
+        && isValid(request.resource.data, changedFields())
+        && xpGained() >= 0
+        && xpGained() <= MAX_XP_PER_SAVE();
+      allow delete: if false;
+    }
+  }
+}
+
+function FIELDS() {
+  return ['xp', 'streak', 'lastPlayed', 'completedLessons', 'mistakes', 'today',
+    'chestOpened', 'onboarded', 'displayName', 'photoUrl'];
+}
+
+// The most XP one save can add: a challenge with every exercise right is 32.
+function MAX_XP_PER_SAVE() {
+  return 50;
+}
+
+function isOwner(userId) {
+  return request.auth != null && request.auth.uid == userId;
+}
+
+function changedFields() {
+  return request.resource.data.diff(resource.data).affectedKeys();
+}
+
+function xpGained() {
+  return request.resource.data.get('xp', 0) - resource.data.get('xp', 0);
+}
+
+function isDate(value) {
+  return value is string && value.size() <= 10;
+}
+
+// Checks each changed field's type and size.
+function isValid(data, changed) {
+  return (!('xp' in changed) || (data.xp is int && data.xp >= 0))
+    && (!('streak' in changed) || (data.streak is int && data.streak >= 0 && data.streak <= 100000))
+    && (!('lastPlayed' in changed) || isDate(data.lastPlayed))
+    && (!('completedLessons' in changed) || (data.completedLessons is list && data.completedLessons.size() <= 500))
+    && (!('mistakes' in changed) || (data.mistakes is list && data.mistakes.size() <= 1000))
+    && (!('today' in changed) || (data.today is map && data.today.keys().hasOnly(['date', 'mission', 'xp', 'lessons', 'reviews'])))
+    && (!('chestOpened' in changed) || isDate(data.chestOpened))
+    && (!('onboarded' in changed) || data.onboarded is bool)
+    && (!('displayName' in changed) || (data.displayName is string && data.displayName.size() <= 60))
+    && (!('photoUrl' in changed) || (data.photoUrl is string && data.photoUrl.size() <= 200000));
+}

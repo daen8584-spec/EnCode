@@ -1,8 +1,11 @@
 {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
     "target": "encoden",
     "public": ".",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "users.json"],
+    "ignore": ["firebase.json", "firestore.rules", "**/.*", "**/node_modules/**", "users.json"],
     "headers": [
       {
         "source": "**/*.@(html|js|css)",

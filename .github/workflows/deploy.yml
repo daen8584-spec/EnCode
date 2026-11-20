@@ -1,0 +1,35 @@
+# Publishes the site and the Firestore rules to Firebase whenever main changes.
+# Needs the repository secret FIREBASE_SERVICE_ACCOUNT: a service account key (JSON) for the project.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency: deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Save the service account key
+        env:
+          KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Add the FIREBASE_SERVICE_ACCOUNT secret in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          printf '%s' "$KEY" > "$RUNNER_TEMP/key.json"
+
+      - name: Deploy site and Firestore rules
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
+        run: npx --yes firebase-tools@15.37.0 deploy --only hosting:encoden,firestore:rules --non-interactive
