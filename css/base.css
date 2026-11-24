@@ -399,6 +399,35 @@ h1 {
     background: rgb(255 255 255 / 35%);
 }
 
+/* Shown instead of the page when the student's progress cannot be loaded. */
+.load-error {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: var(--bg);
+}
+
+.load-error-card {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    max-width: 420px;
+    padding: 32px 28px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.load-error-card h1 {
+    font-size: 24px;
+}
+
+.load-error-card .button {
+    margin-top: 8px;
+}
+
 .toasts {
     position: fixed;
     bottom: calc(24px + env(safe-area-inset-bottom, 0px));

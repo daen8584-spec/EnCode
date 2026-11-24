@@ -1,0 +1,20 @@
+# Response headers for Cloudflare Pages: https://developers.cloudflare.com/pages/configuration/headers/
+# Each path gets one Cache-Control, so the blocks below must not overlap on it.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+
+# Pages, scripts and styles change with every deploy: always ask the server whether they changed.
+/js/*
+  Cache-Control: no-cache
+/css/*
+  Cache-Control: no-cache
+
+# Vendored libraries live in a folder named after their version, so they never change.
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=86400

@@ -9,6 +9,7 @@ import { loadPython, runPython } from "./python.js";
 
 const SNIPPETS = {
     hello: "print('Olá, mundo!')",
+    input: "nome = input('Qual é o seu nome? ')\nprint('Prazer, ' + nome + '!')",
     loop: "for i in range(1, 6):\n    print('Contando:', i)",
     function: "def saudacao(nome):\n    return 'Olá, ' + nome + '!'\n\nprint(saudacao('EnCoder'))"
 };
@@ -254,14 +255,42 @@ function initEditor() {
     const code = $("code");
     const output = $("output");
     const run = $("run");
+    let answer = null; // answers the input() the program is waiting on
     code.value = SNIPPETS.hello;
 
+    // input() asks right in the output panel, like a terminal, instead of a browser pop-up.
+    const ask = (prompt) => new Promise((resolve) => {
+        const field = h("input", {
+            className: "console-input",
+            type: "text",
+            ariaLabel: prompt.trim() || "Digite a resposta e aperte Enter",
+            placeholder: "Enter para enviar",
+            autocomplete: "off",
+            autocapitalize: "off",
+            spellcheck: false
+        });
+        answer = (value) => {
+            answer = null;
+            field.replaceWith(`${value}\n`);
+            resolve(value);
+        };
+        field.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            answer(field.value);
+        });
+        output.append(prompt, field);
+        field.focus();
+    });
+
     $("snippet").addEventListener("change", ({ target }) => {
+        answer?.("");
         code.value = SNIPPETS[target.value];
         output.textContent = "";
     });
 
     $("clear").addEventListener("click", () => {
+        answer?.("");
         code.value = output.textContent = "";
         code.focus();
     });
@@ -275,12 +304,17 @@ function initEditor() {
         run.ariaBusy = "true";
         output.textContent = "";
         output.classList.remove("is-error");
+        let shown = 0;
         try {
             const result = await runPython(code.value, {
-                input: (prompt) => window.prompt(prompt) ?? "",
-                onOutput: (text) => { output.textContent = text; }
+                input: ask,
+                onOutput: (text) => {
+                    output.append(text.slice(shown));
+                    shown = text.length;
+                }
             });
-            output.textContent = [result.output, result.error].filter(Boolean).join("\n") || "(sem saída)";
+            if (result.error) output.append(`${output.textContent && !output.textContent.endsWith("\n") ? "\n" : ""}${result.error}`);
+            if (!output.textContent) output.textContent = "(sem saída)";
             output.classList.toggle("is-error", Boolean(result.error));
         } catch {
             output.textContent = "Não foi possível carregar o Python. Verifique sua conexão.";

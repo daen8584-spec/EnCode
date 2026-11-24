@@ -162,6 +162,7 @@
                         <label class="snippet">Exemplo
                             <select id="snippet">
                                 <option value="hello">Olá, mundo</option>
+                                <option value="input">Pergunta e resposta</option>
                                 <option value="loop">Laço de repetição</option>
                                 <option value="function">Função</option>
                             </select>
@@ -198,6 +199,10 @@
                         <p class="muted" id="profile-email"></p>
                         <p class="muted">Membro desde <span id="member-since"></span></p>
                         <span class="badge" id="verified" hidden>Conta verificada</span>
+                        <p class="verify-note" id="verify" hidden>
+                            Seu email ainda não foi confirmado.
+                            <button class="text-button" id="verify-send" type="button">Enviar link de confirmação</button>
+                        </p>
                     </div>
                 </div>
                 <form class="name-form card" id="name-form">

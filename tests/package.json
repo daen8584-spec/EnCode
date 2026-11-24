@@ -1,0 +1,17 @@
+{
+  "name": "encoder-tests",
+  "private": true,
+  "description": "Checks for EnCoder. The site itself has no build step; this folder only holds tests.",
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:content && npm run test:rules",
+    "test:content": "node --test content.test.mjs",
+    "test:rules": "firebase emulators:exec --project demo-encoder --only firestore \"node --test rules.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.2",
+    "firebase": "12.19.0",
+    "firebase-tools": "15.37.0",
+    "playwright": "1.63.0"
+  }
+}

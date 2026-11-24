@@ -1,12 +1,12 @@
 # The site itself is published by Cloudflare Pages, which deploys every push to main.
-# This workflow only publishes the Firestore security rules, when they change.
+# This workflow only publishes the Firestore security rules, when they change, after their tests pass.
 # Needs the repository secret FIREBASE_SERVICE_ACCOUNT: a service account key (JSON) for the encoding-c67fb project.
 name: Deploy Firestore rules
 
 on:
   push:
     branches: [main]
-    paths: [firestore.rules, firebase.json, .firebaserc]
+    paths: [firestore.rules, firebase.json, .firebaserc, tests/rules.test.mjs]
   workflow_dispatch:
 
 concurrency: deploy
@@ -20,6 +20,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      # The Firestore emulator runs on Java.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Test the rules before publishing them
+        working-directory: tests
+        run: |
+          npm ci
+          npm run test:rules
 
       - name: Save the service account key
         env:

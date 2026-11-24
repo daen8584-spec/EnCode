@@ -1,4 +1,4 @@
-import { signIn, signUp } from "./auth.js";
+import { resetPassword, signIn, signUp } from "./auth.js";
 import { auth, onAuthStateChanged } from "./firebase.js";
 import { toast } from "./dom.js";
 import { createMascot } from "./mascot.js";
@@ -107,6 +107,31 @@ form.addEventListener("submit", async (event) => {
         guide.mood("sad");
         guide.say(error.message);
         shake();
+    }
+});
+
+const forgot = document.getElementById("forgot");
+forgot?.addEventListener("click", async () => {
+    const { email } = form.elements;
+    if (!validate(email)) {
+        email.focus();
+        guide.mood("sad");
+        guide.say("Digite seu email aqui em cima que eu mando um link para criar uma nova senha.");
+        return;
+    }
+    forgot.disabled = true;
+    try {
+        await resetPassword(email.value.trim());
+        const message = "Se esse email tiver uma conta, enviamos um link para criar uma nova senha. Confira sua caixa de entrada.";
+        toast(message, "success");
+        guide.mood("happy");
+        guide.say(message);
+    } catch (error) {
+        toast(error.message, "error");
+        guide.mood("sad");
+        guide.say(error.message);
+    } finally {
+        forgot.disabled = false;
     }
 });
 

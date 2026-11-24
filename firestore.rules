@@ -26,7 +26,8 @@ function FIELDS() {
     'chestOpened', 'onboarded', 'displayName', 'photoUrl'];
 }
 
-// The most XP one save can add: a challenge with every exercise right is 32.
+// The most XP one save can add. Lessons earn maxXp() from js/xp.js (a challenge with every exercise
+// right earns 32); tests/content.test.mjs fails if any lesson could earn more than this.
 function MAX_XP_PER_SAVE() {
   return 50;
 }

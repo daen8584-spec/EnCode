@@ -5,11 +5,13 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.19.0/firebas
 export {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
+    sendEmailVerification,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signOut,
     updateProfile
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-export { arrayUnion, doc, getDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-lite.js";
+export { doc, getDoc, increment, runTransaction, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-lite.js";
 
 const app = initializeApp({
     apiKey: "AIzaSyC80ld4eXYx38RFkUUYPdnkiJV4Dn3vT34",
@@ -21,4 +23,6 @@ const app = initializeApp({
 });
 
 export const auth = getAuth(app);
+// Password reset and verification emails are sent in Portuguese.
+auth.languageCode = "pt-BR";
 export const db = getFirestore(app);
