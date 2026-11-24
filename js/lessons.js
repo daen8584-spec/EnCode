@@ -2,6 +2,7 @@ import { requireUser } from "./auth.js";
 import { findTrack, TRACKS } from "./content.js";
 import { $, h } from "./dom.js";
 import { createMascot } from "./mascot.js";
+import { maxXp } from "./game.js";
 import { currentStreak, loadUserData } from "./progress.js";
 
 const svg = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
@@ -24,7 +25,6 @@ const stateOf = (lesson) => completed.has(lesson.id) ? "done"
     : !lesson.previous || completed.has(lesson.previous.id) ? "current"
     : "locked";
 const wordsOf = (lessons) => lessons.flatMap((lesson) => lesson.teach.filter((card) => card.meaning).map((card) => ({ ...card, learned: completed.has(lesson.id) })));
-const xpOf = (lesson) => 10 * (lesson.challenge ? 2 : 1) + 2 * lesson.exercises.length;
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
 function closePreviews() {
@@ -39,7 +39,7 @@ function preview(lesson, state) {
     const meta = [
         lesson.teach.length && plural(lesson.teach.length, "explicação", "explicações"),
         plural(lesson.exercises.length, "exercício", "exercícios"),
-        `+${xpOf(lesson)} XP`
+        `+${maxXp(lesson)} XP`
     ].filter(Boolean).join(", ");
     return h("div", { className: "node-pop", onclick: (event) => event.stopPropagation() },
         h("strong", { textContent: lesson.title }),
@@ -142,7 +142,7 @@ function renderSide(track) {
         h("section", { className: "side-card side-next" },
             h("span", { className: "eyebrow", textContent: next ? "Próxima aula" : "Trilha concluída" }),
             h("strong", { textContent: next ? next.title : "Você terminou todas as aulas!" }),
-            next && h("p", { className: "muted", textContent: plural(next.exercises.length, "exercício", "exercícios") + `, +${xpOf(next)} XP` }),
+            next && h("p", { className: "muted", textContent: plural(next.exercises.length, "exercício", "exercícios") + `, +${maxXp(next)} XP` }),
             h("a", { className: "button", href: next ? `lesson.html?id=${next.id}` : "lesson.html?review", textContent: next ? (done ? "Continuar" : "Começar") : "Praticar" })
         ),
         h("section", { className: "side-card side-words" },

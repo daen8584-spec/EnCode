@@ -868,6 +868,21 @@ body::before {
     color: #ff9a9d;
 }
 
+.console-input {
+    width: min(100%, 24ch);
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 2px solid currentColor;
+    background: transparent;
+    color: var(--code-text);
+    font: inherit;
+    outline: none;
+}
+
+.console-input:focus-visible {
+    background: rgb(255 255 255 / 8%);
+}
+
 /* Profile */
 
 .profile {
@@ -908,6 +923,32 @@ body::before {
 
 .profile-summary h2 {
     font-size: 28px;
+}
+
+.verify-note {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.text-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.text-button:hover {
+    text-decoration: underline;
+}
+
+.text-button:disabled {
+    color: var(--muted);
+    text-decoration: none;
+    cursor: default;
 }
 
 .badge {

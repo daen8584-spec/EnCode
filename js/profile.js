@@ -1,4 +1,4 @@
-import { displayName } from "./auth.js";
+import { displayName, verifyEmail } from "./auth.js";
 import { updateProfile } from "./firebase.js";
 import { saveUserData } from "./progress.js";
 import { $, toast } from "./dom.js";
@@ -39,7 +39,24 @@ export function initProfile(user, data) {
     };
 
     render();
-    $("verified").hidden = !user.emailVerified;
+    const showVerified = () => {
+        $("verified").hidden = !user.emailVerified;
+        $("verify").hidden = user.emailVerified;
+    };
+    showVerified();
+    user.reload().then(showVerified, () => {}); // picks up a confirmation made since the last sign-in
+
+    $("verify-send").addEventListener("click", async ({ currentTarget: button }) => {
+        button.disabled = true;
+        try {
+            await verifyEmail(user);
+            button.textContent = "Link enviado";
+            toast(`Enviamos um link de confirmação para ${user.email}.`, "success");
+        } catch (error) {
+            button.disabled = false;
+            toast(error.message, "error");
+        }
+    });
     $("member-since").textContent = new Date(user.metadata.creationTime).toLocaleDateString("pt-BR", { dateStyle: "long" });
 
     $("name-form").addEventListener("submit", async (event) => {

@@ -2,6 +2,8 @@
 import { increment } from "./firebase.js";
 import { localDate, saveUserData, todayCounts } from "./progress.js";
 
+export { baseXp, EXERCISE_XP, maxXp } from "./xp.js";
+
 export const MASCOT_NAME = "Bit";
 
 const svg = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;

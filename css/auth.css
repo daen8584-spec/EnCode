@@ -120,6 +120,34 @@
     font-weight: 600;
 }
 
+.label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.forgot {
+    margin-bottom: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.forgot:hover {
+    text-decoration: underline;
+}
+
+.forgot:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
 .field-error {
     display: block;
     font-size: 13px;

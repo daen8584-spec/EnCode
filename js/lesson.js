@@ -4,14 +4,11 @@ import { $, h, shuffle, toast } from "./dom.js";
 import { checkBlank, checkCode, checkOrder } from "./grading.js";
 import { annotate } from "./keywords.js";
 import { createMascot } from "./mascot.js";
-import { dailyMission, rankOf } from "./game.js";
+import { baseXp as baseXpOf, dailyMission, EXERCISE_XP, maxXp, rankOf } from "./game.js";
 import { afterSession, loadUserData, recordSession } from "./progress.js";
 import { loadPython, normalizeCode, runPython } from "./python.js";
 import { isMuted, play, setMuted } from "./sound.js";
 
-const LESSON_XP = 10;
-const REVIEW_XP = 5;
-const EXERCISE_XP = 2;
 const REVIEW_SIZE = 6;
 const PREVIEW_BASE = "<style>body{margin:12px;font:16px system-ui,sans-serif;color:#1a1a2e;background:#fff}</style>";
 
@@ -74,15 +71,39 @@ await requireUser();
 const data = await loadUserData();
 const params = new URLSearchParams(location.search);
 
+const exercisesById = new Map(ALL_LESSONS.flatMap((lesson) => lesson.exercises).map((exercise) => [exercise.id, exercise]));
+
+// A lesson in progress is kept for this tab, so reloading the page picks up where the student stopped.
+const review = params.has("review");
+const SAVED_KEY = `encoder-lesson:${review ? "review" : params.get("id")}`;
+
+function readSaved() {
+    try {
+        return JSON.parse(sessionStorage.getItem(SAVED_KEY));
+    } catch {
+        return null;
+    }
+}
+
+function writeSaved(state) {
+    try {
+        if (state) sessionStorage.setItem(SAVED_KEY, JSON.stringify(state));
+        else sessionStorage.removeItem(SAVED_KEY);
+    } catch {}
+}
+
+const saved = readSaved();
+
 // Review mode practises earlier mistakes first, then random exercises from finished lessons.
 function buildReview() {
+    const resumed = saved?.exercises?.map((id) => exercisesById.get(id));
+    if (resumed?.length && resumed.every(Boolean)) return { title: "Revisão", review: true, teach: [], exercises: resumed };
     const done = ALL_LESSONS.filter((lesson) => data.completedLessons.includes(lesson.id)).flatMap((lesson) => lesson.exercises);
     const mistakes = shuffle(done.filter((exercise) => data.mistakes.includes(exercise.id)));
     const others = shuffle(done.filter((exercise) => !data.mistakes.includes(exercise.id)));
-    return { title: "Revisão", teach: [], exercises: shuffle([...mistakes, ...others].slice(0, REVIEW_SIZE)) };
+    return { title: "Revisão", review: true, teach: [], exercises: shuffle([...mistakes, ...others].slice(0, REVIEW_SIZE)) };
 }
 
-const review = params.has("review");
 const lesson = review ? buildReview()
     : findLesson(params.get("id")) ?? ALL_LESSONS.find(({ id }) => !data.completedLessons.includes(id)) ?? ALL_LESSONS[0];
 
@@ -95,11 +116,36 @@ const mascot = createMascot();
 $("mascot-slot").append(mascot.root);
 
 const words = lesson.teach.filter((card) => card.meaning);
-const baseXp = review ? REVIEW_XP : LESSON_XP * (lesson.challenge ? 2 : lesson.machine ? 1.5 : 1);
-const queue = [{ type: "intro" }, ...lesson.teach.map((card) => ({ type: "teach", ...card })), ...lesson.exercises];
-const results = [];
-const missed = new Set();
+const baseXp = baseXpOf(lesson);
+const queue = [{ type: "intro", key: "intro" }, ...lesson.teach.map((card, i) => ({ type: "teach", key: `teach:${i}`, ...card })), ...lesson.exercises];
+const keyOf = (step) => step.key ?? step.id;
+let results = [];
+let missed = new Set();
 let index = 0;
+
+function saveState() {
+    writeSaved({
+        exercises: review ? lesson.exercises.map((exercise) => exercise.id) : undefined,
+        queue: queue.map(keyOf),
+        index,
+        results,
+        missed: [...missed].map((exercise) => exercise.id)
+    });
+}
+
+// Rebuilds the queue (with any exercises sent to the end for another try) from the saved keys.
+function resume() {
+    if (!saved || !(saved.index > 0) || !Array.isArray(saved.queue)) return false;
+    const steps = new Map(queue.map((step) => [keyOf(step), step]));
+    const restored = saved.queue.map((key) => steps.get(key));
+    if (restored.some((step) => !step) || saved.index >= restored.length) return false;
+    queue.splice(0, queue.length, ...restored);
+    index = saved.index;
+    results = saved.results ?? [];
+    missed = new Set((saved.missed ?? []).map((id) => exercisesById.get(id)).filter(Boolean));
+    return true;
+}
+
 let stepId = 0;
 let view = null;
 let answered = false;
@@ -264,14 +310,14 @@ async function explain(node, { language }, id) {
 const RENDERERS = {
     intro: () => {
         const minutes = Math.max(2, Math.round((lesson.teach.length * 40 + lesson.exercises.length * 50) / 60));
-        const maxXp = baseXp + EXERCISE_XP * lesson.exercises.length;
+        const xpLimit = maxXp(lesson);
         const badge = review ? "Revisão" : lesson.challenge ? `${lesson.track.name}: Desafio`
             : lesson.machine ? `${lesson.track.name}: Máquina quebrada` : lesson.track.name;
         const meta = [
             lesson.teach.length && [ICONS.teach, `${lesson.teach.length} ${lesson.teach.length === 1 ? "explicação" : "explicações"}`],
             [ICONS.code, `${lesson.exercises.length} exercícios`],
             [ICONS.clock, `cerca de ${minutes} min`],
-            [ICONS.bolt, `até +${maxXp} XP`]
+            [ICONS.bolt, `até +${xpLimit} XP`]
         ].filter(Boolean);
         return {
             node: h("div", { className: `lesson-intro card is-${lesson.track?.id ?? "review"}` },
@@ -356,7 +402,13 @@ const RENDERERS = {
     blank: ({ code, answer, placeholder, language }) => {
         const input = h("input", { className: "input is-code", placeholder, spellcheck: false, autocomplete: "off", autocapitalize: "off" });
         input.setAttribute("autocorrect", "off");
-        input.addEventListener("input", () => setReady(input.value.trim() !== ""));
+        const marks = code.split("___").slice(1).map(() => h("mark", { textContent: "___" }));
+        // One answer fills every blank (like both ends of <___>...</___>), so the code shows it as you type.
+        input.addEventListener("input", () => {
+            const value = input.value.trim();
+            for (const mark of marks) mark.textContent = value || "___";
+            setReady(value !== "");
+        });
         input.addEventListener("focus", () => {
             mascot.pointAt(input);
             mascot.mood("watch");
@@ -364,7 +416,7 @@ const RENDERERS = {
         return {
             node: h("div", { className: "stack" },
                 h("pre", { className: "code-block" }, code.split("___").flatMap((part, i) => [
-                    i > 0 && h("mark", { textContent: "___" }),
+                    i > 0 && marks[i - 1],
                     ...annotate(part, language)
                 ])),
                 input
@@ -627,15 +679,16 @@ async function finish() {
     confetti(dialog);
 
     try {
-        await recordSession(data, {
+        await recordSession({
             lessonId: lesson.id,
             xp,
             missed: ids([...missed]),
             passed: ids(lesson.exercises.filter((exercise) => !missed.has(exercise)))
         });
     } catch (error) {
+        // The result stays on this device and is sent the next time a page loads.
         console.error("Could not save progress", error);
-        toast("Não foi possível salvar seu progresso.", "error");
+        toast("Sem conexão agora. Seu progresso ficou guardado e será salvo quando você voltar.", "error");
     }
 }
 
@@ -651,8 +704,13 @@ ui.action.addEventListener("click", async () => {
     }
     results[index] ??= true;
     index += 1;
-    if (index < queue.length) render();
-    else finish();
+    if (index < queue.length) {
+        saveState();
+        render();
+    } else {
+        writeSaved(null);
+        finish();
+    }
 });
 
 addEventListener("keydown", (event) => {
@@ -682,4 +740,6 @@ $("celebration-title").textContent = review ? "Revisão completa!" : lesson.chal
 ui.title.textContent = lesson.title;
 document.title = `${lesson.title} | EnCoder`;
 if (queue.some((step) => step.language === "python")) loadPython().catch(() => {});
+const resumed = resume();
 render();
+if (resumed) toast("Continuando de onde você parou.", "info");

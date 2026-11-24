@@ -1,4 +1,5 @@
-const SKULPT_URL = "https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/";
+// Skulpt is served from this site, so lessons do not depend on a CDN or run code we have not checked in.
+const SKULPT_URL = new URL("../vendor/skulpt-1.2.0/", import.meta.url).href;
 const TIME_LIMIT_MS = 5000;
 
 // Phones and some keyboards replace typed symbols with typographic ones.
@@ -57,16 +58,27 @@ export function loadPython() {
     return loading;
 }
 
+// `input` may return the typed text or a promise of it.
 export async function runPython(code, { input = () => "", onOutput } = {}) {
     await loadPython();
     const { Sk } = window;
     let output = "";
 
+    // Time spent waiting for the student to type does not count against the time limit.
+    const ask = async (prompt) => {
+        const started = Date.now();
+        try {
+            return await input(prompt);
+        } finally {
+            if (Sk.execStart) Sk.execStart = new Date(Number(Sk.execStart) + Date.now() - started);
+        }
+    };
+
     Sk.configure({
         __future__: Sk.python3,
         execLimit: TIME_LIMIT_MS,
         yieldLimit: 100,
-        inputfun: input,
+        inputfun: ask,
         inputfunTakesPrompt: true,
         output: (text) => {
             output += text;
