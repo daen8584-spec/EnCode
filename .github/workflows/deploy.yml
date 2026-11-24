@@ -1,10 +1,12 @@
-# Publishes the site and the Firestore rules to Firebase whenever main changes.
-# Needs the repository secret FIREBASE_SERVICE_ACCOUNT: a service account key (JSON) for the project.
-name: Deploy
+# The site itself is published by Cloudflare Pages, which deploys every push to main.
+# This workflow only publishes the Firestore security rules, when they change.
+# Needs the repository secret FIREBASE_SERVICE_ACCOUNT: a service account key (JSON) for the encoding-c67fb project.
+name: Deploy Firestore rules
 
 on:
   push:
     branches: [main]
+    paths: [firestore.rules, firebase.json, .firebaserc]
   workflow_dispatch:
 
 concurrency: deploy
@@ -29,7 +31,7 @@ jobs:
           fi
           printf '%s' "$KEY" > "$RUNNER_TEMP/key.json"
 
-      - name: Deploy site and Firestore rules
+      - name: Deploy Firestore rules
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/key.json
-        run: npx --yes firebase-tools@15.37.0 deploy --only hosting:encoden,firestore:rules --non-interactive
+        run: npx --yes firebase-tools@15.37.0 deploy --only firestore:rules --non-interactive
