@@ -1244,3 +1244,40 @@ body::before {
         padding: 14px max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
     }
 }
+
+/* Help in small steps: a hint row under each exercise, options the hint took away, the line it placed. */
+.hint-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hint-row .hint-button {
+    min-height: 44px;
+}
+
+.option.is-removed {
+    opacity: 0.35;
+    text-decoration: line-through;
+}
+
+.chip.is-given {
+    outline: 3px dashed var(--gold);
+    outline-offset: 2px;
+}
+
+.hint-shape {
+    margin: 0;
+}
+
+.hint-shape .code-block {
+    margin-top: 6px;
+}
+
+/* A near miss is not an error: the exercise stays open. */
+.lesson-footer.is-near {
+    background: #fff4d6;
+}
+
+.lesson-footer.is-near .feedback strong {
+    color: #8a5a00;
+}

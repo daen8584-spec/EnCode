@@ -49,7 +49,7 @@ const KEYS = {
     css: ["{", "}", ":", ";", ".", "-"]
 };
 const PRAISE = ["Isso mesmo!", "Mandou bem!", "Perfeito!", "Exatamente!", "Muito bom!"];
-const COMFORT = ["Quase! Leia a dica aqui embaixo.", "Errar faz parte. Veja a dica!", "Sem pressa, vamos entender o erro."];
+const COMFORT = ["Leia a explicação aqui embaixo.", "Errar faz parte. Veja a explicação!", "Sem pressa, vamos entender o erro."];
 
 const ui = {
     title: $("title"),
@@ -273,6 +273,32 @@ function sandbox({ example, language, sample }) {
     return h("div", { className: "sandbox" }, editor.node, live);
 }
 
+// Challenges are the test: no hints, no solutions, no explanations. Everywhere else help comes in small steps.
+const helpAllowed = () => !lesson.challenge;
+
+function hintButton(steps) {
+    if (!helpAllowed() || !steps.length) return null;
+    let used = 0;
+    const label = h("span", { textContent: "Dica" });
+    const button = h("button", { type: "button", className: "hint-button", innerHTML: ICONS.bulb }, label);
+    button.addEventListener("click", () => {
+        if (answered) return;
+        play("tap");
+        steps[used]();
+        used += 1;
+        if (used >= steps.length) button.disabled = true;
+        else label.textContent = used === steps.length - 1 && steps.solution ? "Ver solução" : "Mais uma dica";
+    });
+    return button;
+}
+
+// Shows what the answer looks like without giving it away: strings, text and values become "...".
+function skeleton(language, code) {
+    if (language === "python") return code.replace(/"[^"\n]*"|'[^'\n]*'/g, "\"...\"").replace(/\b\d+\b/g, "...");
+    if (language === "html") return code.replace(/>([^<]+)</g, (whole, text) => (text.trim() ? ">...<" : whole)).replace(/="[^"]*"/g, "=\"...\"");
+    return code.replace(/:\s*([^;}]+)/g, ": ...");
+}
+
 function hintFor({ language, mustInclude = [], expected, hint }) {
     if (hint) return `Dica: ${hint}`;
     if (language === "python") {
@@ -365,7 +391,7 @@ const RENDERERS = {
         };
     },
 
-    choice: ({ options }) => {
+    choice: ({ options, hint: tip, explain: why }) => {
         const [answer] = options;
         let picked = null;
         const list = h("div", { className: "options" }, shuffle(options).map((option, i) => h("button", {
@@ -384,22 +410,40 @@ const RENDERERS = {
             }
         }, h("kbd", { textContent: i + 1 }), h("span", { textContent: option }))));
 
+        // The hint takes away wrong options, leaving the answer and one other.
+        const hint = hintButton([() => {
+            const wrong = shuffle([...list.children].filter((button) => button.value !== answer));
+            for (const button of wrong.slice(0, Math.max(1, wrong.length - 1))) {
+                button.disabled = true;
+                button.classList.add("is-removed");
+                if (button.value === picked) {
+                    picked = null;
+                    button.ariaPressed = false;
+                    setReady(false);
+                }
+            }
+            mascot.say(tip ? `Dica: ${tip}` : "Tirei as erradas. Qual das que sobraram é a certa?");
+        }]);
         return {
-            node: list,
+            node: hint ? h("div", { className: "stack" }, list, h("div", { className: "hint-row" }, hint)) : list,
             check: () => {
                 for (const button of list.children) {
                     button.disabled = true;
                     button.classList.toggle("is-correct", button.value === answer);
                     button.classList.toggle("is-wrong", button.value === picked && picked !== answer);
                 }
-                return picked === answer
-                    ? { ok: true }
-                    : { ok: false, message: "A resposta certa está destacada.", show: list.querySelector(".is-correct") };
+                if (picked === answer) return { ok: true };
+                if (!helpAllowed()) {
+                    list.querySelector(".is-correct")?.classList.remove("is-correct");
+                    return { ok: false, message: "" };
+                }
+                return { ok: false, message: `A resposta certa está destacada. ${why ?? ""}`.trim(), show: list.querySelector(".is-correct") };
             }
         };
     },
 
-    blank: ({ code, answer, placeholder, language }) => {
+    blank: (exercise) => {
+        const { code, answer, placeholder, language, hint: tip, explain: why } = exercise;
         const input = h("input", { className: "input is-code", placeholder, spellcheck: false, autocomplete: "off", autocapitalize: "off" });
         input.setAttribute("autocorrect", "off");
         const marks = code.split("___").slice(1).map(() => h("mark", { textContent: "___" }));
@@ -413,16 +457,26 @@ const RENDERERS = {
             mascot.pointAt(input);
             mascot.mood("watch");
         });
+        // First the idea, then the shape of the word. The answer itself only appears after a wrong try.
+        const hint = hintButton([
+            () => mascot.say(`Dica: ${tip ?? "Leia a pergunta de novo e veja o que vem antes e depois do espaço amarelo."}`),
+            () => mascot.say(`Começa com "${answer.slice(0, Math.min(2, answer.length - 1)) || answer[0]}" e tem ${answer.length} ${answer.length === 1 ? "caractere" : "caracteres"}.`)
+        ]);
         return {
             node: h("div", { className: "stack" },
                 h("pre", { className: "code-block" }, code.split("___").flatMap((part, i) => [
                     i > 0 && marks[i - 1],
                     ...annotate(part, language)
                 ])),
-                input
+                input,
+                hint && h("div", { className: "hint-row" }, hint)
             ),
             focus: input,
-            check: () => ({ ok: checkBlank(input.value, answer) })
+            check: () => {
+                const result = checkBlank(input.value, exercise);
+                if (result.ok || result.near) return result;
+                return { ok: false, message: helpAllowed() ? `A resposta era ${answer}. ${why ?? ""}`.trim() : "" };
+            }
         };
     },
 
@@ -444,8 +498,17 @@ const RENDERERS = {
         };
         bank.append(...mixed.map((line, i) => h("button", { type: "button", className: "chip", textContent: line, style: `--i: ${i}`, onclick: move })));
 
+        const hint = hintButton([() => {
+            const first = [...bank.children, ...answer.children].find((chip) => chip.textContent === lines[0]);
+            answer.prepend(first);
+            first.disabled = true;
+            first.classList.add("is-given");
+            setReady(bank.children.length === 0);
+            mascot.pointAt(first);
+            mascot.say("Comecei para você: esta é a primeira linha. Agora continue!");
+        }]);
         return {
-            node: h("div", { className: "stack" }, answer, bank),
+            node: h("div", { className: "stack" }, answer, bank, hint && h("div", { className: "hint-row" }, hint)),
             check: () => {
                 const chips = [...answer.children];
                 chips.forEach((chip, i) => {
@@ -465,8 +528,30 @@ const RENDERERS = {
 // Writing code from scratch and fixing a broken machine share one layout. A machine starts with its broken code.
 function codeTask(exercise, { broken = false } = {}) {
     const { language, expected, sample } = exercise;
-    let hints = 0;
-    const hint = h("button", { type: "button", className: "hint-button", innerHTML: `${ICONS.bulb}<span>Dica</span>` });
+    const solution = language === "python" ? exercise.solution : expected;
+    const shape = skeleton(language, solution);
+    const steps = [() => {
+        mascot.mood("idle");
+        mascot.say(hintFor(exercise));
+    }];
+    const shapeBox = h("figure", { className: "hint-shape", hidden: true },
+        h("figcaption", { className: "label", textContent: "Formato do código" }),
+        h("pre", { className: "code-block", textContent: shape }));
+    if (shape !== solution) {
+        steps.push(() => {
+            shapeBox.hidden = false;
+            mascot.pointAt(shapeBox);
+            mascot.say("Veja o formato do código. Troque cada ... pelo que falta.");
+        });
+    }
+    steps.push(() => {
+        editor.set(solution);
+        missed.add(exercise);
+        mascot.pointAt(editor.field);
+        mascot.say("Aqui está uma solução. Leia com calma e depois toque em Verificar.");
+    });
+    steps.solution = true;
+    const hint = hintButton(steps);
     const editor = codeEditor(language, { tools: hint, value: broken ? exercise.broken : "" });
     editor.field.addEventListener("input", () => setReady(editor.field.value.trim() !== "" && editor.field.value !== exercise.broken));
     const machine = broken && h("div", { className: "machine is-broken" },
@@ -478,21 +563,6 @@ function codeTask(exercise, { broken = false } = {}) {
         h("p", { textContent: exercise.story })
     );
 
-    hint.addEventListener("click", () => {
-        hints += 1;
-        play("tap");
-        if (hints === 1) {
-            mascot.mood("idle");
-            mascot.say(hintFor(exercise));
-            hint.lastChild.textContent = "Ver solução";
-            return;
-        }
-        editor.set(language === "python" ? exercise.solution : expected);
-        missed.add(exercise);
-        hint.disabled = true;
-        mascot.pointAt(editor.field);
-        mascot.say("Aqui está uma solução. Leia com calma e depois toque em Verificar.");
-    });
 
     let goal;
     let extra = null;
@@ -512,7 +582,7 @@ function codeTask(exercise, { broken = false } = {}) {
     }
 
     return {
-        node: h("div", { className: "stack" }, machine, language === "python" && goal, editor.node, extra, language !== "python" && goal),
+        node: h("div", { className: "stack" }, machine, language === "python" && goal, editor.node, shapeBox, extra, language !== "python" && goal),
         focus: broken ? null : editor.field,
         check: () => checkCode(language, editor.field.value, exercise),
         onResult: (result) => {
@@ -556,7 +626,7 @@ function render() {
         const mistakes = lesson.exercises.filter((exercise) => data.mistakes.includes(exercise.id)).length;
         mascot.say(review ? `Vamos revisar ${lesson.exercises.length} exercícios${mistakes ? `, ${mistakes} deles você errou antes` : ""}.`
             : lesson.machine ? "Ih, umas máquinas quebraram! Vamos descobrir o que aconteceu e consertar juntos?"
-            : lesson.challenge ? "Hora do desafio! Sem explicação, só você e o código. Use as dicas se precisar."
+            : lesson.challenge ? "Hora do desafio! Sem dicas e sem ajuda desta vez: só você e o código."
             : words.length ? `Hoje vamos aprender ${list(words.map((card) => card.term))}!` : "Vamos praticar!");
         return;
     }
@@ -566,6 +636,22 @@ function render() {
     }
     mascot.pointAt(ui.question);
     mascot.say(PROMPTS[step.type === "code" ? step.language : step.type]);
+}
+
+// A near miss (letter case, a typo, an accent) is not a mistake: say what to fix and let the student try again.
+function showNear({ message }) {
+    view.onResult?.({ ok: false, message });
+    play("tap");
+    ui.footer.className = "lesson-footer is-near";
+    $("feedback-title").textContent = "Quase!";
+    $("feedback-detail").textContent = helpAllowed() ? message.replace(/^Quase! /, "") : "Tem um pequeno detalhe diferente. Confira e verifique de novo.";
+    ui.feedback.hidden = false;
+    ui.action.className = "button lesson-action";
+    ui.action.textContent = "Verificar de novo";
+    setReady(true);
+    mascot.mood("watch");
+    mascot.say(helpAllowed() ? message : "Quase! Confira os detalhes.");
+    view.focus?.focus();
 }
 
 function showResult(result) {
@@ -587,7 +673,7 @@ function showResult(result) {
 
     ui.footer.className = `lesson-footer ${ok ? "is-correct" : "is-wrong"}`;
     $("feedback-title").textContent = ok ? pick(PRAISE) : "Resposta incorreta";
-    $("feedback-detail").textContent = ok ? "" : `${message ?? "Confira e tente de novo."} Você vai tentar de novo no fim.`;
+    $("feedback-detail").textContent = ok ? "" : `${message || "Confira e tente de novo."} Você vai tentar de novo no fim.`;
     ui.feedback.hidden = false;
     ui.action.classList.add(ok ? "is-success" : "is-error");
     ui.action.textContent = "Continuar";
@@ -601,7 +687,7 @@ function showResult(result) {
         mascot.say("A certa é esta aqui. Vamos treinar de novo no fim!");
     } else {
         mascot.mood("sad");
-        mascot.say(pick(COMFORT));
+        mascot.say(helpAllowed() ? pick(COMFORT) : "Não foi dessa vez. Você tenta de novo no fim!");
     }
 }
 
@@ -699,7 +785,8 @@ ui.action.addEventListener("click", async () => {
         mascot.rest("think");
         mascot.say("Deixa eu ver...");
         const [result] = await Promise.all([view.check(), wait(600)]);
-        showResult(result);
+        if (result.near) showNear(result);
+        else showResult(result);
         return;
     }
     results[index] ??= true;

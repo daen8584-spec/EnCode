@@ -36,7 +36,9 @@ export default {
                             question: "Complete para pintar o texto de azul",
                             code: "p { ___: blue; }",
                             placeholder: "digite a propriedade",
-                            answer: "color"
+                            answer: "color",
+                            hint: "Em inglês, \"cor\".",
+                            explain: "color muda a cor do texto."
                         },
                         {
                             type: "code",
@@ -72,7 +74,9 @@ export default {
                             question: "Complete para deixar o h1 com 32 pixels",
                             code: "h1 { font-___: 32px; }",
                             placeholder: "digite a parte que falta",
-                            answer: "size"
+                            answer: "size",
+                            hint: "font-??? quer dizer tamanho da fonte. Como se diz tamanho em inglês?",
+                            explain: "font-size muda o tamanho da letra."
                         },
                         {
                             type: "code",
@@ -108,7 +112,10 @@ export default {
                             question: "Complete para deixar o fundo do body preto",
                             code: "body { ___: black; }",
                             placeholder: "digite a propriedade",
-                            answer: "background"
+                            answer: "background",
+                            accept: ["background-color"],
+                            hint: "Em inglês, \"fundo\".",
+                            explain: "background pinta o fundo. background-color também funciona."
                         },
                         {
                             type: "code",
@@ -195,7 +202,9 @@ export default {
                             question: "Complete o seletor da classe alerta",
                             code: "___alerta { color: red; }",
                             placeholder: "digite o símbolo",
-                            answer: "."
+                            answer: ".",
+                            hint: "Classes começam com um símbolo bem pequeno antes do nome.",
+                            explain: "O ponto (.) diz que alerta é uma classe."
                         },
                         {
                             type: "code",
@@ -246,7 +255,9 @@ export default {
                             question: "Complete para afastar o parágrafo 16px dos vizinhos",
                             code: "p { ___: 16px; }",
                             placeholder: "digite a propriedade",
-                            answer: "margin"
+                            answer: "margin",
+                            hint: "É o espaço por FORA da caixa, que afasta os vizinhos.",
+                            explain: "margin cria espaço por fora da caixa, longe dos vizinhos."
                         },
                         {
                             type: "code",
@@ -258,7 +269,9 @@ export default {
                             question: "Complete para dar espaço por dentro da caixa amarela",
                             code: ".caixa {\n  background: yellow;\n  ___: 12px;\n}",
                             placeholder: "digite a propriedade",
-                            answer: "padding"
+                            answer: "padding",
+                            hint: "É o espaço por DENTRO da caixa, entre a borda e o conteúdo.",
+                            explain: "padding cria espaço por dentro da caixa."
                         },
                         {
                             type: "code",
@@ -294,7 +307,9 @@ export default {
                             question: "Complete para a borda ser tracejada",
                             code: ".caixa { border: 1px ___ gray; }",
                             placeholder: "digite o estilo",
-                            answer: "dashed"
+                            answer: "dashed",
+                            hint: "Em inglês, \"tracejada\". A borda contínua é solid e a pontilhada é dotted.",
+                            explain: "dashed faz a borda tracejada, com risquinhos."
                         },
                         {
                             type: "code",
@@ -350,7 +365,10 @@ export default {
                             question: "Complete para colocar os itens do menu lado a lado",
                             code: ".menu { display: ___; }",
                             placeholder: "digite o valor",
-                            answer: "flex"
+                            answer: "flex",
+                            accept: ["inline-flex"],
+                            hint: "É o display que coloca os itens lado a lado. Quatro letras.",
+                            explain: "display: flex coloca os itens lado a lado."
                         },
                         {
                             type: "code",
@@ -362,7 +380,9 @@ export default {
                             question: "Complete para afastar os itens do menu",
                             code: ".menu {\n  display: flex;\n  ___: 16px;\n  background: lightblue;\n}",
                             placeholder: "digite a propriedade",
-                            answer: "gap"
+                            answer: "gap",
+                            hint: "Em inglês, \"vão\": o espaço entre os itens do flex.",
+                            explain: "gap cria espaço entre os itens do flex."
                         },
                         {
                             type: "code",
@@ -481,7 +501,9 @@ export default {
                             question: "Complete para alinhar o texto à direita",
                             code: "p { text-align: ___; }",
                             placeholder: "digite o valor",
-                            answer: "right"
+                            answer: "right",
+                            hint: "Em inglês, \"direita\".",
+                            explain: "text-align: right alinha o texto à direita."
                         },
                         {
                             type: "code",
@@ -527,7 +549,9 @@ export default {
                             question: "Complete a propriedade do peso da fonte",
                             code: ".aviso { font-___: bold; }",
                             placeholder: "digite a parte que falta",
-                            answer: "weight"
+                            answer: "weight",
+                            hint: "font-??? quer dizer peso da fonte. Como se diz peso em inglês?",
+                            explain: "font-weight controla o peso da letra: normal ou negrito."
                         },
                         {
                             type: "code",
@@ -539,7 +563,10 @@ export default {
                             question: "Complete para o aviso ficar vermelho e em negrito",
                             code: ".aviso {\n  color: red;\n  font-weight: ___;\n}",
                             placeholder: "digite o valor",
-                            answer: "bold"
+                            answer: "bold",
+                            accept: ["700"],
+                            hint: "Em inglês, \"negrito\".",
+                            explain: "font-weight: bold deixa o texto em negrito."
                         },
                         {
                             type: "choice",
@@ -580,7 +607,9 @@ export default {
                             question: "Complete para arredondar os cantos",
                             code: ".cartao { border-___: 20px; }",
                             placeholder: "digite a parte que falta",
-                            answer: "radius"
+                            answer: "radius",
+                            hint: "border-??? quer dizer raio da borda. Como se diz raio em inglês?",
+                            explain: "border-radius arredonda os cantos."
                         },
                         {
                             type: "code",
@@ -602,7 +631,9 @@ export default {
                             question: "Complete para arredondar o cartão amarelo",
                             code: ".cartao {\n  background: yellow;\n  padding: 16px;\n  ___: 8px;\n}",
                             placeholder: "digite a propriedade",
-                            answer: "border-radius"
+                            answer: "border-radius",
+                            hint: "Duas palavras ligadas por hífen: borda + raio.",
+                            explain: "border-radius arredonda os cantos da caixa."
                         },
                         {
                             type: "code",
@@ -638,7 +669,9 @@ export default {
                             question: "Complete com a propriedade da largura",
                             code: ".faixa { ___: 150px; }",
                             placeholder: "digite a propriedade",
-                            answer: "width"
+                            answer: "width",
+                            hint: "Em inglês, \"largura\".",
+                            explain: "width define a largura da caixa."
                         },
                         {
                             type: "code",
@@ -655,7 +688,9 @@ export default {
                             question: "Complete para a faixa laranja ter 250px de largura",
                             code: ".faixa {\n  ___: 250px;\n  background: orange;\n}",
                             placeholder: "digite a propriedade",
-                            answer: "width"
+                            answer: "width",
+                            hint: "Em inglês, \"largura\".",
+                            explain: "width define a largura: 250px."
                         },
                         {
                             type: "code",

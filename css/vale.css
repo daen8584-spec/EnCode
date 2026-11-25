@@ -694,3 +694,18 @@ body:has(.lesson)::before { background: var(--sky); }
     .snowball, .steps li::after { transition: none; }
     .stage-goal span, .feedback-icon, .machine.is-fixed { animation: none !important; }
 }
+
+/* near miss: Bit squints at the detail, nothing is marked wrong */
+.lesson-footer.is-near { background: #fff4d6; border-top-color: var(--outline); }
+.is-near .feedback-icon { background-color: #ffe9a8; }
+.is-near .feedback strong { color: #8a5a00; }
+:root[data-theme="dark"] .lesson-footer.is-near { background: #3a3218; }
+:root[data-theme="dark"] .is-near .feedback strong { color: #ffd27a; }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .lesson-footer.is-near { background: #3a3218; }
+    :root:not([data-theme="light"]) .is-near .feedback strong { color: #ffd27a; }
+}
+.option.is-removed { opacity: 0.35; text-decoration: line-through; box-shadow: none; translate: 0 6px; }
+.hint-row .hint-button { min-height: 44px; padding: 0 14px; border: 3px solid var(--outline); border-radius: 8px; background: #fff4d6; color: var(--outline); box-shadow: 0 4px 0 var(--outline); }
+.hint-row .hint-button:hover:not(:disabled) { background: #ffe9a8; }
+.hint-shape .code-block { border: 3px dashed var(--gold); }

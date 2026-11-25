@@ -67,7 +67,16 @@ test("every lesson can be finished and earns XP the rules accept", { timeout: 30
                             if (new Set(exercise.options).size !== exercise.options.length) report(where, "has duplicate options");
                         } else if (exercise.type === "blank") {
                             if (!exercise.code.includes("___")) report(where, "code has no ___ to fill");
-                            if (!checkBlank(exercise.answer, exercise.answer)) report(where, "its answer does not pass");
+                            for (const answer of [exercise.answer, ...(exercise.accept ?? [])]) {
+                                if (!checkBlank(answer, exercise).ok) report(where, `the answer ${JSON.stringify(answer)} does not pass`);
+                            }
+                            // Kids type in capitals by accident: in Python that is a near miss, never a plain "wrong".
+                            const shouted = exercise.answer.toUpperCase();
+                            if (shouted !== exercise.answer) {
+                                const result = checkBlank(shouted, exercise);
+                                if (!(language === "python" ? result.near : result.ok)) report(where, `${JSON.stringify(shouted)} should be ${language === "python" ? "a near miss" : "accepted"}`);
+                            }
+                            if (exercise.type === "blank" && !lesson.challenge && !exercise.hint) report(where, "needs a `hint`");
                         } else if (exercise.type === "order") {
                             if (exercise.lines.length < 2) report(where, "needs at least 2 lines");
                             if (language === "python") {
