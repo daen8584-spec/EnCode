@@ -50,7 +50,7 @@ $("hero-mascot").append(guide.root);
 
 // The home screen always offers one next step: open the chest, do the day's training, or continue the course.
 function nextStep(mission) {
-    const next = ALL_LESSONS.find((lesson) => !completed.has(lesson.id));
+    const next = ALL_LESSONS.find((lesson) => !completed.has(lesson.id) && !lesson.creative);
     const mistakes = data.mistakes.length;
     if (mission.done && !mission.chestOpened) {
         return { eyebrow: "Missão cumprida!", title: "Seu baú do dia está pronto", action: "Abrir baú", chest: true,

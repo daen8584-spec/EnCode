@@ -298,6 +298,74 @@ export default {
                             solution: "idade = 15\nif idade >= 12:\n    print(\"Pode entrar\")"
                         }
                     ]
+                },
+                {
+                    id: "py-c1",
+                    title: "Do seu jeito: primeiros passos",
+                    creative: true,
+                    teach: [],
+                    exercises: [
+                        {
+                            type: "free",
+                            question: "Mostre os números de 1 a 5, um em cada linha. Pode fazer do jeito que quiser!",
+                            cases: [
+                                {
+                                    expected: "1\n2\n3\n4\n5"
+                                }
+                            ],
+                            hint: "Dá para usar cinco prints... ou um for com range. Qual você prefere?",
+                            example: "for i in range(1, 6):\n    print(i)",
+                            bonus: {
+                                lines: 2
+                            }
+                        },
+                        {
+                            type: "free",
+                            question: "A variável nome já existe. Cumprimente a pessoa: Oi, seguido do nome e de um ponto de exclamação.",
+                            cases: [
+                                {
+                                    given: {
+                                        nome: "Ana"
+                                    },
+                                    expected: "Oi, Ana!"
+                                },
+                                {
+                                    given: {
+                                        nome: "Leo"
+                                    },
+                                    expected: "Oi, Leo!"
+                                }
+                            ],
+                            hint: "O nome muda de um caso para o outro, então use a variável nome em vez de escrever o nome.",
+                            example: "print(\"Oi, \" + nome + \"!\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A variável idade já existe. Se a idade for 10 ou mais, mostre Pode entrar. Se não, mostre Ainda não.",
+                            cases: [
+                                {
+                                    given: {
+                                        idade: 12
+                                    },
+                                    expected: "Pode entrar"
+                                },
+                                {
+                                    given: {
+                                        idade: 7
+                                    },
+                                    expected: "Ainda não"
+                                },
+                                {
+                                    given: {
+                                        idade: 10
+                                    },
+                                    expected: "Pode entrar"
+                                }
+                            ],
+                            hint: "Use if para testar a idade e else para o outro caminho. Cuidado com o caso de idade igual a 10!",
+                            example: "if idade >= 10:\n    print(\"Pode entrar\")\nelse:\n    print(\"Ainda não\")"
+                        }
+                    ]
                 }
             ]
         },
@@ -650,6 +718,89 @@ export default {
                             solution: "n = 2\nwhile n <= 8:\n    print(n)\n    n = n + 2"
                         }
                     ]
+                },
+                {
+                    id: "py-c2",
+                    title: "Do seu jeito: listas e laços",
+                    creative: true,
+                    teach: [],
+                    exercises: [
+                        {
+                            type: "free",
+                            question: "A variável n já existe. Faça uma contagem regressiva de n até 1, um número por linha, e depois mostre Já!",
+                            cases: [
+                                {
+                                    given: {
+                                        n: 3
+                                    },
+                                    expected: "3\n2\n1\nJá!"
+                                },
+                                {
+                                    given: {
+                                        n: 5
+                                    },
+                                    expected: "5\n4\n3\n2\n1\nJá!"
+                                }
+                            ],
+                            hint: "Um while que diminui n a cada volta resolve. Um range que anda para trás também!",
+                            example: "while n > 0:\n    print(n)\n    n = n - 1\nprint(\"Já!\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A lista numeros já existe. Mostre quantos números dela são maiores que 10.",
+                            cases: [
+                                {
+                                    given: {
+                                        numeros: [4, 12, 7, 20]
+                                    },
+                                    expected: "2"
+                                },
+                                {
+                                    given: {
+                                        numeros: [15, 30, 11]
+                                    },
+                                    expected: "3"
+                                },
+                                {
+                                    given: {
+                                        numeros: [1, 2]
+                                    },
+                                    expected: "0"
+                                }
+                            ],
+                            hint: "Comece com um contador em 0 e some 1 cada vez que achar um número maior que 10.",
+                            example: "grandes = 0\nfor numero in numeros:\n    if numero > 10:\n        grandes = grandes + 1\nprint(grandes)"
+                        },
+                        {
+                            type: "free",
+                            question: "A lista cores já existe. Mostre a última cor da lista, seja qual for o tamanho dela.",
+                            cases: [
+                                {
+                                    given: {
+                                        cores: ["azul", "verde", "roxo"]
+                                    },
+                                    expected: "roxo"
+                                },
+                                {
+                                    given: {
+                                        cores: ["sol"]
+                                    },
+                                    expected: "sol"
+                                },
+                                {
+                                    given: {
+                                        cores: ["preto", "rosa"]
+                                    },
+                                    expected: "rosa"
+                                }
+                            ],
+                            hint: "A última posição depende do tamanho da lista. len pode ajudar, e o Python também entende posições negativas.",
+                            example: "print(cores[len(cores) - 1])",
+                            bonus: {
+                                lines: 1
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -991,6 +1142,95 @@ export default {
                             hint: "para somar tudo use sum.",
                             mustInclude: ["sum("],
                             solution: "gols = [2, 4, 3]\nprint(sum(gols))"
+                        }
+                    ]
+                },
+                {
+                    id: "py-c3",
+                    title: "Do seu jeito: decisões",
+                    creative: true,
+                    teach: [],
+                    exercises: [
+                        {
+                            type: "free",
+                            question: "A variável nota já existe. Mostre Ótimo para nota 9 ou mais, Bom para nota 6 até 8 e Estude mais para nota abaixo de 6.",
+                            cases: [
+                                {
+                                    given: {
+                                        nota: 10
+                                    },
+                                    expected: "Ótimo"
+                                },
+                                {
+                                    given: {
+                                        nota: 7
+                                    },
+                                    expected: "Bom"
+                                },
+                                {
+                                    given: {
+                                        nota: 6
+                                    },
+                                    expected: "Bom"
+                                },
+                                {
+                                    given: {
+                                        nota: 3
+                                    },
+                                    expected: "Estude mais"
+                                }
+                            ],
+                            hint: "if, elif e else formam três caminhos. Teste a nota maior primeiro.",
+                            example: "if nota >= 9:\n    print(\"Ótimo\")\nelif nota >= 6:\n    print(\"Bom\")\nelse:\n    print(\"Estude mais\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A lista gols já existe. Mostre o total de gols. Na linha de baixo, mostre Vitória! se o total for maior que 5, senão Tente de novo.",
+                            cases: [
+                                {
+                                    given: {
+                                        gols: [2, 3, 1]
+                                    },
+                                    expected: "6\nVitória!"
+                                },
+                                {
+                                    given: {
+                                        gols: [1, 1]
+                                    },
+                                    expected: "2\nTente de novo"
+                                },
+                                {
+                                    given: {
+                                        gols: [5]
+                                    },
+                                    expected: "5\nTente de novo"
+                                }
+                            ],
+                            hint: "Primeiro descubra o total (sum ajuda!), guarde numa variável e depois decida com if.",
+                            example: "total = sum(gols)\nprint(total)\nif total > 5:\n    print(\"Vitória!\")\nelse:\n    print(\"Tente de novo\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A variável palavra já existe. Mostre a palavra gritando: toda em maiúsculas e com um ! no fim.",
+                            cases: [
+                                {
+                                    given: {
+                                        palavra: "oi"
+                                    },
+                                    expected: "OI!"
+                                },
+                                {
+                                    given: {
+                                        palavra: "python"
+                                    },
+                                    expected: "PYTHON!"
+                                }
+                            ],
+                            hint: "upper deixa tudo maiúsculo. Depois é só juntar com o !",
+                            example: "print(palavra.upper() + \"!\")",
+                            bonus: {
+                                lines: 1
+                            }
                         }
                     ]
                 }

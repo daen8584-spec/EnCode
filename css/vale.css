@@ -709,3 +709,18 @@ body:has(.lesson)::before { background: var(--sky); }
 .hint-row .hint-button { min-height: 44px; padding: 0 14px; border: 3px solid var(--outline); border-radius: 8px; background: #fff4d6; color: var(--outline); box-shadow: 0 4px 0 var(--outline); }
 .hint-row .hint-button:hover:not(:disabled) { background: #ffe9a8; }
 .hint-shape .code-block { border: 3px dashed var(--gold); }
+
+/* free exercises: every case the code has to pass, side by side */
+.free-case-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 6px; }
+.free-case { display: grid; gap: 4px; align-content: start; }
+.free-given { justify-self: start; padding: 2px 8px; border: 2px solid var(--outline); border-radius: 4px; background: var(--gold); color: var(--outline); font: 500 14px/1.4 var(--mono); }
+.free-case .code-block { margin: 0; }
+.free-example { margin: 0; padding: 14px 16px; border: 3px solid var(--outline); border-radius: 8px; background: var(--right-soft, #dff4e6); }
+.free-example .code-block { margin: 8px 0 0; }
+.free-bonus:not(:empty) { margin: 10px 0 0; font-weight: 700; color: var(--text); }
+
+/* creative lessons on the map: an optional bonus stone with a light bulb */
+.is-creative .node-circle { background: #3fb3a3; color: #fff; }
+.is-creative.is-locked .node-circle { background: #d8efe9; color: #4b7d74; border-color: #4b7d74; box-shadow: 0 7px 0 #4b7d74; }
+.is-creative.is-done .node-circle { background: var(--primary); }
+.is-creative .node-start { background: #3fb3a3; color: #fff; }

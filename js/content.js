@@ -7,7 +7,11 @@
 //   fix:    a broken machine. Like `code`, but the editor starts with `broken` code to repair.
 //            `machine` and `story` describe it; `hint` is the first hint.
 // Python code and fix exercises carry a `solution`; for HTML and CSS the solution is `expected`.
-// Lessons marked `machine` or `challenge` have no teach cards and appear differently on the map.
+//   free:   Python only. Any code that prints the right result passes. Each of `cases` gives starting values
+//            (`given`, like { n: 3 }) and the `expected` output, so the same code must work for all of them.
+//            `hint` is the only help; `example` is one way to solve it, shown after it passes; `bonus` is optional.
+// Lessons marked `machine`, `challenge` or `creative` have no teach cards and appear differently on the map.
+// Creative lessons are optional: nothing waits for them, so they never lock the lessons after them.
 // Teach cards with a `meaning` are added to the student's dictionary.
 
 import css from "./content/css.js";
@@ -25,7 +29,7 @@ const USES_WORD = {
 
 // All the code a student reads or writes in a lesson (Python's `expected` is output, not code).
 const codeOf = (lesson, language) => lesson.exercises
-    .flatMap(({ code, lines = [], solution, expected, broken }) => [code, ...lines, solution, language === "python" ? "" : expected, broken])
+    .flatMap(({ code, lines = [], solution, expected, broken, example }) => [code, ...lines, solution, language === "python" ? "" : expected, broken, example])
     .filter(Boolean)
     .join("\n");
 
@@ -33,7 +37,8 @@ for (const track of TRACKS) {
     track.lessons = track.units.flatMap((unit) => unit.lessons);
     const learned = [];
     track.lessons.forEach((lesson, i) => {
-        Object.assign(lesson, { track, previous: track.lessons[i - 1], next: track.lessons[i + 1] });
+        const before = track.lessons.slice(0, i).filter((earlier) => !earlier.creative);
+        Object.assign(lesson, { track, previous: before.at(-1), next: track.lessons[i + 1] });
         for (const step of lesson.teach) Object.assign(step, { language: track.id, sample: lesson.sample });
         lesson.exercises.forEach((exercise, j) => {
             Object.assign(exercise, { id: `${lesson.id}:${j}`, language: track.id, sample: lesson.sample });

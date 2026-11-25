@@ -5,6 +5,6 @@ const REVIEW_XP = 5;
 const LESSON_XP = 10;
 
 export const baseXp = (lesson) => lesson.review ? REVIEW_XP
-    : LESSON_XP * (lesson.challenge ? 2 : lesson.machine ? 1.5 : 1);
+    : LESSON_XP * (lesson.challenge || lesson.creative ? 2 : lesson.machine ? 1.5 : 1);
 
 export const maxXp = (lesson) => baseXp(lesson) + EXERCISE_XP * lesson.exercises.length;

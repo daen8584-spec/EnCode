@@ -132,6 +132,38 @@ function checkCss(code, { expected }) {
     }
 }
 
+// A free exercise only checks the result, so any way that works passes.
+// Each case gives the starting values (like n = 3); the same code has to work for every case, which rules out
+// printing the answer directly and asks for real logic.
+const pyValue = (value) => typeof value === "boolean" ? (value ? "True" : "False")
+    : Array.isArray(value) ? `[${value.map(pyValue).join(", ")}]` : JSON.stringify(value);
+export const givenCode = (given = {}) => Object.entries(given).map(([name, value]) => `${name} = ${pyValue(value)}`).join("\n");
+export const describeGiven = (given = {}) => Object.entries(given).map(([name, value]) => `${name} = ${pyValue(value)}`).join(", ");
+
+export async function runWithGiven(code, given) {
+    const setup = givenCode(given);
+    const shift = setup ? setup.split("\n").length : 0;
+    const result = await runPython(setup ? `${setup}\n${code}` : code);
+    // Error messages count lines from the student's own code, not from the hidden starting values.
+    if (result.error) result.error = result.error.replace(/linha (\d+)/, (_, n) => `linha ${Math.max(1, Number(n) - shift)}`);
+    return result;
+}
+
+export async function checkFree(code, { cases }) {
+    for (const { given, expected } of cases) {
+        const { output, error } = await runWithGiven(code, given);
+        const when = given ? `Com ${describeGiven(given)}: ` : "";
+        if (error) return fail(`${when}${error}`);
+        if (collapse(output) === collapse(expected)) continue;
+        if (!output.trim()) return fail(`${when}o programa não mostrou nada. Use print para mostrar o resultado.`);
+        if (loose(output) === loose(expected)) {
+            return near(`Quase! ${when}a saída tem uma diferença de maiúsculas, acentos ou pontuação. Esperado: ${expected.trim()} · Sua saída: ${output.trim()}`);
+        }
+        return fail(`${when}sua saída foi ${output.trim()}, mas deveria ser ${expected.trim()}.`);
+    }
+    return pass;
+}
+
 const CHECKERS = { python: checkPython, html: checkHtml, css: checkCss };
 
 export const checkCode = (language, code, exercise) => CHECKERS[language](code, exercise);

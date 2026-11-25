@@ -1,7 +1,7 @@
 import { requireUser } from "./auth.js";
 import { ALL_LESSONS, findLesson } from "./content.js";
 import { $, h, shuffle, toast } from "./dom.js";
-import { checkBlank, checkCode, checkOrder } from "./grading.js";
+import { checkBlank, checkCode, checkFree, checkOrder, describeGiven, runWithGiven } from "./grading.js";
 import { annotate } from "./keywords.js";
 import { createMascot } from "./mascot.js";
 import { baseXp as baseXpOf, dailyMission, EXERCISE_XP, maxXp, rankOf } from "./game.js";
@@ -25,13 +25,15 @@ const ICONS = {
     bulb: svg('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>'),
     play: svg('<path d="M8 5v14l11-7z" fill="currentColor"/>')
 };
+ICONS.free = ICONS.bulb;
 const TASK_LABELS = {
     teach: "Explicação",
     choice: "Escolha a resposta",
     blank: "Complete o código",
     order: "Monte o código",
     code: "Escreva o código",
-    fix: "Conserte a máquina"
+    fix: "Conserte a máquina",
+    free: "Do seu jeito"
 };
 const PROMPTS = {
     choice: "Qual destas é a resposta certa?",
@@ -40,7 +42,8 @@ const PROMPTS = {
     python: "Escreva o código. Você pode executar antes de verificar!",
     html: "Escreva o HTML e compare com o objetivo.",
     css: "Escreva o CSS e deixe igual ao objetivo.",
-    fix: "Esta máquina está quebrada. Encontre o erro e conserte!"
+    fix: "Esta máquina está quebrada. Encontre o erro e conserte!",
+    free: "Não importa como você faz: só precisa funcionar em todos os casos!"
 };
 const FILE_NAMES = { python: "main.py", html: "index.html", css: "style.css" };
 const KEYS = {
@@ -245,14 +248,15 @@ function codeEditor(language, { value = "", tools = null } = {}) {
     };
 }
 
-function pythonConsole(editor) {
+// For free exercises the console runs with the first case's starting values, like n = 3.
+function pythonConsole(editor, given = null) {
     const output = h("pre", { className: "console-output", textContent: "Toque em Executar para ver a saída do seu código." });
     const run = h("button", { type: "button", className: "button is-success is-small", innerHTML: `${ICONS.play}Executar` });
     run.addEventListener("click", async () => {
         run.disabled = true;
         output.textContent = "Executando...";
         try {
-            const { output: text, error } = await runPython(editor.field.value);
+            const { output: text, error } = given ? await runWithGiven(editor.field.value, given) : await runPython(editor.field.value);
             output.textContent = [text.trimEnd(), error].filter(Boolean).join("\n") || "(sem saída)";
             output.classList.toggle("is-error", Boolean(error));
             editor.markError(error);
@@ -262,7 +266,8 @@ function pythonConsole(editor) {
             run.disabled = false;
         }
     });
-    return h("div", { className: "console" }, h("div", { className: "console-head" }, h("span", { textContent: "Saída" }), run), output);
+    const title = given ? `Saída (com ${describeGiven(given)})` : "Saída";
+    return h("div", { className: "console" }, h("div", { className: "console-head" }, h("span", { textContent: title }), run), output);
 }
 
 function sandbox({ example, language, sample }) {
@@ -338,6 +343,7 @@ const RENDERERS = {
         const minutes = Math.max(2, Math.round((lesson.teach.length * 40 + lesson.exercises.length * 50) / 60));
         const xpLimit = maxXp(lesson);
         const badge = review ? "Revisão" : lesson.challenge ? `${lesson.track.name}: Desafio`
+            : lesson.creative ? `${lesson.track.name}: Desafio criativo`
             : lesson.machine ? `${lesson.track.name}: Máquina quebrada` : lesson.track.name;
         const meta = [
             lesson.teach.length && [ICONS.teach, `${lesson.teach.length} ${lesson.teach.length === 1 ? "explicação" : "explicações"}`],
@@ -522,6 +528,7 @@ const RENDERERS = {
     },
 
     code: (exercise) => codeTask(exercise),
+    free: (exercise) => freeTask(exercise),
     fix: (exercise) => codeTask(exercise, { broken: true })
 };
 
@@ -595,6 +602,48 @@ function codeTask(exercise, { broken = false } = {}) {
     };
 }
 
+// Free exercises: the goal is the result, the way there is the student's. One hint with an idea, never a solution.
+function freeTask(exercise) {
+    const { cases, hint: tip, example, bonus } = exercise;
+    const hint = hintButton(tip ? [() => {
+        mascot.mood("idle");
+        mascot.say(`Dica: ${tip}`);
+    }] : []);
+    const editor = codeEditor("python", { tools: hint });
+    editor.field.addEventListener("input", () => setReady(editor.field.value.trim() !== ""));
+    const several = cases.length > 1;
+    const goal = h("div", { className: "goal free-cases" },
+        h("span", { className: "label", textContent: several ? "Seu código precisa funcionar em todos estes casos" : "Saída esperada" }),
+        h("div", { className: "free-case-list" }, cases.map(({ given, expected }) => h("div", { className: "free-case" },
+            given && h("span", { className: "free-given", textContent: `Se ${describeGiven(given)}` }),
+            h("pre", { className: "code-block is-output", textContent: expected })
+        )))
+    );
+    const bonusNote = h("p", { className: "free-bonus" });
+    const other = h("figure", { className: "free-example", hidden: true },
+        h("figcaption", { className: "label", textContent: "Funcionou! Veja outro jeito de resolver" }),
+        h("pre", { className: "code-block", textContent: example ?? "" }),
+        bonusNote
+    );
+    return {
+        node: h("div", { className: "stack" }, goal, editor.node, pythonConsole(editor, cases[0].given ?? null), other),
+        focus: editor.field,
+        check: () => checkFree(editor.field.value, exercise),
+        onResult: (result) => {
+            editor.markError(result.message);
+            if (!result.ok) return;
+            other.hidden = !example && !bonus;
+            other.querySelector("pre").hidden = !example;
+            if (bonus) {
+                const lines = editor.field.value.split("\n").filter((line) => line.trim()).length;
+                bonusNote.textContent = lines <= bonus.lines
+                    ? `Bônus conquistado: você resolveu em ${lines} ${lines === 1 ? "linha" : "linhas"}!`
+                    : `Bônus: dá para resolver em até ${bonus.lines} linhas. Quer tentar outro dia?`;
+            }
+        }
+    };
+}
+
 function renderSteps() {
     ui.steps.replaceChildren(...queue.flatMap((step, i) => {
         if (step.type === "intro") return [];
@@ -627,6 +676,7 @@ function render() {
         mascot.say(review ? `Vamos revisar ${lesson.exercises.length} exercícios${mistakes ? `, ${mistakes} deles você errou antes` : ""}.`
             : lesson.machine ? "Ih, umas máquinas quebraram! Vamos descobrir o que aconteceu e consertar juntos?"
             : lesson.challenge ? "Hora do desafio! Sem dicas e sem ajuda desta vez: só você e o código."
+            : lesson.creative ? "Desafio criativo! Eu mostro o resultado, e você escolhe como chegar lá. Pense com calma!"
             : words.length ? `Hoje vamos aprender ${list(words.map((card) => card.term))}!` : "Vamos praticar!");
         return;
     }
@@ -759,6 +809,7 @@ async function finish() {
         : review ? "Revisão feita! Seus erros estão sumindo."
         : lesson.machine ? "Tudo funcionando de novo! Você é demais!"
         : lesson.challenge ? "Desafio vencido! Que orgulho!"
+        : lesson.creative ? "Você resolveu do seu jeito. Isso é pensar como programador!"
         : pick(["Você arrasou!", "Aula concluída! Bora para a próxima?"]));
     countUp($("xp-gained"), xp);
     countUp($("accuracy"), Math.round((firstTry / lesson.exercises.length) * 100));
@@ -823,6 +874,7 @@ syncSound();
 $("celebration").addEventListener("cancel", (event) => event.preventDefault());
 $("close").href = review ? "dashboard.html" : `lessons.html?track=${lesson.track.id}`;
 $("celebration-title").textContent = review ? "Revisão completa!" : lesson.challenge ? "Desafio vencido!"
+    : lesson.creative ? "Desafio criativo completo!"
     : lesson.machine ? "Máquinas consertadas!" : "Lição completa!";
 ui.title.textContent = lesson.title;
 document.title = `${lesson.title} | EnCoder`;
