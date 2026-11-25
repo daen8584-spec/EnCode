@@ -6,16 +6,26 @@
     <meta name="theme-color" content="#f3f6fc">
     <title>Página não encontrada | EnCoder</title>
     <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Jersey+10&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/auth.css">
+    <link rel="stylesheet" href="/css/oficina.css">
+    <link rel="stylesheet" href="/css/vale.css">
+    <script type="module" src="/js/vale.js"></script>
 </head>
-<body>
+<body class="lost">
+    <div class="valley is-page" aria-hidden="true">
+        <div class="sky" data-sun="center"><svg class="sky-art" shape-rendering="crispEdges"></svg></div>
+        <svg class="drifts" shape-rendering="crispEdges" preserveAspectRatio="none"></svg>
+        <div class="snow"></div>
+    </div>
     <main class="auth-main is-standalone">
-        <section class="auth-card card">
-            <p class="brand is-large"><span class="logo">404</span></p>
+        <section class="auth-card card lost-card">
+            <svg class="snowcap" aria-hidden="true" shape-rendering="crispEdges" preserveAspectRatio="none"></svg>
+            <div class="lost-trail" aria-hidden="true"><span class="lost-steps"></span><span class="lost-sign">?</span><span class="lost-fox"></span></div>
+            <p class="brand is-large"><span class="logo" aria-hidden="true"></span>EnCoder</p>
             <h1>Página não encontrada</h1>
-            <p class="muted">O endereço pode estar errado ou a página foi removida.</p>
+            <p class="muted">Este lugar não está no mapa. O endereço pode estar errado ou a página foi removida.</p>
             <a class="button" href="/dashboard.html">Voltar ao início</a>
         </section>
     </main>

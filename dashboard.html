@@ -9,15 +9,16 @@
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Jersey+10&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/mascot.css">
     <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/oficina.css">
     <script type="module" src="js/dashboard.js"></script>
 </head>
 <body class="is-loading">
     <header class="topbar">
-        <a class="brand" href="#home"><span class="logo">&lt;/&gt;</span>EnCoder</a>
+        <a class="brand" href="#home"><span class="logo" aria-hidden="true"></span>EnCoder</a>
         <div class="hud">
             <span class="hud-chip is-rank" id="hud-rank" title="Sua patente"></span>
             <span class="hud-chip is-streak" title="Dias seguidos">
@@ -58,6 +59,11 @@
             <section class="view" id="view-home">
                 <div class="home">
                     <div class="hero bubble-left">
+                        <div class="workshop-wall" aria-hidden="true">
+                            <span class="shelf"><i class="jar"></i><i class="jar is-tall"></i><i class="gear-icon"></i><i class="book"></i><i class="book is-red"></i></span>
+                            <span class="window-pane"></span>
+                            <span class="blueprint"></span>
+                        </div>
                         <div class="hero-text">
                             <p class="eyebrow" id="hero-eyebrow">Sua próxima aula</p>
                             <h1 id="greeting">Olá!</h1>
@@ -158,7 +164,7 @@
                 </header>
                 <div class="editor card">
                     <div class="editor-bar">
-                        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="file-tab">main.py</span>
                         <label class="snippet">Exemplo
                             <select id="snippet">
                                 <option value="hello">Olá, mundo</option>

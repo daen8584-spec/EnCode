@@ -1,0 +1,696 @@
+/*
+O Vale do Bit: everything outside Bit's workshop. See tools/DESIGN.md.
+Loads after oficina.css on login, signup, 404, the map and the lesson. The dashboard does not load it.
+Pixel scenery is drawn by js/vale.js; this file sets its colours and lays the pages out around it.
+*/
+
+/* ---------- tokens ---------- */
+:root {
+    --sky: #8fcff0;
+    --sky-bands: ;
+    --sun: #fff1a8;
+    --sun-ring: #ffe27a;
+    --mtn-far: #c4e2f5;
+    --mtn-far-sh: #b2d7ef;
+    --mtn: #a6d0ec;
+    --mtn-sh: #93c3e4;
+    --cap: #ffffff;
+    --cloud: #ffffff;
+    --cloud-sh: #e1f0fa;
+    --aurora: #3fae8c;
+    --aurora-2: #c77fa6;
+    --snow: #fbfdff;
+    --snow-back: #dbe8f7;
+    --drift: #e3eefa;
+    --pond: #cfeaf8;
+    --pond-edge: #9fd0ea;
+    --ice: #e4f4ff;
+    --ice-edge: #8ccbeb;
+    --ice-deep: #5aa9d6;
+    --ground-page: #f3f8fd;
+    --right: #24804a;
+    --right-soft: #dff4e6;
+    --wrong: #c2412f;
+    --wrong-soft: #fde6e1;
+}
+:root[data-theme="dark"] {
+    --sky: #1f2c62;
+    --sun: #f3eed0;
+    --sun-ring: #2a3974;
+    --mtn-far: #2d3b78;
+    --mtn-far-sh: #28356c;
+    --mtn: #34448a;
+    --mtn-sh: #2d3c7c;
+    --cap: #c9d5ef;
+    --cloud: #33438a;
+    --cloud-sh: #2c3b7a;
+    --snow: #dce5f5;
+    --snow-back: #b6c4e2;
+    --drift: #222c5c;
+    --pond: #2f4c82;
+    --pond-edge: #243a6a;
+    --ice: #283a6e;
+    --ice-edge: #5c86c4;
+    --ground-page: #18204a;
+    --right-soft: #173a2c;
+    --wrong-soft: #3d2026;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --sky: #1f2c62;
+    --sun: #f3eed0;
+    --sun-ring: #2a3974;
+    --mtn-far: #2d3b78;
+    --mtn-far-sh: #28356c;
+    --mtn: #34448a;
+    --mtn-sh: #2d3c7c;
+    --cap: #c9d5ef;
+    --cloud: #33438a;
+    --cloud-sh: #2c3b7a;
+    --snow: #dce5f5;
+    --snow-back: #b6c4e2;
+    --drift: #222c5c;
+    --pond: #2f4c82;
+    --pond-edge: #243a6a;
+    --ice: #283a6e;
+    --ice-edge: #5c86c4;
+    --ground-page: #18204a;
+    --right-soft: #173a2c;
+    --wrong-soft: #3d2026;
+} }
+
+/* ---------- shared scenery ---------- */
+.sky { position: absolute; inset: 0; overflow: hidden; background: var(--sky); pointer-events: none; }
+.sky-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sky rect { stroke: none; }
+.drifts { display: block; width: 100%; height: 28px; pointer-events: none; }
+.snowcap { position: absolute; left: -6px; bottom: calc(100% - 3px); width: calc(100% + 12px); height: 22px; display: block; pointer-events: none; }
+.snowcap rect, .drifts rect, .unit-scenery rect { stroke: none; }
+.unit-scenery svg rect { stroke: none; }
+
+/* ---------- login and signup: the snowy valley ---------- */
+.auth { position: relative; isolation: isolate; --ground: 120px; }
+.auth .valley, .valley { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.valley .sky { bottom: calc(var(--ground) - 4px); --ground: 0px; }
+.valley .drifts { position: absolute; left: 0; bottom: calc(var(--ground) - 1px); }
+.valley .snow { position: absolute; left: 0; right: 0; bottom: 0; height: var(--ground); background: var(--snow); }
+.valley.is-page { position: fixed; }
+
+.auth-intro {
+    position: static;
+    overflow: visible;
+    background: none;
+    color: var(--outline);
+    padding: 34px 44px 0;
+    gap: 16px;
+}
+.auth-intro > :not(.valley) { position: relative; z-index: 1; }
+.auth-intro .brand.is-large { font-size: 76px; line-height: 0.9; gap: 14px; color: #1d2340; text-shadow: 3px 0 0 #fff, -3px 0 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff, 3px 3px 0 #fff, -3px 3px 0 #fff, 3px -3px 0 #fff, -3px -3px 0 #fff, 0 8px 0 #1d2340, 4px 8px 0 #1d2340, -4px 8px 0 #1d2340; }
+.intro-copy { max-width: 470px; color: #1d2340; }
+.auth-headline { max-width: none; margin: 0 0 12px; font-size: 38px; line-height: 1.02; color: inherit; text-shadow: 2px 2px 0 rgb(255 255 255 / 70%); }
+.auth-points { gap: 6px; color: inherit; font-size: 16px; font-weight: 600; max-width: none; }
+.auth-points li::before { content: ""; width: 18px; height: 18px; margin-top: 2px; border-radius: 0; background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%224%22 y=%220%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%225%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%226%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%226%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%226%22 y=%223%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%228%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%229%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%226%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%228%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%227%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%224%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%228%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%223%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%228%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%229%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%229%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E") center / contain no-repeat; image-rendering: pixelated; }
+:root[data-theme="dark"] .intro-copy { color: #eef2ff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .intro-copy { color: #eef2ff; } }
+:root[data-theme="dark"] .auth-headline { text-shadow: 2px 2px 0 rgb(0 0 0 / 50%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .auth-headline { text-shadow: 2px 2px 0 rgb(0 0 0 / 50%); } }
+
+/* Bit and the easel stand in the snow at the bottom of the left half */
+.auth-intro { display: grid; grid-template-columns: 190px minmax(0, 380px); grid-template-rows: auto auto 1fr auto; column-gap: 18px; }
+.auth-intro .brand, .intro-copy { grid-column: 1 / -1; }
+.auth-mascot-slot { grid-column: 1; grid-row: 4; align-self: end; width: 190px; margin: 0 0 calc(var(--ground) - 62px); padding: 0; }
+.auth-mascot-slot .mascot-bubble { max-width: 250px; }
+.easel { grid-column: 2; grid-row: 4; align-self: end; position: relative; margin-bottom: calc(var(--ground) + 40px); }
+.easel::before, .easel::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    width: 12px;
+    height: 76px;
+    background: var(--wood);
+    border: 3px solid var(--outline);
+    border-top: 0;
+    z-index: -1;
+}
+.easel::before { left: 16%; rotate: 6deg; transform-origin: top; }
+.easel::after { right: 16%; rotate: -6deg; transform-origin: top; }
+.board {
+    margin: 0;
+    background: var(--board);
+    color: var(--chalk);
+    border: 9px solid var(--wood);
+    outline: 3px solid var(--outline);
+    box-shadow: 7px 7px 0 3px rgb(29 35 64 / 45%);
+    padding: 4px 16px 14px;
+}
+.board-tabs { display: flex; gap: 4px; margin: 0 -6px 8px; border-bottom: 2px dashed rgb(243 246 238 / 30%); }
+.board-tab {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: rgb(243 246 238 / 72%);
+    font: 400 24px/1 var(--display);
+    cursor: pointer;
+}
+.board-tab[aria-selected="true"] { color: #ffe27a; box-shadow: inset 0 -4px 0 #ffe27a; }
+.board-tab:hover { color: #fff; }
+.board-tab:focus-visible { outline: 3px solid #ffe27a; outline-offset: -3px; }
+.board-lesson { margin: 0 0 4px; color: rgb(243 246 238 / 80%); font-size: 15px; font-weight: 600; }
+.board pre { margin: 0; font: 500 18px/1.5 var(--mono); white-space: pre-wrap; }
+.b-kw { color: #ffe27a; }
+.b-str { color: #ffb38a; }
+.b-tag { color: #8fd6ff; }
+.b-sel { color: #9be8b4; }
+.board-out { display: flex; flex-direction: column; gap: 2px; margin: 10px 0 0; padding-top: 8px; border-top: 2px dashed rgb(243 246 238 / 30%); min-height: 66px; }
+.board-out small { color: rgb(243 246 238 / 70%); font-size: 13px; font-weight: 600; }
+.out-py { font: 500 17px/1.5 var(--mono); }
+.out-h1 { font: 700 30px/1.1 var(--font); }
+.out-css { color: #ffb38a; font-weight: 700; }
+
+.auth-main { position: relative; z-index: 1; background: none; padding-bottom: calc(var(--ground) - 30px); }
+.auth-card {
+    position: relative;
+    padding: 34px 34px 30px;
+    background: var(--paper);
+    background-image: none;
+    border: 3px solid var(--outline);
+    border-radius: 6px;
+    box-shadow: 8px 8px 0 var(--outline);
+}
+.auth-card::before { content: none; }
+.auth-card h1 { font-size: 54px; }
+.auth-card > .snowcap { --snow: #fbfdff; }
+:root[data-theme="dark"] .auth-card > .snowcap { --snow: #dce5f5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .auth-card > .snowcap { --snow: #dce5f5; } }
+
+@media (max-width: 860px) {
+    .auth { --ground: 70px; }
+    .auth .valley { bottom: auto; height: 380px; }
+    .valley .snow { height: var(--ground); }
+    .auth { background: var(--snow); }
+    .auth-intro { display: grid; grid-template-columns: 104px minmax(0, 1fr); grid-template-rows: auto 1fr; min-height: 380px; padding: 18px 16px 0; column-gap: 10px; }
+    .auth-intro .brand.is-large { font-size: 54px; }
+    .intro-copy { display: none; }
+    .auth-mascot-slot { position: relative; left: auto; bottom: auto; grid-row: 2; width: 104px; margin: 0 0 calc(var(--ground) - 28px); }
+    .auth-mascot-slot .mascot-bubble { display: none; }
+    .easel { grid-row: 2; margin-bottom: calc(var(--ground) + 34px); }
+    .easel::before, .easel::after { height: 50px; }
+    .board { border-width: 7px; padding: 2px 10px 10px; }
+    .board-tab { font-size: 20px; padding: 0 7px; }
+    .board pre { font-size: 15px; }
+    .board-out { min-height: 54px; }
+    .out-h1 { font-size: 24px; }
+    .auth-main { padding: 34px 16px 40px; }
+    .auth-card { padding: 28px 20px 24px; }
+    .auth-card h1 { font-size: 44px; }
+}
+
+/* ---------- 404: the footprints stop in the snow ---------- */
+.lost { min-height: 100dvh; --ground: 120px; }
+.lost .auth-main { min-height: 100dvh; padding-bottom: calc(var(--ground) - 20px); }
+.lost-card { text-align: center; padding: 30px 28px 32px; max-width: 460px; }
+.lost-card .brand { justify-content: center; }
+.lost-trail {
+    position: relative;
+    height: 140px;
+    margin-bottom: 8px;
+    border: 3px solid var(--outline);
+    border-radius: 4px;
+    background: var(--snow) linear-gradient(var(--sky) 0 46%, transparent 46%);
+    background-image: linear-gradient(var(--sky) 0 46%, var(--snow-back) 46% 50%, var(--snow) 50%);
+    overflow: hidden;
+    clip-path: none;
+}
+.lost-steps {
+    position: absolute;
+    left: 6%;
+    top: 62%;
+    width: 52%;
+    height: 22px;
+    background: radial-gradient(ellipse 5px 7px at 30% 30%, var(--ice-edge) 98%, transparent) 0 0 / 34px 22px repeat-x,
+                radial-gradient(ellipse 5px 7px at 70% 75%, var(--ice-edge) 98%, transparent) 0 0 / 34px 22px repeat-x;
+    -webkit-mask: linear-gradient(90deg, #000 60%, transparent);
+    mask: linear-gradient(90deg, #000 60%, transparent);
+}
+.lost-sign {
+    position: absolute;
+    left: 58%;
+    top: 22%;
+    width: 50px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 3px solid var(--outline);
+    border-radius: 3px;
+    background: var(--wood-light);
+    color: var(--outline);
+    font: 400 34px/1 var(--display);
+    rotate: -8deg;
+}
+.lost-sign::after { content: ""; position: absolute; top: 100%; left: 50%; width: 8px; height: 46px; translate: -50% 0; background: var(--wood-dark); border: 3px solid var(--outline); border-top: 0; }
+.lost-fox { position: absolute; right: 6%; bottom: 8px; width: 74px; aspect-ratio: 440 / 536; background: url("../assets/mascot.webp") center / contain no-repeat; transform: scaleX(-1); }
+
+/* ---------- the map: the trail runs through the valley ---------- */
+body:has(.map) { background: var(--ground-page); background-image: none; }
+body:has(.map)::after { content: none; display: none; }
+body[data-track]:has(.map) { background-color: var(--ground-page); }
+:root[data-theme="dark"] body[data-track]:has(.map) { background-color: var(--ground-page); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body[data-track]:has(.map) { background-color: var(--ground-page); } }
+
+.unit { position: relative; isolation: isolate; padding-bottom: 20px; }
+.unit-scenery { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.unit.is-fogged .unit-scenery { opacity: 0.42; }
+
+/* each unit opens with a window onto its stretch of sky; the time of day moves on unit by unit */
+.unit.is-morning { --sky: #8fcff0; }
+.unit.is-sunset {
+    --sky: #f4a66a;
+    --sky-bands: #f7b77c #f9c98e #fbd9a2;
+    --sun: #ff7d45;
+    --sun-ring: #ffa25c;
+    --mtn-far: #9bb3db;
+    --mtn-far-sh: #8aa3ce;
+    --mtn: #7e97c7;
+    --mtn-sh: #6f88bb;
+    --cap: #fff4ea;
+    --cloud: #ffe3c4;
+    --cloud-sh: #f8c99c;
+}
+.unit.is-aurora {
+    --sky: #14204a;
+    --sun: #f3eed0;
+    --sun-ring: #1d2b5e;
+    --mtn-far: #2d3b78;
+    --mtn-far-sh: #28356c;
+    --mtn: #34448a;
+    --mtn-sh: #2d3c7c;
+    --cap: #c9d5ef;
+    --cloud: #24326a;
+    --cloud-sh: #1f2b5c;
+}
+:root[data-theme="dark"] .unit.is-sunset {
+    --sky: #1b2f52;
+    --sky-bands: #233a5e #2c4566;
+    --sun: #f3eed0;
+    --sun-ring: #1b2f52;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .unit.is-sunset {
+    --sky: #1b2f52;
+    --sky-bands: #233a5e #2c4566;
+    --sun: #f3eed0;
+    --sun-ring: #1b2f52;
+} }
+.unit-banner {
+    position: relative;
+    overflow: hidden;
+    min-height: 190px;
+    align-content: end;
+    padding: 70px 26px 40px;
+    border: 3px solid var(--outline);
+    border-radius: 6px;
+    background: var(--sky);
+    color: #fff;
+    box-shadow: 6px 6px 0 var(--outline);
+    text-shadow: 2px 0 0 var(--outline), -2px 0 0 var(--outline), 0 2px 0 var(--outline), 0 -2px 0 var(--outline), 2px 2px 0 var(--outline), -2px 2px 0 var(--outline), 2px -2px 0 var(--outline), -2px -2px 0 var(--outline);
+}
+.unit-banner::before { content: none; }
+.unit-banner::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    top: auto;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 34px;
+    border: 0;
+    border-radius: 0;
+    z-index: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23fbfdff%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23fbfdff%22/%3E%3C/svg%3E") 0 0 / 24px 18px repeat-x, linear-gradient(transparent 17px, var(--snow) 17px);
+}
+:root[data-theme="dark"] .unit-banner::after { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23dce5f5%22/%3E%3C/svg%3E"), linear-gradient(transparent 17px, var(--snow) 17px); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .unit-banner::after { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23dce5f5%22/%3E%3C/svg%3E"), linear-gradient(transparent 17px, var(--snow) 17px); } }
+.unit-banner > .sky { z-index: 0; bottom: 20px; }
+.unit-banner > :not(.sky) { position: relative; z-index: 1; }
+.unit-index { justify-self: start; background: var(--outline); color: #fff; text-shadow: none; }
+.unit-banner h2 { font-size: 48px; line-height: 0.95; color: #1d2340; text-shadow: 3px 0 0 #fff, -3px 0 0 #fff, 0 3px 0 #fff, 0 -3px 0 #fff, 3px 3px 0 #fff, -3px 3px 0 #fff, 3px -3px 0 #fff, -3px -3px 0 #fff, 0 6px 0 #1d2340; }
+.unit-banner p { justify-self: start; padding: 2px 8px; border-radius: 3px; background: rgb(29 35 64 / 78%); color: #fff; font-size: 15px; font-weight: 600; text-shadow: none; }
+.unit.is-aurora .unit-banner h2 { color: #fff; text-shadow: 3px 0 0 #1d2340, -3px 0 0 #1d2340, 0 3px 0 #1d2340, 0 -3px 0 #1d2340, 3px 3px 0 #1d2340, -3px 3px 0 #1d2340, 3px -3px 0 #1d2340, -3px -3px 0 #1d2340, 0 6px 0 #1d2340; }
+:root[data-theme="dark"] .unit-banner h2 { color: #fff; text-shadow: 3px 0 0 #1d2340, -3px 0 0 #1d2340, 0 3px 0 #1d2340, 0 -3px 0 #1d2340, 3px 3px 0 #1d2340, -3px 3px 0 #1d2340, 3px -3px 0 #1d2340, -3px -3px 0 #1d2340, 0 6px 0 #1d2340; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .unit-banner h2 { color: #fff; text-shadow: 3px 0 0 #1d2340, -3px 0 0 #1d2340, 0 3px 0 #1d2340, 0 -3px 0 #1d2340, 3px 3px 0 #1d2340, -3px 3px 0 #1d2340, 3px -3px 0 #1d2340, -3px -3px 0 #1d2340, 0 6px 0 #1d2340; } }
+.unit-words { margin-top: 10px; }
+.unit-words li { background: #fff; color: var(--outline); text-shadow: none; }
+
+/* the trail is packed snow, sled tracks mark how far you got */
+.trail-base { stroke: #cddff2; stroke-width: 16; stroke-dasharray: none; stroke-linecap: round; opacity: 1; }
+.trail-done { stroke: var(--primary); stroke-width: 6; stroke-dasharray: 12 10; stroke-linecap: butt; opacity: 1; }
+:root[data-theme="dark"] .trail-base { stroke: #2a3a6e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .trail-base { stroke: #2a3a6e; } }
+
+/* lesson stones: round and chunky like toys, each kind with its own face */
+.node-circle {
+    width: 80px;
+    border: 3px solid var(--outline);
+    border-radius: 50%;
+    background: var(--snow);
+    color: #6b7390;
+    box-shadow: inset 0 -8px 0 rgb(29 35 64 / 12%), 0 7px 0 var(--outline);
+}
+.node-circle svg { width: 30px; height: 30px; stroke-width: 3; }
+.is-done .node-circle { background: var(--primary); color: #fff; box-shadow: inset 0 -8px 0 rgb(0 0 0 / 18%), 0 7px 0 var(--outline); }
+.is-current .node-circle { background: var(--gold); color: var(--outline); box-shadow: inset 0 -8px 0 rgb(0 0 0 / 14%), 0 7px 0 var(--outline), 0 0 0 8px rgb(242 179 61 / 40%); }
+.is-locked .node-circle { background: #eef3fa; color: #6b7390; border-color: #6b7390; box-shadow: inset 0 -8px 0 rgb(29 35 64 / 8%), 0 7px 0 #6b7390; }
+:root[data-theme="dark"] .is-locked .node-circle { background: #2a3463; color: #aab3d6; border-color: #aab3d6; box-shadow: 0 7px 0 #0a0e24; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .is-locked .node-circle { background: #2a3463; color: #aab3d6; border-color: #aab3d6; box-shadow: 0 7px 0 #0a0e24; } }
+.is-machine .node-circle { border-radius: 10px; background: var(--ice) url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%226%22 y=%220%22 width=%224%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%226%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%227%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%229%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%222%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%225%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%229%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2213%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%222%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%223%22 width=%2210%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2213%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%224%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%227%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%229%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2212%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%221%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%225%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%226%22 y=%225%22 width=%224%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%2211%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2213%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%220%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%221%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%224%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2210%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%2212%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2215%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%220%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%221%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%225%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2210%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2215%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%220%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%221%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%225%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2210%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2215%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%220%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%224%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%225%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2210%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%2212%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2215%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%221%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%225%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%226%22 y=%2210%22 width=%224%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2210%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%2211%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2213%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%224%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%227%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%238ccbeb%22/%3E%3Crect x=%229%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2212%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%222%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%2212%22 width=%2210%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2213%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%222%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%225%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%227%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%229%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2213%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%223%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%226%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%227%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%229%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%2211%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3Crect x=%226%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%235a7fa8%22/%3E%3C/svg%3E") center / 62% no-repeat; image-rendering: pixelated; box-shadow: inset 0 0 0 4px #fff, 0 7px 0 var(--outline); }
+.is-machine.is-done .node-circle { background: #b8e0c4 url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%226%22 y=%220%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%223%22 width=%2210%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%227%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%229%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2212%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%226%22 y=%225%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2211%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%224%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2212%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%224%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%225%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2212%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%226%22 y=%2210%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2211%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%227%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%229%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2212%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2212%22 width=%2210%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E") center / 62% no-repeat; }
+.is-machine.is-current .node-circle { background: var(--gold) url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%226%22 y=%220%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%223%22 width=%2210%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%227%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%229%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2212%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%226%22 y=%225%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2211%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%224%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2212%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%224%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%225%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2212%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2215%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%226%22 y=%2210%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2211%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%227%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%229%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2212%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2212%22 width=%2210%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%225%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%2213%22 y=%2213%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%23e8b13b%22/%3E%3Crect x=%229%22 y=%2214%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2211%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E") center / 62% no-repeat; }
+.is-challenge .node-circle { border-radius: 50% 50% 10px 10px; }
+.is-challenge:not(.is-done) .node-circle { background: #ff8a4c; color: #fff; }
+.node-label { background: var(--paper); }
+.node-start { background: var(--outline); color: #fff; }
+.node-pop { box-shadow: 6px 6px 0 var(--outline); }
+
+/* ---------- the lesson: a stage with a snowball, then Bit's challenge card ---------- */
+body:has(.lesson) { background: var(--ground-page); background-image: none; }
+body:has(.lesson)::before { background: var(--sky); }
+.lesson-header {
+    position: relative;
+    top: auto;
+    height: 168px;
+    align-items: flex-start;
+    padding-top: 16px;
+    padding-bottom: 0;
+    background: var(--sky);
+    border-bottom: 3px solid var(--outline);
+    box-shadow: none;
+    overflow: hidden;
+    isolation: isolate;
+    z-index: 0;
+}
+.stage-sky { z-index: -2; bottom: 46px; --ground: 0px; }
+.stage-drifts { position: absolute; left: 0; right: 0; bottom: 0; z-index: -1; height: 66px; }
+.lesson-header::after { content: ""; position: absolute; inset: auto 0 0; height: 40px; z-index: -1; background: var(--snow); }
+.lesson-header .icon-button { width: 48px; color: var(--outline); background: #fff; border: 3px solid var(--outline); outline: 0; border-radius: 6px; box-shadow: 0 4px 0 var(--outline); }
+.lesson-header .icon-button:hover { background: var(--ice); color: var(--outline); }
+.combo { align-self: flex-start; margin-top: 6px; padding: 4px 10px 2px; border: 3px solid var(--outline); border-radius: 6px; background: #fff; color: var(--flame); box-shadow: 0 4px 0 var(--outline); font-size: 24px; }
+
+/* the trail of flags across the snow */
+.steps {
+    position: absolute;
+    left: max(24px, calc((100% - 1000px) / 2 + 24px));
+    right: calc(max(24px, calc((100% - 1000px) / 2 + 24px)) + 92px);
+    bottom: 20px;
+    height: 54px;
+    gap: 0;
+    align-items: flex-end;
+}
+.steps::before { content: ""; position: absolute; left: 0; right: -92px; bottom: 4px; height: 10px; background: #cddff2; border-radius: 5px; }
+:root[data-theme="dark"] .steps::before { background: #a8b8da; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .steps::before { background: #a8b8da; } }
+.steps li, .steps li:is(.is-done, .is-current, .is-missed, .is-teach) {
+    position: relative;
+    width: auto;
+    height: 54px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+.steps li::before { content: none; }
+.steps li::after {
+    content: "";
+    position: absolute;
+    left: calc(50% - 3px);
+    bottom: 6px;
+    width: 30px;
+    height: 40px;
+    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 12 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%220%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%221%22 width=%227%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%225%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%227%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%229%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%224%22 width=%226%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%228%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23cfe2f5%22/%3E%3Crect x=%2211%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%225%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%227%22 y=%225%22 width=%223%22 height=%221%22 fill=%22%23cfe2f5%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%226%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%23cfe2f5%22/%3E%3Crect x=%228%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%23cfe2f5%22/%3E%3Crect x=%225%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E") 0 100% / contain no-repeat;
+    image-rendering: pixelated;
+}
+.steps .is-current::after { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 12 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%220%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%221%22 width=%227%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%225%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%227%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%229%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%224%22 width=%226%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%228%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2211%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%225%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%227%22 y=%225%22 width=%223%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%226%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%228%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%23c48a1d%22/%3E%3Crect x=%225%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.steps .is-done::after { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 12 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%220%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%221%22 width=%227%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%225%22 height=%221%22 fill=%22%232f9e55%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%227%22 height=%221%22 fill=%22%232f9e55%22/%3E%3Crect x=%229%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%224%22 width=%226%22 height=%221%22 fill=%22%232f9e55%22/%3E%3Crect x=%228%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%231f7a3e%22/%3E%3Crect x=%2211%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%225%22 height=%221%22 fill=%22%232f9e55%22/%3E%3Crect x=%227%22 y=%225%22 width=%223%22 height=%221%22 fill=%22%231f7a3e%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%232f9e55%22/%3E%3Crect x=%226%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231f7a3e%22/%3E%3Crect x=%228%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%231f7a3e%22/%3E%3Crect x=%225%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.steps .is-missed::after { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 12 16%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%220%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%221%22 width=%227%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%225%22 height=%221%22 fill=%22%23e0614f%22/%3E%3Crect x=%227%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%227%22 height=%221%22 fill=%22%23e0614f%22/%3E%3Crect x=%229%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%224%22 width=%226%22 height=%221%22 fill=%22%23e0614f%22/%3E%3Crect x=%228%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23b8432b%22/%3E%3Crect x=%2211%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%225%22 height=%221%22 fill=%22%23e0614f%22/%3E%3Crect x=%227%22 y=%225%22 width=%223%22 height=%221%22 fill=%22%23b8432b%22/%3E%3Crect x=%2210%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%224%22 height=%221%22 fill=%22%23e0614f%22/%3E%3Crect x=%226%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%23b8432b%22/%3E%3Crect x=%228%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%23b8432b%22/%3E%3Crect x=%225%22 y=%227%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2210%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2213%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2214%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2215%22 width=%224%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.steps .is-teach::after { left: calc(50% - 8px); width: 16px; height: 32px; background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 5 10%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%221%22 y=%220%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%221%22 width=%223%22 height=%221%22 fill=%22%23cfe2f5%22/%3E%3Crect x=%224%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%222%22 width=%223%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%224%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%223%22 width=%223%22 height=%221%22 fill=%22%23ffffff%22/%3E%3Crect x=%224%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23cfe2f5%22/%3E%3Crect x=%224%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.steps .is-teach:is(.is-done, .is-current)::after { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 5 10%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%221%22 y=%220%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%221%22 width=%223%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%224%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%222%22 width=%223%22 height=%221%22 fill=%22%23ffe9a8%22/%3E%3Crect x=%224%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%223%22 width=%223%22 height=%221%22 fill=%22%23ffe9a8%22/%3E%3Crect x=%224%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23f2b33d%22/%3E%3Crect x=%224%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%223%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+
+/* the snowball rolls to the current flag and grows with every right answer */
+.snowball {
+    --size: 28px;
+    position: absolute;
+    left: 0;
+    bottom: 12px;
+    width: var(--size);
+    height: var(--size);
+    border: 3px solid var(--outline);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset -5px -5px 0 #cfe2f5, inset 4px 4px 0 #fff;
+    translate: var(--x, 0) 0;
+    rotate: var(--spin, 0deg);
+    transition: translate 0.7s cubic-bezier(0.3, 1.2, 0.5, 1), rotate 0.7s ease-out, width 0.5s, height 0.5s;
+    z-index: 2;
+}
+.snowball::after { content: ""; position: absolute; left: 22%; top: 22%; width: 18%; height: 18%; background: #cfe2f5; }
+.snowball[hidden] { display: none; }
+
+/* the snowman at the end of the trail: grey outlines show what is still to build */
+.stage-goal {
+    position: absolute;
+    right: max(24px, calc((100% - 1000px) / 2 + 24px));
+    bottom: 14px;
+    width: 64px;
+    height: 104px;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+}
+.stage-goal span {
+    display: block;
+    border: 3px dashed rgb(29 35 64 / 35%);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 35%);
+    margin-top: -6px;
+}
+.sm-base { width: 52px; height: 46px; }
+.sm-mid { width: 40px; height: 36px; }
+.sm-head { position: relative; width: 30px; height: 28px; }
+.stage-goal[data-parts="1"] .sm-base,
+.stage-goal[data-parts="2"] :is(.sm-base, .sm-mid),
+.stage-goal[data-parts="3"] span { border: 3px solid var(--outline); background: #fff; box-shadow: inset -5px -4px 0 #cfe2f5; animation: plop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.stage-goal[data-parts="3"] .sm-head::before { content: ""; position: absolute; left: 6px; top: 7px; width: 4px; height: 4px; background: var(--outline); box-shadow: 9px 0 0 var(--outline); }
+.stage-goal[data-parts="3"] .sm-head::after { content: ""; position: absolute; left: 10px; top: 13px; width: 14px; height: 6px; background: #f08a24; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.stage-goal[data-parts="3"] .sm-mid { position: relative; }
+.stage-goal[data-parts="3"] .sm-mid::before { content: ""; position: absolute; left: -4px; right: -4px; top: -2px; height: 8px; background: var(--primary); border: 2px solid var(--outline); }
+@keyframes plop { 0% { scale: 0.4; } 100% { scale: 1; } }
+
+/* the challenge: Bit asks in the same dark dialogue box he talks in; you answer on the snow */
+.lesson { padding-top: 40px; align-items: start; }
+.lesson-content { position: relative; display: flex; flex-direction: column; align-items: flex-start; }
+.lesson-content > #step { align-self: stretch; }
+.lesson-content h1 { margin: 0 0 10px; padding: 3px 10px 1px; border: 3px solid var(--outline); border-radius: 6px; background: var(--paper); color: var(--text); font: 400 22px/1 var(--display); }
+.task-type {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 -3px 14px;
+    padding: 5px 12px 3px 8px;
+    border: 3px solid var(--outline);
+    border-bottom: 0;
+    border-radius: 6px 6px 0 0;
+    background: var(--gold);
+    color: var(--outline);
+    font: 400 22px/1 var(--display);
+}
+.task-type svg { width: 20px; height: 20px; stroke-width: 2.6; }
+.lesson-question:not(:empty) {
+    align-self: stretch;
+    margin: 0 0 22px;
+    padding: 18px 22px 20px;
+    border: 3px solid #fff;
+    outline: 3px solid var(--outline);
+    border-radius: 4px;
+    background: var(--outline);
+    color: #fff;
+    font: 400 36px/1.05 var(--display);
+    box-shadow: 8px 8px 0 3px rgb(29 35 64 / 25%);
+}
+.lesson-content:has(.lesson-question:empty) h1 { padding: 0; border: 0; background: none; font: 400 44px/1 var(--display); }
+
+/* answers are chunky ice blocks: press them like toys */
+.options { gap: 14px; }
+.option {
+    min-height: 64px;
+    border: 3px solid var(--outline);
+    border-radius: 10px;
+    background: var(--ice);
+    color: var(--text);
+    box-shadow: inset 0 4px 0 rgb(255 255 255 / 75%), inset 0 -6px 0 rgb(90 169 214 / 25%), 0 6px 0 var(--outline);
+    font-size: 18px;
+    font-weight: 600;
+    transition: translate 0.08s, box-shadow 0.08s, background-color 0.15s;
+}
+.option:hover:not(:disabled) { background: #f2faff; translate: 0 -2px; box-shadow: inset 0 4px 0 #fff, inset 0 -6px 0 rgb(90 169 214 / 25%), 0 8px 0 var(--outline); }
+.option:active:not(:disabled) { translate: 0 6px; box-shadow: inset 0 4px 0 #fff, 0 0 0 var(--outline); }
+.option kbd { width: 36px; height: 36px; border: 0; border-radius: 6px; background: var(--outline); color: #fff; box-shadow: none; font: 400 24px/1 var(--display); }
+.option[aria-pressed="true"] { background: var(--primary); border-color: var(--outline); color: #fff; box-shadow: inset 0 4px 0 rgb(255 255 255 / 25%), 0 6px 0 var(--outline); }
+.option[aria-pressed="true"] kbd { background: #fff; color: var(--primary); }
+.option.is-correct { background: var(--right); border-color: var(--outline); color: #fff; box-shadow: 0 6px 0 var(--outline); }
+.option.is-correct kbd { background: #fff; color: var(--right); }
+.option.is-wrong { background: var(--wrong); border-color: var(--outline); color: #fff; box-shadow: 0 6px 0 var(--outline); }
+.option.is-wrong kbd { background: #fff; color: var(--wrong); }
+:root[data-theme="dark"] .option:hover:not(:disabled) { background: #31457e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .option:hover:not(:disabled) { background: #31457e; } }
+
+/* fill the gap: the blank is a hole in the ice */
+.code-block mark, .blank { background: var(--gold); }
+.input.is-code { border: 3px solid var(--outline); border-radius: 8px; background: var(--ice); box-shadow: inset 0 4px 0 rgb(90 169 214 / 25%); font-size: 18px; }
+.input.is-code:focus { border-color: var(--primary); outline: 3px solid var(--gold); }
+
+/* put the lines in order: stack the ice blocks */
+.order-answer { min-height: 80px; border: 3px dashed var(--ice-deep); border-radius: 8px; background: var(--ice); }
+.order-answer:empty::before { color: var(--muted); opacity: 1; }
+.chip {
+    min-height: 48px;
+    border: 3px solid var(--outline);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--outline);
+    box-shadow: inset 0 -5px 0 #cfe2f5, 0 5px 0 var(--outline);
+}
+.order-answer .chip { box-shadow: inset 0 -5px 0 #cfe2f5, 0 3px 0 var(--outline); }
+.order-answer .chip.is-correct { background: #c9efd5; }
+.order-answer .chip.is-wrong { background: #fbd0c8; }
+
+/* teaching happens at the chalkboard on its easel */
+.teach { border: 10px solid var(--wood); outline: 3px solid var(--outline); border-radius: 2px; box-shadow: 8px 8px 0 3px rgb(29 35 64 / 30%); margin-bottom: 40px; position: relative; }
+.teach::after { content: ""; position: absolute; left: 14%; right: 14%; top: calc(100% + 13px); height: 34px; background: linear-gradient(90deg, var(--outline) 0 3px, var(--wood) 3px 13px, var(--outline) 13px 16px, transparent 16px calc(100% - 16px), var(--outline) calc(100% - 16px) calc(100% - 13px), var(--wood) calc(100% - 13px) calc(100% - 3px), var(--outline) calc(100% - 3px)); }
+
+/* the broken machine is frozen solid; fixing the code thaws it */
+.machine.is-broken {
+    background-color: #cfe9f8;
+    box-shadow: inset 0 0 0 5px rgb(255 255 255 / 70%), 6px 6px 0 var(--outline);
+    padding-top: 30px;
+}
+.machine.is-broken::before { filter: saturate(0.25) brightness(1.15); }
+.machine.is-broken::after { filter: saturate(0.25) brightness(1.15); }
+.machine.is-broken .machine-head::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 22px;
+    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 22%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%220%22 width=%2240%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%223%22 width=%2240%22 height=%223%22 fill=%22%23f2faff%22/%3E%3Crect x=%222%22 y=%226%22 width=%228%22 height=%2212%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2210%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%224%22 y=%2218%22 width=%224%22 height=%222%22 fill=%22%231d2340%22/%3E%3Crect x=%2213%22 y=%226%22 width=%228%22 height=%227%22 fill=%22%231d2340%22/%3E%3Crect x=%2215%22 y=%226%22 width=%224%22 height=%225%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2215%22 y=%2213%22 width=%224%22 height=%222%22 fill=%22%231d2340%22/%3E%3Crect x=%2221%22 y=%226%22 width=%228%22 height=%2215%22 fill=%22%231d2340%22/%3E%3Crect x=%2223%22 y=%226%22 width=%224%22 height=%2213%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2223%22 y=%2221%22 width=%224%22 height=%222%22 fill=%22%231d2340%22/%3E%3Crect x=%2231%22 y=%226%22 width=%228%22 height=%229%22 fill=%22%231d2340%22/%3E%3Crect x=%2233%22 y=%226%22 width=%224%22 height=%227%22 fill=%22%23bfe6f8%22/%3E%3Crect x=%2233%22 y=%2215%22 width=%224%22 height=%222%22 fill=%22%231d2340%22/%3E%3C/svg%3E") 0 0 / 40px 22px repeat-x;
+    image-rendering: pixelated;
+    pointer-events: none;
+}
+.machine.is-fixed { animation: thaw 0.9s ease-out; }
+@keyframes thaw { 0% { background-color: #cfe9f8; } 100% { background-color: #b8e0c4; } }
+
+/* the result banner comes from Bit */
+.lesson-footer { border-top: 3px solid var(--outline); background: var(--paper); }
+.lesson-footer.is-correct { background: var(--right-soft); border-top-color: var(--outline); }
+.lesson-footer.is-wrong { background: var(--wrong-soft); border-top-color: var(--outline); }
+.feedback-icon {
+    width: 64px;
+    border: 3px solid var(--outline);
+    border-radius: 8px;
+    background-color: #bfe6f8;
+    background-image: url("../assets/mascot-happy.webp"), url("../assets/mascot.webp");
+    background-position: 52% 6%;
+    background-size: 205% auto;
+    background-repeat: no-repeat;
+    animation: plop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.is-wrong .feedback-icon { background-image: url("../assets/mascot-blink.webp"), url("../assets/mascot.webp"); background-color: #ffd9d0; }
+.feedback-icon::before { content: none !important; }
+.is-correct .feedback strong { color: var(--right); }
+.is-wrong .feedback strong { color: var(--wrong); }
+:root[data-theme="dark"] .is-correct .feedback strong { color: #7fdca3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .is-correct .feedback strong { color: #7fdca3; } }
+:root[data-theme="dark"] .is-wrong .feedback strong { color: #ff9a8a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .is-wrong .feedback strong { color: #ff9a8a; } }
+.feedback strong { font-size: 34px; }
+.lesson-action { min-height: 58px; font-size: 19px; box-shadow: 0 6px 0 var(--outline); }
+.lesson-action.is-success { background: var(--right); color: #fff; }
+.lesson-action.is-error { background: var(--wrong); color: #fff; }
+
+/* the opening card: a level card with the words to collect */
+.lesson-intro { position: relative; padding: 30px 32px 28px; border: 3px solid var(--outline); border-radius: 6px; background: var(--paper); box-shadow: 8px 8px 0 var(--outline); }
+.lesson-intro::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    width: auto;
+    top: -14px;
+    height: 18px;
+    rotate: 0deg;
+    border: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23fbfdff%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23fbfdff%22/%3E%3C/svg%3E") 0 100% / 24px 18px repeat-x;
+    image-rendering: pixelated;
+}
+:root[data-theme="dark"] .lesson-intro::before { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23dce5f5%22/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lesson-intro::before { background-image: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23dce5f5%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%2305070f%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23dce5f5%22/%3E%3C/svg%3E"); } }
+.lesson-intro h2 { font-size: 64px; line-height: 0.9; }
+.lesson-intro > :not(.intro-meta) { max-width: calc(100% - 150px); }
+.lesson-intro::after {
+    content: "";
+    position: absolute;
+    right: 28px;
+    top: 26px;
+    width: 120px;
+    height: 150px;
+    background: var(--art, url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 9 14%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%222%22 y=%220%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%221%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%222%22 width=%227%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%223%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%226%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%223%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%225%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%227%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%23f08a24%22/%3E%3Crect x=%226%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%227%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%226%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%23a8402a%22/%3E%3Crect x=%223%22 y=%227%22 width=%224%22 height=%221%22 fill=%22%23d4573b%22/%3E%3Crect x=%227%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23a8402a%22/%3E%3Crect x=%225%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%228%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%225%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%228%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2210%22 width=%226%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%227%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23d6e6f6%22/%3E%3Crect x=%228%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%23d6e6f6%22/%3E%3Crect x=%222%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%225%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%227%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%23d6e6f6%22/%3E%3Crect x=%228%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2212%22 width=%224%22 height=%221%22 fill=%22%23d6e6f6%22/%3E%3Crect x=%226%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2213%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E")) 50% 100% / contain no-repeat;
+    image-rendering: pixelated;
+}
+.lesson-intro.is-python { --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 11 13%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%224%22 y=%220%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%221%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%227%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%222%22 width=%223%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%227%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%228%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%223%22 width=%225%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%228%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%225%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%235cb886%22/%3E%3Crect x=%226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%227%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%229%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%225%22 width=%225%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%227%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%232a7454%22/%3E%3Crect x=%229%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%223%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%235cb886%22/%3E%3Crect x=%226%22 y=%226%22 width=%223%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%229%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2210%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%227%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%228%22 y=%227%22 width=%222%22 height=%221%22 fill=%22%232a7454%22/%3E%3Crect x=%2210%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%233f9a6b%22/%3E%3Crect x=%227%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2210%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%229%22 width=%2211%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%225%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%226%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%225%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%236a421f%22/%3E%3Crect x=%226%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%2212%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.lesson-intro.is-html { --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 15 14%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%225%22 y=%220%22 width=%225%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%225%22 y=%221%22 width=%225%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2210%22 y=%221%22 width=%222%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%222%22 width=%229%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2212%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%223%22 y=%223%22 width=%229%22 height=%221%22 fill=%22%23d4573b%22/%3E%3Crect x=%2212%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2213%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%222%22 y=%224%22 width=%2211%22 height=%221%22 fill=%22%23d4573b%22/%3E%3Crect x=%2213%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2214%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%2213%22 height=%221%22 fill=%22%23a8402a%22/%3E%3Crect x=%2214%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%226%22 width=%2215%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%2211%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%2213%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%223%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%229%22 y=%228%22 width=%223%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2212%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%2213%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%223%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23ffd27a%22/%3E%3Crect x=%225%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%226%22 y=%229%22 width=%223%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%229%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23ffd27a%22/%3E%3Crect x=%2211%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2212%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%2213%22 y=%229%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%223%22 y=%2210%22 width=%229%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2212%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%2213%22 y=%2210%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2211%22 width=%224%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%226%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%2211%22 width=%222%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%229%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%2211%22 width=%223%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%2213%22 y=%2211%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%2212%22 width=%224%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%226%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%227%22 y=%2212%22 width=%222%22 height=%221%22 fill=%22%238e5a2c%22/%3E%3Crect x=%229%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%2210%22 y=%2212%22 width=%223%22 height=%221%22 fill=%22%23cf9a62%22/%3E%3Crect x=%2213%22 y=%2212%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%2213%22 width=%2213%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.lesson-intro.is-css { --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 7 9%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%223%22 y=%220%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%224%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%224%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%237286e8%22/%3E%3Crect x=%225%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%224%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%237286e8%22/%3E%3Crect x=%225%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%224%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%237286e8%22/%3E%3Crect x=%226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%222%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%223%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%224%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%237286e8%22/%3E%3Crect x=%226%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%23a9b8ff%22/%3E%3Crect x=%224%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%237286e8%22/%3E%3Crect x=%225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%237286e8%22/%3E%3Crect x=%224%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E"); }
+.intro-words ul { gap: 12px; }
+.intro-words li {
+    position: relative;
+    padding: 10px 16px 10px 46px;
+    border: 3px solid var(--outline);
+    border-radius: 10px;
+    background: var(--ice) url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 7 9%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%223%22 y=%220%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%224%22 y=%221%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%222%22 width=%222%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%224%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%233fb393%22/%3E%3Crect x=%225%22 y=%222%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%223%22 width=%222%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%224%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%233fb393%22/%3E%3Crect x=%225%22 y=%223%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%224%22 width=%223%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%224%22 y=%224%22 width=%222%22 height=%221%22 fill=%22%233fb393%22/%3E%3Crect x=%226%22 y=%224%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%222%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%23fbfdff%22/%3E%3Crect x=%223%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%224%22 y=%225%22 width=%222%22 height=%221%22 fill=%22%233fb393%22/%3E%3Crect x=%226%22 y=%225%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%221%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%226%22 width=%222%22 height=%221%22 fill=%22%237fe0c0%22/%3E%3Crect x=%224%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%233fb393%22/%3E%3Crect x=%225%22 y=%226%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%222%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%233fb393%22/%3E%3Crect x=%224%22 y=%227%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3Crect x=%223%22 y=%228%22 width=%221%22 height=%221%22 fill=%22%231d2340%22/%3E%3C/svg%3E") 12px 50% / 24px auto no-repeat;
+    image-rendering: auto;
+    box-shadow: inset 0 4px 0 rgb(255 255 255 / 75%), 0 5px 0 var(--outline);
+}
+.intro-words li code { font-size: 20px; }
+.intro-meta { gap: 10px 14px; border-top: 3px dashed var(--line-soft); }
+.intro-meta li { padding: 4px 10px; border: 2px solid var(--outline); border-radius: 6px; background: var(--surface-2); }
+
+/* celebration: the snowman is built */
+.celebration { border: 3px solid var(--outline); outline: 0; border-radius: 8px; box-shadow: 10px 10px 0 rgb(29 35 64 / 50%); overflow: visible; padding-bottom: 40px; background: var(--paper) url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 18%22 shape-rendering=%22crispEdges%22%3E%3Crect x=%220%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%220%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23fbfdff%22/%3E%3Crect x=%224%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%224%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23fbfdff%22/%3E%3Crect x=%228%22 y=%222%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%228%22 y=%225%22 width=%224%22 height=%2213%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2212%22 y=%223%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2212%22 y=%226%22 width=%224%22 height=%2212%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2216%22 y=%225%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2216%22 y=%228%22 width=%224%22 height=%2210%22 fill=%22%23fbfdff%22/%3E%3Crect x=%2220%22 y=%226%22 width=%224%22 height=%223%22 fill=%22%231d2340%22/%3E%3Crect x=%2220%22 y=%229%22 width=%224%22 height=%229%22 fill=%22%23fbfdff%22/%3E%3C/svg%3E") 0 100% / 24px 18px repeat-x; }
+.celebration::backdrop { background: rgb(20 32 74 / 78%); }
+
+/* ---------- phones ---------- */
+@media (max-width: 760px) {
+    .unit-banner { min-height: 160px; padding: 56px 16px 36px; }
+    .unit-banner h2 { font-size: 38px; }
+    .node-circle { width: 72px; }
+}
+@media (max-width: 640px) {
+    .lesson-header { height: 140px; padding-top: 10px; }
+    .steps { left: 14px; right: 74px; bottom: 16px; height: 46px; }
+    .steps::before { right: -74px; }
+    .steps li { height: 46px; }
+    .steps li::after { width: 22px; height: 30px; }
+    .steps .is-teach::after { width: 12px; height: 24px; left: calc(50% - 6px); }
+    .stage-goal { right: 10px; bottom: 12px; scale: 0.78; transform-origin: bottom right; }
+    .lesson { padding-top: 30px; }
+    .lesson-question:not(:empty) { font-size: 28px; padding: 14px 16px 16px; }
+    .lesson-intro > :not(.intro-meta) { max-width: none; }
+    .lesson-intro::after { width: 64px; height: 80px; top: 18px; right: 16px; }
+    .lesson-intro h2 { max-width: calc(100% - 70px); }
+    .lesson-intro { padding: 24px 18px; }
+    .lesson-intro h2 { font-size: 48px; }
+    .lesson-mascot { margin-bottom: 26px; }
+    .feedback-icon { width: 52px; }
+    .feedback strong { font-size: 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .snowball, .steps li::after { transition: none; }
+    .stage-goal span, .feedback-icon, .machine.is-fixed { animation: none !important; }
+}
