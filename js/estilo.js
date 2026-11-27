@@ -1,7 +1,8 @@
 // Style guide: colour roles, Bit's moods and every sprite, drawn from the same sources the site uses.
 import { h } from "./dom.js";
 import { createMascot } from "./mascot.js";
-import { SPRITES } from "./vale-sprites.js";
+import { ART, frame } from "./vale-art.js";
+import { animate } from "./vale-engine.js";
 
 const COLOURS = [
     ["--outline", "Tinta", "Contornos e texto"],
@@ -30,7 +31,17 @@ document.getElementById("moods").append(...MOODS.map(([mood, label]) => {
     return h("figure", { className: "mood" }, bit.root, h("figcaption", {}, h("code", { textContent: mood }), ` ${label}`));
 }));
 
-document.getElementById("sprite-list").append(...Object.entries(SPRITES).map(([name, s]) => h("figure", { className: "sprite-card" },
-    h("span", { className: "sprite-art", innerHTML: `<svg viewBox="0 0 ${s.w} ${s.h}" width="${s.w * 5}" height="${s.h * 5}" shape-rendering="crispEdges" aria-hidden="true">${s.day}</svg>` }),
-    h("figcaption", { textContent: name })
-)));
+// Every sprite at 3x, playing its frames; night colours follow the page theme.
+const dark = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+document.getElementById("sprite-list").append(...Object.entries(ART).map(([name, s]) => {
+    const cv = h("canvas", { width: s.w * 3, height: s.h * 3, ariaHidden: "true" });
+    const ctx = cv.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    const tile = { el: cv, t: 0, update(dt) { this.t += dt; }, render() {
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        ctx.drawImage(frame(name, Math.floor(this.t * 6) % s.frames.length, dark()), 0, 0, cv.width, cv.height);
+    } };
+    if (s.frames.length > 1) animate(tile); else tile.render();
+    return h("figure", { className: "sprite-card" }, h("span", { className: "sprite-art" }, cv),
+        h("figcaption", { textContent: s.frames.length > 1 ? `${name} · ${s.frames.length} quadros` : name }));
+}));

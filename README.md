@@ -29,7 +29,7 @@ sign-in is refused.
 | --- | --- |
 | `*.html` | One page each: home (`index.html`), login, sign-up, dashboard, lesson map (`lessons.html`), the lesson player (`lesson.html`) and the style guide (`estilo.html`) |
 | `css/oficina.css`, `css/vale.css` | The look: Bit's workshop (dashboard) and the snowy valley (every other page) |
-| `js/vale.js`, `js/vale-sprites.js` | Draws the pixel scenery (skies, map landscape, lesson stage, small scenes) from character-grid sprites. It only reads the page, so no other script depends on it |
+| `js/vale.js`, `js/vale-engine.js`, `js/vale-art.js` | The pixel scenery: skies with live stars and aurora, the valley behind each unit on the map, the snowball stage in a lesson and the small living scenes (snow, smoke, fire, creatures). `vale-art.js` holds the sprites, `vale-engine.js` the particle systems, creatures and scenes, and `vale.js` puts them on the pages. It only reads the page, so no other script depends on it |
 | `js/content/` | The lessons for each track. The format is described at the top of `js/content.js` |
 | `js/lesson.js` | The lesson player: steps, exercises, feedback and the end-of-lesson celebration |
 | `js/grading.js` | How answers are checked: Python by its output, HTML by its parsed tree, CSS by resolved values |
@@ -45,6 +45,11 @@ The site is one world, "O Vale do Bit": outside is a snowy pixel valley, inside 
 Open `estilo.html` for the colours and their roles, type, buttons, answer blocks, Bit's moods,
 scenes and every sprite, all rendered with the site's real CSS. Build new screens from those
 pieces, and add a colour there, with a role, before using it anywhere else.
+
+Sprites follow one style: drawn by hand pixel by pixel or shaded in clean colour bands, never
+speckled; light always from the upper left; a selective outline that darkens the colour it touches
+(soft on the lit side, firm in shadow). Creatures face the way they move. Animation runs at a
+steady 30 frames a second, only for what is on screen, and stops completely with reduced motion.
 
 ## Adding or changing lessons
 
