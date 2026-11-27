@@ -7,6 +7,7 @@ import { createMascot } from "./mascot.js";
 import { baseXp as baseXpOf, dailyMission, EXERCISE_XP, maxXp, rankOf } from "./game.js";
 import { afterSession, loadUserData, recordSession } from "./progress.js";
 import { loadPython, normalizeCode, runPython } from "./python.js";
+import { burst } from "./juice.js";
 import { isMuted, play, setMuted } from "./sound.js";
 
 const REVIEW_SIZE = 6;
@@ -116,6 +117,14 @@ if (!lesson.exercises.length) {
 }
 
 const mascot = createMascot();
+// Bit follows along: he thinks while the student types and watches when they pause.
+let typingTimer = 0;
+$("step").addEventListener("input", () => {
+    if (answered) return;
+    mascot.mood("think");
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => { if (!answered) mascot.mood("watch"); }, 1400);
+});
 $("mascot-slot").append(mascot.root);
 
 const words = lesson.teach.filter((card) => card.meaning);
@@ -288,7 +297,7 @@ function hintButton(steps) {
     const button = h("button", { type: "button", className: "hint-button", innerHTML: ICONS.bulb }, label);
     button.addEventListener("click", () => {
         if (answered) return;
-        play("tap");
+        play("hint");
         steps[used]();
         used += 1;
         if (used >= steps.length) button.disabled = true;
@@ -691,7 +700,7 @@ function render() {
 // A near miss (letter case, a typo, an accent) is not a mistake: say what to fix and let the student try again.
 function showNear({ message }) {
     view.onResult?.({ ok: false, message });
-    play("tap");
+    play("near");
     ui.footer.className = "lesson-footer is-near";
     $("feedback-title").textContent = "Quase!";
     $("feedback-detail").textContent = helpAllowed() ? message.replace(/^Quase! /, "") : "Tem um pequeno detalhe diferente. Confira e verifique de novo.";
@@ -715,11 +724,14 @@ function showResult(result) {
         missed.add(step);
         queue.push(step);
     }
-    play(ok ? "correct" : "wrong");
+    // A streak climbs: each right answer in a row plays a little higher and the flame grows.
+    play(ok ? "correct" : "wrong", { rise: Math.max(0, combo - 1) });
+    if (ok) burst(ui.step.querySelector(".option[aria-pressed='true'], .is-correct, .order-answer, .input.is-code, .editor") ?? ui.step);
 
     $("combo").hidden = combo < 2;
     $("combo-count").textContent = combo;
-    if (combo >= 2) $("combo").animate([{ scale: 1.4 }, { scale: 1 }], { duration: 300, easing: "ease-out" });
+    $("combo").dataset.level = String(Math.min(combo, 6));
+    if (combo >= 2) $("combo").animate([{ scale: 1.5 }, { scale: 1 }], { duration: 320, easing: "cubic-bezier(0.3, 1.6, 0.5, 1)" });
 
     ui.footer.className = `lesson-footer ${ok ? "is-correct" : "is-wrong"}`;
     $("feedback-title").textContent = ok ? pick(PRAISE) : "Resposta incorreta";
@@ -730,7 +742,8 @@ function showResult(result) {
     setReady(true);
 
     if (ok) {
-        mascot.mood("happy");
+        clearTimeout(typingTimer);
+        mascot.mood(combo >= 3 ? "wow" : "happy");
         mascot.say(combo >= 3 ? `${combo} acertos seguidos! Você está voando!` : $("feedback-title").textContent);
     } else if (show) {
         mascot.pointAt(show);
@@ -769,7 +782,13 @@ async function finish() {
     renderSteps();
     ui.action.disabled = true;
     mascot.hush();
-    play("done");
+    // Finishing the last main lesson of a unit is its own moment: the aurora lights up.
+    const unit = lesson.track.units?.find((candidate) => candidate.lessons.includes(lesson));
+    const unitDone = !review && unit && unit.lessons.filter((other) => !other.creative)
+        .every((other) => other === lesson || data.completedLessons.includes(other.id));
+    $("celebration").classList.toggle("is-unit-done", Boolean(unitDone));
+    if (unitDone) $("celebration-title").textContent = "Unidade completa!";
+    play(unitDone ? "unit" : "done");
     $("repeat").href = review ? "lesson.html?review" : `lesson.html?id=${lesson.id}`;
     $("next").href = review ? "dashboard.html" : lesson.next ? `lesson.html?id=${lesson.next.id}` : `lessons.html?track=${lesson.track.id}`;
     $("next").textContent = review ? "Voltar ao início" : lesson.next ? "Próxima lição" : "Ver trilha";
@@ -806,6 +825,7 @@ async function finish() {
     dialog.showModal();
     host.mood("cheer");
     host.say(rankedUp ? `Agora você é ${after.name}!`
+        : unitDone ? `Unidade completa! A aurora acendeu sobre "${unit.title}".`
         : review ? "Revisão feita! Seus erros estão sumindo."
         : lesson.machine ? "Tudo funcionando de novo! Você é demais!"
         : lesson.challenge ? "Desafio vencido! Que orgulho!"

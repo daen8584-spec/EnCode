@@ -149,7 +149,13 @@ function initWelcome() {
     const steps = [...dialog.querySelectorAll(".welcome-step")];
     const dots = [...dialog.querySelectorAll(".welcome-dots i")];
     const mascot = createMascot();
-    const lines = [`Oi, ${firstName}! Eu sou o ${MASCOT_NAME}, seu professor.`, "Pode contar comigo em cada passo.", "Pronto? Vamos juntos!"];
+    const lines = [
+        `Oi, ${firstName}! Eu sou o ${MASCOT_NAME}, seu professor.`,
+        "Esta é a minha oficina. Fique à vontade!",
+        "Lá fora fica o vale. Vamos explorar juntos?",
+        "Essa é a parte mais divertida!",
+        "Pronto? Vamos juntos!"
+    ];
     let current = 0;
     $("welcome-mascot").append(mascot.root);
     $("welcome-title").textContent = "Que bom ter você na turma!";

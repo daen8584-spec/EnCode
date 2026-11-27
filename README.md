@@ -27,7 +27,9 @@ sign-in is refused.
 
 | Path | What it holds |
 | --- | --- |
-| `*.html` | One page each: login, sign-up, dashboard, lesson map (`lessons.html`) and the lesson player (`lesson.html`) |
+| `*.html` | One page each: home (`index.html`), login, sign-up, dashboard, lesson map (`lessons.html`), the lesson player (`lesson.html`) and the style guide (`estilo.html`) |
+| `css/oficina.css`, `css/vale.css` | The look: Bit's workshop (dashboard) and the snowy valley (every other page) |
+| `js/vale.js`, `js/vale-sprites.js` | Draws the pixel scenery (skies, map landscape, lesson stage, small scenes) from character-grid sprites. It only reads the page, so no other script depends on it |
 | `js/content/` | The lessons for each track. The format is described at the top of `js/content.js` |
 | `js/lesson.js` | The lesson player: steps, exercises, feedback and the end-of-lesson celebration |
 | `js/grading.js` | How answers are checked: Python by its output, HTML by its parsed tree, CSS by resolved values |
@@ -36,6 +38,13 @@ sign-in is refused.
 | `firestore.rules` | Who may read and write what. Each student can only touch their own `users/{uid}` |
 | `vendor/` | Third-party code served from this site (Skulpt), in folders named after their version |
 | `tests/` | Content and security-rule tests, with their own `package.json` |
+
+## Design
+
+The site is one world, "O Vale do Bit": outside is a snowy pixel valley, inside is Bit's workshop.
+Open `estilo.html` for the colours and their roles, type, buttons, answer blocks, Bit's moods,
+scenes and every sprite, all rendered with the site's real CSS. Build new screens from those
+pieces, and add a colour there, with a role, before using it anywhere else.
 
 ## Adding or changing lessons
 

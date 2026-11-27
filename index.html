@@ -2,11 +2,121 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="0; url=login.html">
-    <title>EnCoder</title>
-    <link rel="canonical" href="login.html">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <meta name="description" content="EnCoder: crianças aprendem Python, HTML e CSS com o Bit, em lições curtas num vale de neve em pixel art.">
+    <meta name="theme-color" content="#8fcff0">
+    <title>EnCoder | Aprenda a programar com o Bit</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Jersey+10&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/mascot.css">
+    <link rel="stylesheet" href="css/oficina.css">
+    <link rel="stylesheet" href="css/vale.css">
+    <script type="module" src="js/vale.js"></script>
+    <script type="module" src="js/home.js"></script>
 </head>
-<body>
-    <a href="login.html">Entrar no EnCoder</a>
+<body class="home">
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <header class="home-top">
+        <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span>EnCoder</a>
+        <nav class="home-nav" aria-label="Conta">
+            <a class="home-link" href="login.html">Entrar</a>
+            <a class="button" href="signup.html">Criar conta</a>
+        </nav>
+    </header>
+
+    <main id="conteudo">
+        <section class="home-hero" aria-labelledby="hero-title">
+            <div class="valley" aria-hidden="true">
+                <div class="sky" data-sun="center" data-sun-y="0.18"><svg class="sky-art" shape-rendering="crispEdges"></svg></div>
+                <svg class="drifts" shape-rendering="crispEdges" preserveAspectRatio="none"></svg>
+                <div class="snow"></div>
+            </div>
+            <div class="hero-copy">
+                <h1 id="hero-title">Aprenda a programar com o Bit</h1>
+                <p>Lições curtas de Python, HTML e CSS para crianças, num vale de neve em pixel art. Cada acerto faz a sua bola de neve crescer.</p>
+                <div class="hero-actions">
+                    <a class="button is-big" href="#experimente">Experimentar agora</a>
+                    <a class="button is-ghost" href="signup.html">Criar conta grátis</a>
+                </div>
+            </div>
+            <div class="hero-bit" id="hero-bit"></div>
+        </section>
+
+        <section class="home-trail" aria-labelledby="trilhas-title">
+            <h2 id="trilhas-title">Três trilhas pelo vale</h2>
+            <p class="section-lead">Cada trilha é um caminho de lições. Você escolhe por onde começar.</p>
+            <ol class="places">
+                <li class="place is-python">
+                    <svg class="vale-scene" data-scene="python" aria-hidden="true" shape-rendering="crispEdges"></svg>
+                    <h3>Python <span>na floresta</span></h3>
+                    <p>Faça o computador falar, contar e tomar decisões. E conserte as máquinas quebradas do Bit.</p>
+                    <code>print("Olá, mundo!")</code>
+                </li>
+                <li class="place is-html">
+                    <svg class="vale-scene" data-scene="html" aria-hidden="true" shape-rendering="crispEdges"></svg>
+                    <h3>HTML <span>na vila</span></h3>
+                    <p>Monte páginas de verdade com títulos, listas, imagens e links, peça por peça.</p>
+                    <code>&lt;h1&gt;Minha página&lt;/h1&gt;</code>
+                </li>
+                <li class="place is-css">
+                    <svg class="vale-scene" data-scene="css" aria-hidden="true" shape-rendering="crispEdges"></svg>
+                    <h3>CSS <span>no jardim</span></h3>
+                    <p>Pinte, arrume e enfeite suas páginas com cores, espaços e cantos redondos.</p>
+                    <code>h1 { color: orange; }</code>
+                </li>
+            </ol>
+        </section>
+
+        <section class="home-how" aria-labelledby="como-title">
+            <div class="how-copy">
+                <h2 id="como-title">Como é uma aula</h2>
+                <ul class="how-list">
+                    <li><b>O Bit explica na lousa.</b> Uma ideia de cada vez, com exemplos curtinhos.</li>
+                    <li><b>Você pratica na hora.</b> Escolhe respostas, completa código, conserta máquinas.</li>
+                    <li><b>A bola de neve cresce.</b> Cada acerto rola a bola até a próxima bandeira. No fim, ela vira um boneco de neve.</li>
+                </ul>
+            </div>
+            <svg class="vale-scene how-scene" data-scene="stage" aria-hidden="true" shape-rendering="crispEdges"></svg>
+        </section>
+
+        <section class="home-try" id="experimente" aria-labelledby="try-title">
+            <div class="try-board">
+                <p class="try-kicker">Sem conta, agora mesmo</p>
+                <h2 id="try-title">Experimente uma lição</h2>
+                <div class="try-step" id="try-1">
+                    <p>Qual comando faz o Python mostrar algo na tela? Complete:</p>
+                    <form class="try-row" id="try-blank-form">
+                        <label class="visually-hidden" for="try-blank">Comando que falta</label>
+                        <code class="try-code"><input id="try-blank" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="12" placeholder="?">("Olá!")</code>
+                        <button class="button" type="submit">Verificar</button>
+                    </form>
+                    <p class="try-feedback" id="try-feedback" role="status"></p>
+                </div>
+                <div class="try-step" id="try-2" hidden>
+                    <p>Agora troque <b>Ana</b> pelo seu nome e toque em Executar:</p>
+                    <form class="try-row" id="try-run-form">
+                        <label class="visually-hidden" for="try-code">Seu código</label>
+                        <input class="try-editor" id="try-code" value='print("Oi, Ana!")' autocomplete="off" autocapitalize="off" spellcheck="false">
+                        <button class="button" type="submit">Executar</button>
+                    </form>
+                    <pre class="try-output" id="try-output" aria-live="polite">Toque em Executar para ver a saída.</pre>
+                </div>
+                <div class="try-step" id="try-3" hidden>
+                    <p class="try-done">Você acabou de programar! Crie uma conta para guardar seu progresso e seguir pelo vale.</p>
+                    <a class="button is-big" href="signup.html">Criar conta e continuar</a>
+                </div>
+            </div>
+            <div class="try-bit" id="try-bit"></div>
+        </section>
+    </main>
+
+    <footer class="home-foot">
+        <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span>EnCoder</a>
+        <p>Programação para crianças, no seu ritmo.</p>
+        <nav aria-label="Rodapé"><a href="login.html">Entrar</a><a href="signup.html">Criar conta</a></nav>
+    </footer>
 </body>
 </html>

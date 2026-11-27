@@ -1138,3 +1138,43 @@ body:has(.lesson) {
 @media (prefers-reduced-motion: reduce) {
     .machine.is-fixed::before, .machine.is-fixed::after, .machine.is-broken { animation: none; }
 }
+
+
+/* ---------- the valley seen from the workshop ---------- */
+/* Valley colours, shared with css/vale.css, so the dashboard window and the welcome tour draw the same world. */
+:root { --sky: #8fcff0; --sky-bands: ; --sun: #fff1a8; --sun-ring: #ffe27a; --mtn-far: #c4e2f5; --mtn-far-sh: #b2d7ef; --mtn: #a6d0ec; --mtn-sh: #93c3e4; --cap: #ffffff; --cloud: #ffffff; --cloud-sh: #e1f0fa; --aurora: #3fae8c; --aurora-2: #c77fa6; --snow: #fbfdff; --snow-back: #dbe8f7; }
+:root[data-theme="dark"] { --sky: #1f2c62; --sun: #f3eed0; --sun-ring: #2a3974; --mtn-far: #2d3b78; --mtn-far-sh: #28356c; --mtn: #34448a; --mtn-sh: #2d3c7c; --cap: #c9d5ef; --cloud: #33438a; --cloud-sh: #2c3b7a; --snow: #dce5f5; --snow-back: #b6c4e2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sky: #1f2c62; --sun: #f3eed0; --sun-ring: #2a3974; --mtn-far: #2d3b78; --mtn-far-sh: #28356c; --mtn: #34448a; --mtn-sh: #2d3c7c; --cap: #c9d5ef; --cloud: #33438a; --cloud-sh: #2c3b7a; --snow: #dce5f5; --snow-back: #b6c4e2; } }
+.window-pane .sky.is-sunset { --sky: #f4a66a; --sky-bands: #f7b77c #f9c98e #fbd9a2; --sun: #ff7d45; --sun-ring: #ffa25c; --mtn-far: #9bb3db; --mtn-far-sh: #8aa3ce; --mtn: #7e97c7; --mtn-sh: #6f88bb; --cap: #fff4ea; --cloud: #ffe3c4; --cloud-sh: #f8c99c; }
+.window-pane .sky.is-aurora { --sky: #14204a; --sky-bands: ; --sun: #f3eed0; --sun-ring: #1d2b5e; --mtn-far: #2d3b78; --mtn-far-sh: #28356c; --mtn: #34448a; --mtn-sh: #2d3c7c; --cap: #c9d5ef; --cloud: #24326a; --cloud-sh: #1f2b5c; }
+.sky { position: absolute; inset: 0; overflow: hidden; background: var(--sky); pointer-events: none; }
+.sky-art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sky rect, .vale-scene rect { stroke: none; }
+
+/* the window: real time of day outside, snow some days */
+.window-pane { width: 112px; height: 86px; overflow: hidden; background: var(--sky); }
+.window-pane .sky { bottom: 14px; }
+.window-pane::before { content: ""; position: absolute; inset: auto 0 0; height: 16px; background: var(--snow); border-top: 3px solid var(--snow-back); z-index: 1; }
+.window-pane::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(90deg, transparent calc(50% - 2px), var(--outline) calc(50% - 2px) calc(50% + 2px), transparent calc(50% + 2px)),
+                linear-gradient(transparent calc(45% - 2px), var(--outline) calc(45% - 2px) calc(45% + 2px), transparent calc(45% + 2px));
+}
+.window-pane.is-snowing .sky::after {
+    content: "";
+    position: absolute;
+    inset: -40px 0 0;
+    background-image: radial-gradient(#fff 1.5px, transparent 2px), radial-gradient(#fff 1px, transparent 1.5px);
+    background-size: 18px 18px, 11px 13px;
+    background-position: 0 0, 7px 5px;
+    animation: window-snow 6s linear infinite;
+}
+@keyframes window-snow { to { background-position: 0 36px, 7px 31px; } }
+
+/* the welcome tour: a little scene above each step */
+.welcome .vale-scene { display: block; width: 100%; height: 132px; border: 3px solid var(--outline); border-radius: 6px; background: var(--sky); }
+
+@media (prefers-reduced-motion: reduce) { .window-pane.is-snowing .sky::after { animation: none; } }

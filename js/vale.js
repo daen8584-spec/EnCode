@@ -229,6 +229,69 @@ function drawMap() {
     });
 }
 
+// ---------- small scenes: the home page places, the lesson stage and the welcome tour ----------
+// Each scene is a strip of sky and snow with a few sprites set on the ground line.
+const SCENES = {
+    python: [["pine", 0.1, 5], ["pine_small", 0.24, 4], ["pine", 0.38, 6], ["lantern", 0.55, 4], ["pine", 0.7, 5], ["rock", 0.84, 4], ["pine_small", 0.94, 4]],
+    html: [["cabin", 0.16, 5], ["snowman", 0.38, 4], ["cabin", 0.62, 5], ["penguin", 0.82, 4], ["pine_small", 0.95, 4]],
+    css: [["crystal", 0.1, 5], ["flower", 0.24, 4], ["crystal_pink", 0.4, 6], ["crystal_blue", 0.58, 5], ["flower", 0.74, 4], ["crystal", 0.9, 6]],
+    workshop: [["chest", 0.3, 6], ["lantern", 0.5, 6], ["gear", 0.7, 6]],
+    map: [],
+    stage: []
+};
+
+function drawScene(svg) {
+    const W = svg.clientWidth, H = svg.clientHeight;
+    if (!W || !H) return;
+    const kind = svg.dataset.scene;
+    const u = 4, ground = q(H * 0.68, u);
+    const at = (name) => css(svg, name);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    let g = rect(0, 0, W, ground, at("--sky"));
+    g += mountain(W * 0.25, ground, W * 0.3, H * 0.42, u, at("--mtn-far"), at("--mtn-far-sh"), at("--cap"));
+    g += mountain(W * 0.78, ground, W * 0.28, H * 0.36, u, at("--mtn"), at("--mtn-sh"), at("--cap"));
+    g += rect(0, ground, W, H - ground, at("--snow")) + rect(0, ground, W, u, at("--snow-back"));
+    const px = Math.max(4, Math.round(H / 40));
+    for (const [name, x, scale] of SCENES[kind] ?? []) {
+        const s = SPRITES[name];
+        const size = Math.round(scale * px / 4);
+        g += sprite(name, W * x - (s.w * size) / 2, ground + u * 2 - s.h * size, size);
+    }
+    const ink = at("--outline") || "#1d2340";
+    if (kind === "stage") {
+        // flags along a trail, the snowball part way, the snowman waiting at the end
+        const y = ground + q((H - ground) * 0.45, u);
+        g += rect(W * 0.06, y, W * 0.88, u * 2, at("--snow-back"));
+        const flags = 5;
+        for (let i = 0; i < flags; i++) {
+            const x = W * (0.1 + i * 0.16);
+            const color = i < 2 ? "#24804a" : i === 2 ? "#f2b33d" : "#ffffff";
+            g += rect(x, y - u * 10, u, u * 10, ink) + rect(x + u, y - u * 10, u * 5, u * 4, ink) + rect(x + u, y - u * 9, u * 4, u * 2, color);
+        }
+        const bx = W * 0.36, r = u * 4;
+        g += disc(bx, y - r + u, r + u, u, ink) + disc(bx, y - r + u, r, u, "#ffffff");
+        g += sprite("snowman", W * 0.88, y - SPRITES.snowman.h * px + u * 2, px);
+    }
+    if (kind === "map") {
+        // a winding trail of lesson stones through the pines
+        const pts = [[0.12, 0.9], [0.3, 0.72], [0.5, 0.86], [0.7, 0.7], [0.88, 0.84]];
+        pts.forEach(([x, y], i) => {
+            if (i) {
+                const [px0, py0] = pts[i - 1];
+                for (let k = 0; k <= 10; k++) g += rect(W * (px0 + (x - px0) * k / 10) - u, H * (py0 + (y - py0) * k / 10) - u, u * 2, u * 2, at("--snow-back"));
+            }
+        });
+        pts.forEach(([x, y], i) => {
+            const color = i < 2 ? "#3a63c9" : i === 2 ? "#f2b33d" : "#eef3fa";
+            g += disc(W * x, H * y, u * 6, u, ink) + disc(W * x, H * y, u * 5, u, color);
+        });
+        for (const [name, x] of [["pine", 0.05], ["pine_small", 0.2], ["pine", 0.62], ["pine_small", 0.95]]) {
+            g += sprite(name, W * x - 16, ground - SPRITES[name].h * px + u * 2, px);
+        }
+    }
+    svg.innerHTML = g;
+}
+
 // ---------- the lesson: roll a snowball along the trail, build a snowman ----------
 function setupStage() {
     const header = document.querySelector(".lesson-header");
@@ -289,11 +352,27 @@ function setupBoards() {
     });
 }
 
+// ---------- the workshop window shows the valley at the real time of day ----------
+function setupWindow() {
+    const pane = document.querySelector(".window-pane");
+    const sky = pane?.querySelector(".sky");
+    if (!sky) return;
+    const now = new Date();
+    const hour = now.getHours();
+    const time = hour >= 20 || hour < 6 ? "is-aurora" : hour >= 17 ? "is-sunset" : "is-morning";
+    sky.classList.add(time);
+    sky.dataset.seed = now.toDateString();
+    // The weather changes once a day: same for the whole day, different tomorrow.
+    pane.classList.toggle("is-snowing", rng(now.toDateString())() < 0.5);
+    pane.title = `${time === "is-aurora" ? "Noite" : time === "is-sunset" ? "Fim de tarde" : "Dia"} no vale${pane.classList.contains("is-snowing") ? ", nevando" : ""}`;
+}
+
 // ---------- wiring ----------
 function drawAll() {
     document.querySelectorAll(".sky-art").forEach(drawSky);
     document.querySelectorAll(".drifts").forEach(drawDrifts);
     document.querySelectorAll(".snowcap").forEach(drawCap);
+    document.querySelectorAll(".vale-scene").forEach(drawScene);
     if (document.querySelector(".map")) drawMap();
 }
 
@@ -302,8 +381,12 @@ const soon = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(
 
 if (document.querySelector(".lesson")) setupStage();
 setupBoards();
+setupWindow();
 const resize = new ResizeObserver(soon);
 resize.observe(document.body);
+// Scenes inside dialogs or hidden views have no size until they appear; draw each one when it gets a size.
+const pieces = new ResizeObserver((entries) => entries.forEach(({ target }) => (target.matches(".vale-scene") ? drawScene(target) : drawSky(target))));
+document.querySelectorAll(".vale-scene, .sky-art").forEach((el) => pieces.observe(el));
 new MutationObserver(soon).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", soon);
 const units = document.getElementById("units");
