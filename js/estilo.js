@@ -14,7 +14,7 @@ const COLOURS = [
     ["--snow", "Neve", "O chão de toda tela"],
     ["--ice", "Gelo", "Blocos de resposta"],
     ["--board", "Lousa", "Explicações e código"],
-    ["--wood", "Madeira", "Moldura da lousa, oficina"],
+    ["--wood", "Madeira", "Detalhes de madeira nas cenas"],
     ["--paper", "Papel", "Cartões e diálogos"]
 ];
 

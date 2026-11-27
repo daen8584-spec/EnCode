@@ -28,7 +28,8 @@ sign-in is refused.
 | Path | What it holds |
 | --- | --- |
 | `*.html` | One page each: home (`index.html`), login, sign-up, dashboard, lesson map (`lessons.html`), the lesson player (`lesson.html`) and the style guide (`estilo.html`) |
-| `css/oficina.css`, `css/vale.css` | The look: Bit's workshop (dashboard) and the snowy valley (every other page) |
+| `css/base.css`, `css/app.css`, `css/lesson.css`, `css/map.css` | Layout and components for each kind of page |
+| `css/vale.css`, `css/clean.css` | The look: the valley scenery, and the clean light interface on top (loaded last) |
 | `js/vale.js`, `js/vale-engine.js`, `js/vale-art.js` | The pixel scenery: skies with live stars and aurora, the valley behind each unit on the map, the snowball stage in a lesson and the small living scenes (snow, smoke, fire, creatures). `vale-art.js` holds the sprites, `vale-engine.js` the particle systems, creatures and scenes, and `vale.js` puts them on the pages. It only reads the page, so no other script depends on it |
 | `js/content/` | The lessons for each track. The format is described at the top of `js/content.js` |
 | `js/lesson.js` | The lesson player: steps, exercises, feedback and the end-of-lesson celebration |
@@ -41,7 +42,7 @@ sign-in is refused.
 
 ## Design
 
-The site is one world, "O Vale do Bit": outside is a snowy pixel valley, inside is Bit's workshop.
+The site is one world, "O Vale do Bit": a snowy pixel valley seen through a clean, light interface.
 Open `estilo.html` for the colours and their roles, type, buttons, answer blocks, Bit's moods,
 scenes and every sprite, all rendered with the site's real CSS. Build new screens from those
 pieces, and add a colour there, with a role, before using it anywhere else.

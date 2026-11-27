@@ -1,6 +1,6 @@
 /*
-O Vale do Bit: everything outside Bit's workshop. See tools/DESIGN.md.
-Loads after oficina.css on login, signup, 404, the map and the lesson. The dashboard does not load it.
+O Vale do Bit: the snowy valley scenery and the pages laid out around it. See tools/DESIGN.md.
+Loaded before clean.css, which sets the light interface on top.
 Pixel scenery is drawn by js/vale.js; this file sets its colours and lays the pages out around it.
 */
 

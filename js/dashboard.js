@@ -20,7 +20,7 @@ const TIPS = [
     "Cumpra a missão do dia para abrir o baú de recompensa.",
     "Errou algo? Em Praticar eu trago esses exercícios de volta.",
     "No Dicionário ficam todas as palavras em inglês que você aprendeu.",
-    "Ganhe XP para subir de patente: Filhote, Explorador, Inventor e Mestre.",
+    "Ganhe XP para subir de patente: Aprendiz, Explorador, Inventor e Mestre.",
     "Nos desafios, a XP vale o dobro."
 ];
 
@@ -149,7 +149,7 @@ function initWelcome() {
     const mascot = createMascot();
     const lines = [
         `Oi, ${firstName}! Eu sou o ${MASCOT_NAME}, seu professor.`,
-        "Esta é a minha oficina. Fique à vontade!",
+        "Esta é a minha cabana. Fique à vontade!",
         "Lá fora fica o vale. Vamos explorar juntos?",
         "Essa é a parte mais divertida!",
         "Pronto? Vamos juntos!"

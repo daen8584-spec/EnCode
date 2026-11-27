@@ -537,7 +537,7 @@ const BUILDERS = {
         actors: [["light_tree", 0.92, 16, TWINKLE], ["bullfinch", 0.08, -8, FINCH, { noShadow: true, perch: true }], ["bullfinch", 0.72, 30, FINCH, { flip: true }]],
         lights: [[0.5, -12, 18, [255, 225, 160]], [0.92, -12, 10, [140, 200, 255]]]
     }),
-    workshop: () => ({
+    cabin: () => ({
         props: [at("pine_s", 0.06, 3), at("pine_s2", 0.95, 3), at("pine", 0.88, 18),
             at("cabin_green", 0.36, 16), at("mailbox", 0.6, 22), at("campfire_base", 0.74, 26, { noShadow: true }), at("rock_s", 0.1, 24)],
         actors: [["hare", 0.02, 0.45]],

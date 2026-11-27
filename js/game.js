@@ -10,7 +10,7 @@ export const MASCOT_NAME = "Bit";
 const svg = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
 
 export const RANKS = [
-    { name: "Filhote", min: 0, color: "#d0844a", icon: pixelIcon("hare") },
+    { name: "Aprendiz", min: 0, color: "#d0844a", icon: pixelIcon("hare") },
     { name: "Explorador", min: 60, color: "#1c9f62", icon: pixelIcon("map") },
     { name: "Inventor", min: 180, color: "#2f6fe4", icon: pixelIcon("lightbulb") },
     { name: "Mestre", min: 400, color: "#c27c0a", icon: pixelIcon("crown") }

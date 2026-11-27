@@ -1,4 +1,4 @@
-// O Vale do Bit: the pixel scenery outside Bit's workshop.
+// O Vale do Bit: the pixel scenery of the valley.
 // Draws the skies (with live stars and aurora at night), the snow drifts and caps on the auth pages,
 // the valley behind each unit on the map, the little scenes on the home page, welcome tour and style
 // guide, and the snowball stage at the top of a lesson. Purely decorative: no other script depends on
@@ -221,7 +221,7 @@ function drawMap() {
 }
 
 // ---------- small scenes: the home page places, the welcome tour and the style guide ----------
-// Each <canvas class="vale-scene" data-scene="python|html|css|workshop|map|stage"> becomes a live
+// Each <canvas class="vale-scene" data-scene="python|html|css|cabin|map|stage"> becomes a live
 // strip of valley at 2x: snow falling, smoke rising, creatures going about their day.
 const scenes = new WeakMap();
 function drawScene(el) {
@@ -383,21 +383,6 @@ function setupBoards() {
     });
 }
 
-// ---------- the workshop window shows the valley at the real time of day ----------
-function setupWindow() {
-    const pane = document.querySelector(".window-pane");
-    const sky = pane?.querySelector(".sky");
-    if (!sky) return;
-    const now = new Date();
-    const hour = now.getHours();
-    const time = hour >= 20 || hour < 6 ? "is-aurora" : hour >= 17 ? "is-sunset" : "is-morning";
-    sky.classList.add(time);
-    sky.dataset.seed = now.toDateString();
-    // The weather changes once a day: same for the whole day, different tomorrow.
-    pane.classList.toggle("is-snowing", rng(now.toDateString())() < 0.5);
-    pane.title = `${time === "is-aurora" ? "Noite" : time === "is-sunset" ? "Fim de tarde" : "Dia"} no vale${pane.classList.contains("is-snowing") ? ", nevando" : ""}`;
-}
-
 // ---------- wiring ----------
 function drawAll() {
     document.querySelectorAll(".sky-art").forEach(drawSky);
@@ -412,7 +397,6 @@ const soon = () => { cancelAnimationFrame(frameId); frameId = requestAnimationFr
 
 if (document.querySelector(".lesson")) { setupStage(); setupCelebration(); }
 setupBoards();
-setupWindow();
 const resize = new ResizeObserver(soon);
 resize.observe(document.body);
 // Scenes inside dialogs or hidden views have no size until they appear; draw each one when it gets a size.
