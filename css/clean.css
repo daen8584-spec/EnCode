@@ -321,3 +321,30 @@ img.px-icon.is-sprite { width: 28px; height: 23px; }
 .celebration .stat.is-xp dd { color: var(--gold-ink); }
 .celebration .stat.is-accuracy dd { color: var(--success-ink); }
 .celebration-actions .button:not(.is-ghost) { background: var(--primary); color: var(--on-primary); box-shadow: 0 4px 0 var(--primary-edge); }
+
+/* "put the code in order": lines are cards that follow the theme, the answer area is a soft dashed box */
+.lesson-content h1 { padding: 0; border: 0; border-radius: 0; background: none; color: var(--muted); font: 800 18px/1.2 var(--font); }
+.order-answer { min-height: 96px; padding: 14px; border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); background: var(--surface-2); }
+.order-answer:empty::before { color: var(--muted); font-weight: 700; }
+.chip {
+    min-height: 48px;
+    padding: 10px 16px;
+    border: 2px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 4px 0 var(--lip);
+    font-weight: 600;
+}
+.chip:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-soft); }
+.chip:active:not(:disabled) { transform: translateY(4px); box-shadow: none; }
+.chip:disabled { opacity: 0.45; box-shadow: none; }
+.order-answer .chip { border-color: var(--border-strong); background: var(--surface); color: var(--text); box-shadow: 0 3px 0 var(--lip); }
+.order-answer .chip.is-correct { border-color: var(--success); background: var(--success-soft); color: var(--success-ink); box-shadow: 0 3px 0 var(--lip-success); }
+.order-answer .chip.is-wrong { border-color: var(--error); background: var(--error-soft); color: var(--error-ink); box-shadow: 0 3px 0 var(--lip-error); }
+
+/* other small pieces that were fixed to white */
+.unit-words li { background: var(--surface); color: var(--text); }
+.combo { border: 0; border-radius: 999px; background: var(--surface); color: var(--flame); box-shadow: var(--shadow); }
+.skip-link { border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow-pop); }
+.order-answer { width: 100%; box-sizing: border-box; justify-items: start; }
