@@ -1,3 +1,4 @@
+import { pixelChest } from "./vale-icons.js";
 import { displayName, logOut, requireUser } from "./auth.js";
 import { ALL_LESSONS, TRACKS } from "./content.js";
 import { $, h } from "./dom.js";
@@ -37,11 +38,7 @@ function countUp(element, to) {
     requestAnimationFrame(tick);
 }
 
-const CHEST = `<svg class="chest" viewBox="0 0 64 58" aria-hidden="true">
-    <g class="chest-base"><rect x="6" y="26" width="52" height="28" rx="5" fill="#b8742f" stroke="#6e4216" stroke-width="3"/>
-    <rect x="6" y="34" width="52" height="5" fill="#f4a51c"/><rect x="28" y="31" width="8" height="11" rx="2" fill="#fff3d9" stroke="#6e4216" stroke-width="2"/></g>
-    <g class="chest-lid"><path d="M6 28v-6a14 14 0 0 1 14-14h24a14 14 0 0 1 14 14v6z" fill="#cf8a3c" stroke="#6e4216" stroke-width="3"/>
-    <rect x="6" y="20" width="52" height="5" fill="#f4a51c"/></g></svg>`;
+const CHEST = pixelChest();
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const firstName = displayName(user).split(" ")[0];

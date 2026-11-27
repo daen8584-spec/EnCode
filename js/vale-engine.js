@@ -403,6 +403,29 @@ export class Aurora {
     }
 }
 
+export class Sparkles {
+    constructor(W, H, seed, count = 26) {
+        this.W = W; this.H = H; this.r = rng(seed);
+        this.p = Array.from({ length: count }, () => this.spawn(true));
+    }
+    spawn(any = false) {
+        const cols = ["#ffe48a", "#ffffff", "#9fe0ff", "#ffb3c7", "#a8f5c0"];
+        return { x: this.r() * this.W, y: this.H * (0.15 + this.r() * 0.55), life: any ? this.r() * 1.6 : 0, max: 0.9 + this.r() * 1.2, c: cols[Math.floor(this.r() * cols.length)] };
+    }
+    update(dt) { for (const s of this.p) { s.life += dt; s.y -= 6 * dt; if (s.life > s.max) Object.assign(s, this.spawn()); } }
+    draw(ctx) {
+        for (const s of this.p) {
+            const k = s.life / s.max, x = Math.round(s.x), y = Math.round(s.y);
+            ctx.fillStyle = s.c;
+            ctx.globalAlpha = k < 0.15 ? k / 0.15 : 1 - Math.max(0, k - 0.6) / 0.4;
+            ctx.fillRect(x, y, 1, 1);
+            if (k > 0.2 && k < 0.7) { ctx.fillRect(x - 1, y, 1, 1); ctx.fillRect(x + 1, y, 1, 1); ctx.fillRect(x, y - 1, 1, 1); ctx.fillRect(x, y + 1, 1, 1); }
+            if (k > 0.35 && k < 0.55) { ctx.fillRect(x - 2, y, 1, 1); ctx.fillRect(x + 2, y, 1, 1); ctx.fillRect(x, y - 2, 1, 1); ctx.fillRect(x, y + 2, 1, 1); }
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
 export class Stars {
     constructor(W, top, seed) {
         const r = rng(seed);
@@ -484,6 +507,7 @@ export const OWL = [[0, R(2.5, 5)], [1, 0.06], [2, 0.12], [1, 0.06], [0, R(1.5, 
 export const DEER = [[0, 0.9], [1, 0.9], [0, 0.9], [4, 0.25], [0, 0.9], [1, 0.9], [2, 0.5], [3, 0.4], [2, 0.4], [3, 0.4], [2, 0.6], [3, 0.4], [0, 0.6], [5, 0.3], [0, R(1, 2.5)]];
 export const FINCH = [[0, R(0.8, 2)], [1, 0.18], [0, 0.25], [1, 0.18], [0, 0.6], [3, 0.3], [0, R(0.6, 1.6)], [2, 0.15]];
 export const TWINKLE = [[0, 0.5], [1, 0.5], [2, 0.5]];
+export const WAVE = [0, 1, 2, 3, 4, 5].map((f) => [f, 0.11]);
 
 // ---------------------------------------------------------------- scenes
 // A scene is built for its canvas size: x positions are fractions of the width, bottoms are measured
@@ -520,7 +544,15 @@ const BUILDERS = {
         fire: 0.74, chimneys: [[0.36, 9]], smoke: [[0.74, -4, 0.4]]
     }),
     map: () => ({ props: [at("pine_s", 0.05, 4), at("pine_s2", 0.24, 3), at("pine", 0.64, 6), at("pine_s", 0.95, 4), at("birch", 0.82, 8, { min: 200 })], trail: true }),
-    stage: () => ({ props: [], stage: true })
+    stage: () => ({ props: [], stage: true }),
+    // the end of a lesson: the snowman is built, every flag is green, sparkles in the air
+    celebrate: () => ({
+        props: [at("pine_s", 0.04, 3), at("pine_s2", 0.96, 3), at("pine", 0.12, 14), at("pine_b", 0.9, 15),
+            at("snowman", 0.74, 24)],
+        actors: [["hare", 0.04, 0.7], ["flag_done", 0.5, 12, WAVE, { seed: "a" }], ["flag_done", 0.58, 10, WAVE, { seed: "b" }],
+            ["flag_done", 0.86, 12, WAVE, { seed: "c" }]],
+        sparkles: true
+    })
 };
 
 export class Scene {
@@ -569,6 +601,7 @@ export class Scene {
         }
         for (const p of this.props) if (p.name === "lamppost") this.lights.push({ x: p.x + 7, y: p.bottom - ART.lamppost.h + 6, r: 11 });
         this.trail = def.trail; this.stageDemo = def.stage ? new StageDemo(W, H, top) : null;
+        this.sparkles = def.sparkles ? new Sparkles(W, H, seed) : null;
     }
     fireY() { const b = this.props.find((p) => p.name === "campfire_base"); return b ? b.bottom - 6 : this.top; }
     update(dt) {
@@ -579,6 +612,7 @@ export class Scene {
         for (const f of this.fx) f.update(dt, this.t);
         for (const c of this.clouds) { c.x += dt * 1.6 * c.s; if (c.x > this.W + 10) c.x = -40; }
         this.stageDemo?.update(dt);
+        this.sparkles?.update(dt);
     }
     render(dt = 0) {
         const { ctx, W, H, top, t, night, pal } = this;
@@ -604,6 +638,7 @@ export class Scene {
             glow(ctx, l.x, l.y, l.r * flick, l.c ?? [255, 205, 110], (night ? l.n ?? 0.5 : 0) * flick, night);
         }
         for (const f of this.fx) f.glow?.(ctx, night);
+        this.sparkles?.draw(ctx);
         this.snow.draw(ctx, true, night);
     }
     drawTrail(ctx) {

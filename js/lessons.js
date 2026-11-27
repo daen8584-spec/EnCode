@@ -1,3 +1,4 @@
+import { pixelIcon } from "./vale-icons.js";
 import { requireUser } from "./auth.js";
 import { findTrack, TRACKS } from "./content.js";
 import { $, h } from "./dom.js";
@@ -11,8 +12,8 @@ const ICONS = {
     current: svg('<path d="M8 5v14l11-7z" fill="currentColor"/>'),
     locked: svg('<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'),
     machine: svg('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'),
-    challenge: svg('<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/>'),
-    creative: svg('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>')
+    challenge: pixelIcon("trophy"),
+    creative: pixelIcon("palette")
 };
 const SVG_NS = "http://www.w3.org/2000/svg";
 

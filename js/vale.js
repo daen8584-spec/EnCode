@@ -4,7 +4,7 @@
 // guide, and the snowball stage at the top of a lesson. Purely decorative: no other script depends on
 // it, and it only reads the DOM the page scripts render.
 import { ART } from "./vale-art.js";
-import { Aurora, Scene, Stars, animate, cloud, drawSnowman, draw, land, rng, shadow, skyBands, sun } from "./vale-engine.js";
+import { Aurora, Hare, Scene, Snow, Stars, animate, cloud, drawSnowman, draw, land, rng, shadow, skyBands, sun } from "./vale-engine.js";
 
 const root = document.documentElement;
 const night = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
@@ -39,7 +39,7 @@ function drawSky(el) {
     const sky = el.closest(".sky");
     if (!W || !H || !sky) return;
     const ground = parseFloat(css(sky, "--ground")) || 0;
-    const narrow = W < 640, short = H < 260, u = narrow || short ? 4 : 6;
+    const narrow = W < 640, short = H < 260, u = W < 200 ? 2 : narrow || short ? 4 : 6;
     const w = Math.ceil(W / u), h = Math.ceil(H / u), top = Math.round((H - ground) / u);
     const aurora = sky.classList.contains("is-aurora");
     const dark = night() || aurora;
@@ -225,6 +225,7 @@ function drawMap() {
 // strip of valley at 2x: snow falling, smoke rising, creatures going about their day.
 const scenes = new WeakMap();
 function drawScene(el) {
+    if (el.classList.contains("celebration-scene")) return;
     const W = el.clientWidth, H = el.clientHeight;
     if (!W || !H) return;
     let s = scenes.get(el);
@@ -342,6 +343,87 @@ function setupStage() {
     animate(st);
 }
 
+// ---------- the lesson page: the valley goes on around the lesson ----------
+// A fixed canvas behind everything: snow drifting down, groves of snowy pines and birches in the
+// margins beside the lesson, and a hare going about its business at the edge of the snow.
+function setupLessonValley() {
+    const lesson = document.querySelector(".lesson");
+    if (!lesson) return;
+    const el = document.createElement("canvas");
+    el.className = "page-valley";
+    el.setAttribute("aria-hidden", "true");
+    document.body.prepend(el);
+    const ctx = el.getContext("2d");
+    const v = { el, t: 0 };
+    const build = () => {
+        const W = Math.ceil(innerWidth / PX), H = Math.ceil(innerHeight / PX);
+        el.width = W; el.height = H;
+        v.W = W; v.H = H; v.dark = night();
+        v.snow = new Snow(W, H, "lesson-snow", Math.round(W * H / 900), Math.round(W * H / 2200));
+        const box = lesson.getBoundingClientRect();
+        const left = Math.floor(box.left / PX) - 4, right = Math.ceil(box.right / PX) + 4;
+        const r = rng("lesson-valley");
+        v.props = [];
+        const grove = (x0, x1) => {
+            if (x1 - x0 < 30) return;
+            const names = ["pine", "pine_s", "pine_b", "pine_s2", "birch", "pine_s", "rock_s", "stump"];
+            for (let y = Math.round(H * 0.32); y < H - 10; y += 22 + Math.floor(r() * 18)) {
+                const name = names[Math.floor(r() * names.length)], s = ART[name];
+                const x = Math.round(x0 + r() * Math.max(1, x1 - x0 - s.w));
+                if (x + s.w > x1 + 6) continue;
+                v.props.push({ name, x, bottom: y, flip: r() < 0.5 });
+            }
+        };
+        grove(2, left);
+        grove(right, W - 2);
+        v.props.sort((a, b) => a.bottom - b.bottom);
+        v.hare = left > 46 ? new Hare(4, left - 32, H - 8, "lesson-hare") : null;
+        v.ground = night() ? "#9cadd6" : "#d5e2f2";
+        v.render(0);
+    };
+    v.update = (dt) => { v.t += dt; v.snow.update(dt, v.t); v.hare?.update(dt); };
+    v.render = () => {
+        ctx.clearRect(0, 0, v.W, v.H);
+        const dark = v.dark;
+        ctx.fillStyle = v.ground;                         // soft drift lines on the snow
+        const r = rng("drifts");
+        for (let i = 0; i < 9; i++) {
+            const x0 = Math.floor(r() * v.W), y0 = Math.floor(v.H * 0.25 + r() * v.H * 0.75), len = 30 + Math.floor(r() * 60);
+            for (let x = x0; x < x0 + len; x++) ctx.fillRect(x, y0 - Math.round(Math.sin((x - x0) / len * Math.PI) * 2), 1, 1);
+        }
+        for (const p of v.props) shadow(ctx, p.x + ART[p.name].w / 2, p.bottom - 1, ART[p.name].w * 0.85, ART[p.name].h, dark);
+        for (const p of v.props) draw(ctx, p.name, 0, p.x, p.bottom, p.flip, dark);
+        v.hare?.draw(ctx, dark);
+        v.snow.draw(ctx, false, dark);
+        v.snow.draw(ctx, true, dark);
+    };
+    let pending = 0;
+    const again = () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(build); };
+    addEventListener("resize", again);
+    new MutationObserver(again).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+    build();
+    animate(v);
+}
+
+// ---------- the end of a lesson: the snowman stands finished; after a whole unit, under the aurora ----------
+function setupCelebration() {
+    const dialog = document.getElementById("celebration");
+    if (!dialog) return;
+    const el = document.createElement("canvas");
+    el.className = "vale-scene celebration-scene";
+    el.dataset.scene = "celebrate";
+    el.setAttribute("aria-hidden", "true");
+    dialog.prepend(el);
+    const scene = new Scene(el, "celebrate", () => night() || dialog.classList.contains("is-unit-done"));
+    const s = { el, live: false, update: (dt) => scene.update(dt), render: (dt) => scene.render(dt) };
+    const show = () => {
+        if (!dialog.open || !el.clientWidth) return;
+        scene.layout(Math.round(el.clientWidth / PX), Math.round(el.clientHeight / PX));
+        if (!s.live) { s.live = true; animate(s); }
+    };
+    new MutationObserver(() => requestAnimationFrame(show)).observe(dialog, { attributes: true, attributeFilter: ["open", "class"] });
+}
+
 // ---------- auth pages: the chalkboard on the easel shows lesson 1 of each track ----------
 function setupBoards() {
     document.querySelectorAll("[data-board-tabs]").forEach((board) => {
@@ -390,7 +472,7 @@ function drawAll() {
 let frameId = 0;
 const soon = () => { cancelAnimationFrame(frameId); frameId = requestAnimationFrame(drawAll); };
 
-if (document.querySelector(".lesson")) setupStage();
+if (document.querySelector(".lesson")) { setupStage(); setupLessonValley(); setupCelebration(); }
 setupBoards();
 setupWindow();
 const resize = new ResizeObserver(soon);
