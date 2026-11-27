@@ -821,7 +821,7 @@ body.home { background: var(--ground-page); color: var(--text); overflow-x: clip
 
 /* ---------- feedback moments ---------- */
 .burst { position: fixed; z-index: 60; width: 0; height: 0; pointer-events: none; }
-.burst i { position: absolute; left: 0; top: 0; translate: 0 0; border: 2px solid var(--outline); }
+.burst i { position: absolute; left: 0; top: 0; translate: 0 0; border: 3px solid var(--outline); margin: -8px 0 0 -8px; }
 /* the combo flame grows with the streak */
 .combo[data-level="3"] { font-size: 28px; }
 .combo[data-level="4"] { font-size: 30px; background: #fff4d6; }
