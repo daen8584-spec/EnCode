@@ -1,3 +1,4 @@
+import { codeKeys, insertText } from "./code-keys.js";
 import { requireUser } from "./auth.js";
 import { ALL_LESSONS, findLesson } from "./content.js";
 import { $, h, shuffle, toast } from "./dom.js";
@@ -184,7 +185,6 @@ function codeEditor(language, { value = "", tools = null } = {}) {
     field.setAttribute("autocorrect", "off");
     const gutter = h("div", { className: "gutter", ariaHidden: "true" });
     let errorLine = 0;
-    let escaped = false;
 
     const sync = () => {
         const lines = field.value.split("\n").length;
@@ -193,10 +193,7 @@ function codeEditor(language, { value = "", tools = null } = {}) {
         field.style.height = "auto";
         field.style.height = `${field.scrollHeight}px`;
     };
-    const insert = (text) => {
-        field.setRangeText(text, field.selectionStart, field.selectionEnd, "end");
-        field.dispatchEvent(new Event("input", { bubbles: true }));
-    };
+    const insert = (text) => insertText(field, text);
 
     field.addEventListener("input", () => {
         errorLine = 0;
@@ -206,24 +203,7 @@ function codeEditor(language, { value = "", tools = null } = {}) {
         mascot.pointAt(field);
         mascot.mood("watch");
     });
-    field.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") escaped = true;
-        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-            event.preventDefault();
-            if (!ui.action.disabled) ui.action.click();
-        } else if (event.key === "Tab" && !event.shiftKey && !escaped) {
-            event.preventDefault();
-            insert("    ");
-        } else if (event.key === "Enter") {
-            const before = field.value.slice(0, field.selectionStart);
-            const line = before.slice(before.lastIndexOf("\n") + 1);
-            let indent = line.match(/^\s*/)[0];
-            if (/[:{]\s*$/.test(line) && language !== "html") indent += "    ";
-            event.preventDefault();
-            insert(`\n${indent}`);
-        }
-        if (event.key !== "Escape") escaped = false;
-    });
+    codeKeys(field, { language, onRun: () => { if (!ui.action.disabled) ui.action.click(); } });
 
     const keys = h("div", { className: "code-keys" }, [...KEYS[language], "tab"].map((key) => h("button", {
         type: "button",

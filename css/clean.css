@@ -348,3 +348,33 @@ img.px-icon.is-sprite { width: 28px; height: 23px; }
 .combo { border: 0; border-radius: 999px; background: var(--surface); color: var(--flame); box-shadow: var(--shadow); }
 .skip-link { border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow-pop); }
 .order-answer { width: 100%; box-sizing: border-box; justify-items: start; }
+
+/* ---------- readable in both themes ----------
+   The pixel layer painted some labels with an outline colour that no longer exists,
+   which left white text on a light page. Each one gets a real colour here. */
+
+/* fill-in-the-blank: the gap and the typed answer were gold on gold */
+.code-block mark, .blank { padding: 0 4px; border-radius: 6px; background: var(--gold); color: #1b2540; font-weight: 800; }
+
+/* the map */
+.node-start { border: 0; border-radius: 999px; background: var(--primary); color: var(--on-primary); box-shadow: 0 3px 0 var(--primary-edge); }
+.node-start::after { border: 0; background: var(--primary); }
+.is-creative .node-start::after { background: #1d9a8a; }
+.is-creative .node-start { background: #1d9a8a; color: #fff; box-shadow: 0 3px 0 #137468; }
+.unit-index { border: 0; border-radius: 999px; background: rgb(27 37 64 / 82%); color: #fff; }
+.lost-sign { border: 0; border-radius: 6px; background: #c98b4f; color: #3b2410; box-shadow: 0 3px 0 #8e5a2c; }
+.lost-sign::after { border: 0; background: #8e5a2c; }
+
+/* small labels */
+.avatar { color: var(--on-primary); }
+.machine-status { color: var(--on-primary); }
+.intro-badge { background: var(--track-python-soft); color: var(--gold-ink); }
+.lesson-intro.is-html .intro-badge { background: var(--track-html-soft); color: var(--error-ink); }
+.lesson-intro.is-css .intro-badge { background: var(--track-css-soft); color: var(--success-ink); }
+.hud-chip, .hud-chip b, .hud-chip.is-rank span { color: var(--text); }
+.editor .editor-bar .snippet, .editor .console-head, .editor .console-head > span { color: var(--muted); }
+.eyebrow { color: var(--primary-ink); }
+.mission-head .eyebrow, .mission-line .eyebrow { color: var(--gold-ink); }
+.estilo .sprite-card figcaption, .sprite-card figcaption { color: var(--text); }
+.snippet select { min-height: 36px; border: 2px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); font-weight: 700; }
+.snippet option { background: var(--surface); color: var(--text); }

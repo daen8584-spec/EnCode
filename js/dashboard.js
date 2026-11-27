@@ -1,6 +1,7 @@
 import { pixelChest } from "./vale-icons.js";
 import { displayName, logOut, requireUser } from "./auth.js";
 import { ALL_LESSONS, TRACKS } from "./content.js";
+import { codeKeys } from "./code-keys.js";
 import { $, h } from "./dom.js";
 import { createMascot } from "./mascot.js";
 import { initProfile } from "./profile.js";
@@ -260,6 +261,7 @@ function initEditor() {
     const run = $("run");
     let answer = null; // answers the input() the program is waiting on
     code.value = SNIPPETS.hello;
+    codeKeys(code, { onRun: () => { if (!run.disabled) run.click(); } });
 
     // input() asks right in the output panel, like a terminal, instead of a browser pop-up.
     const ask = (prompt) => new Promise((resolve) => {
