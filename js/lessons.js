@@ -13,7 +13,7 @@ const ICONS = {
     locked: svg('<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'),
     machine: svg('<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>'),
     challenge: pixelIcon("trophy"),
-    creative: pixelIcon("palette")
+    creative: pixelIcon("star")
 };
 const SVG_NS = "http://www.w3.org/2000/svg";
 

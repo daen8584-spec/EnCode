@@ -846,7 +846,6 @@ body.guide { background: var(--ground-page); color: var(--text); }
 .sprite-art rect { stroke: none; }
 @media (max-width: 640px) { .type-row { grid-template-columns: 1fr; } .guide-head h1 { font-size: 40px; } }
 
-/* the valley around the lesson (drawn by js/vale.js) and the scene at the top of the celebration */
-.page-valley { position: fixed; inset: 0; z-index: -1; width: 100vw; height: 100vh; image-rendering: pixelated; pointer-events: none; }
+/* the scene at the top of the celebration */
 .celebration-scene { height: 130px; margin: 0 -28px; width: calc(100% + 56px); border: 0; border-bottom: 3px solid var(--outline); border-radius: 5px 5px 0 0; box-shadow: none; }
 @media (max-width: 560px) { .celebration-scene { margin: 0 -18px; width: calc(100% + 36px); } }
