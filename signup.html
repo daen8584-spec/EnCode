@@ -2,33 +2,73 @@
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
     <meta name="description" content="Crie sua conta gratuita no EnCoder e aprenda HTML, CSS e Python.">
     <meta name="theme-color" content="#15203f">
     <title>Criar conta | EnCoder</title>
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800;900&family=Jersey+10&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/mascot.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/vale.css">
+    <link rel="stylesheet" href="css/clean.css">
+    <script type="module" src="js/vale.js"></script>
     <script type="module" src="js/auth-page.js"></script>
 </head>
 <body>
     <div class="auth">
-        <section class="auth-intro bubble-right">
-            <a class="brand is-large" href="login.html"><span class="logo">&lt;/&gt;</span>EnCoder</a>
-            <h2 class="auth-headline">Aprenda a programar <em>em português</em>, um passo de cada vez.</h2>
+        <section class="auth-intro">
+            <a class="brand is-large" href="login.html"><span class="logo" aria-hidden="true"></span>EnCoder</a>
+            <div class="intro-copy">
+                <h2 class="auth-headline">Aprenda a programar em português, um passo de cada vez.</h2>
             <ul class="auth-points">
                 <li>Python, HTML e CSS do zero, com exercícios de verdade</li>
                 <li>Um professor que explica cada palavra em inglês do código</li>
                 <li>Lições curtas, feitas para caber no celular</li>
             </ul>
+            </div>
+            <div class="valley" aria-hidden="true">
+                <div class="sky" data-sun="center" data-sun-y="0.16"><canvas class="sky-art"></canvas></div>
+                <svg class="drifts" shape-rendering="crispEdges" preserveAspectRatio="none"></svg>
+                <div class="snow"></div>
+            </div>
+            <div class="easel">
+                <figure class="board" data-board-tabs aria-label="Primeira lição de cada trilha">
+                    <div class="board-tabs" role="tablist" aria-label="Trilhas">
+                        <button class="board-tab" role="tab" id="tab-py" aria-controls="board-panel" aria-selected="true" tabindex="0" type="button">Python</button>
+                        <button class="board-tab" role="tab" id="tab-html" aria-controls="board-panel" aria-selected="false" tabindex="-1" type="button">HTML</button>
+                        <button class="board-tab" role="tab" id="tab-css" aria-controls="board-panel" aria-selected="false" tabindex="-1" type="button">CSS</button>
+                    </div>
+                    <div id="board-panel" role="tabpanel" aria-labelledby="tab-py">
+                        <p class="board-lesson">Lição 1: Primeiro comando</p>
+                        <pre><code><span class="b-kw">print</span>(<span class="b-str">"Olá, mundo!"</span>)</code></pre>
+                        <p class="board-out"><small>Saída</small><span class="out-py">Olá, mundo!</span></p>
+                    </div>
+                    <template data-for="tab-py">
+                        <p class="board-lesson">Lição 1: Primeiro comando</p>
+                        <pre><code><span class="b-kw">print</span>(<span class="b-str">"Olá, mundo!"</span>)</code></pre>
+                        <p class="board-out"><small>Saída</small><span class="out-py">Olá, mundo!</span></p>
+                    </template>
+                    <template data-for="tab-html">
+                        <p class="board-lesson">Lição 1: Primeiro título</p>
+                        <pre><code><span class="b-tag">&lt;h1&gt;</span>Olá!<span class="b-tag">&lt;/h1&gt;</span></code></pre>
+                        <p class="board-out"><small>Na página</small><span class="out-h1">Olá!</span></p>
+                    </template>
+                    <template data-for="tab-css">
+                        <p class="board-lesson">Lição 1: Cor do texto</p>
+                        <pre><code><span class="b-sel">p</span> { <span class="b-kw">color</span>: <span class="b-str">orange</span>; }</code></pre>
+                        <p class="board-out"><small>Na página</small><span class="out-css">Este texto ficou laranja</span></p>
+                    </template>
+                </figure>
+            </div>
             <div class="auth-mascot-slot"></div>
         </section>
         <main class="auth-main">
             <section class="auth-card card" aria-labelledby="title">
+            <svg class="snowcap" aria-hidden="true" shape-rendering="crispEdges" preserveAspectRatio="none"></svg>
             <h1 id="title">Criar conta</h1>
             <p class="muted">Crie sua conta gratuita e comece a programar.</p>
 

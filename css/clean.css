@@ -1,0 +1,380 @@
+/* ==========================================================================
+   Clean layer: the interface is light, flat and rounded; pixel art is kept for
+   the world (skies, the valley, the map landscape, Bit and the creatures).
+   Loaded last on every page. Tokens follow the redesign:
+   snow background, white cards with soft shadows, navy text, one blue for
+   actions, bright colours only for meaning, buttons with a solid bottom lip.
+   Night is a deep blue-violet with lighter cards, never black.
+   ========================================================================== */
+
+:root {
+    --bg: #f4f7fc;
+    --grid: transparent;
+    --surface: #ffffff;
+    --surface-2: #eef3fa;
+    --border: #dce4f0;
+    --border-strong: #d5deeb;
+    --text: #1b2540;
+    --muted: #55627f;
+    --primary: #1f6feb;
+    --primary-edge: #1858be;
+    --primary-soft: #eaf2ff;
+    --primary-ink: #1f6feb;
+    --on-primary: #ffffff;
+    --success: #1d883c;
+    --success-edge: #146b34;
+    --success-soft: #ddf7e4;
+    --success-ink: #146b34;
+    --error: #d93a3a;
+    --error-edge: #a3201f;
+    --error-soft: #ffe3e1;
+    --error-ink: #a3201f;
+    --gold: #ffc233;
+    --gold-edge: #c48a1d;
+    --gold-soft: #fff3cc;
+    --gold-ink: #7a5200;
+    --flame: #f2622e;
+    --zap: #e6a700;
+    --lip: #d5deeb;
+    --lip-primary: #b7cff7;
+    --lip-success: #a9ddb9;
+    --lip-error: #f2b8b3;
+    --shadow: 0 1px 2px rgb(27 37 64 / 6%), 0 4px 12px rgb(27 37 64 / 6%);
+    --shadow-pop: 0 8px 24px rgb(27 37 64 / 14%);
+    --radius: 12px;
+    --radius-lg: 16px;
+    --font: "Nunito", "Segoe UI", system-ui, sans-serif;
+    --display: "Nunito", "Segoe UI", system-ui, sans-serif;
+    /* the valley layer's names for the same roles */
+    --ground-page: var(--bg);
+    --ice: var(--surface);
+    --paper: var(--surface);
+    --right: var(--success);
+    --right-soft: var(--success-soft);
+    --wrong: var(--error);
+    --wrong-soft: var(--error-soft);
+    --track-python: #e69500;
+    --track-python-soft: #fff1d6;
+    --track-html: #e5533d;
+    --track-html-soft: #ffe6e1;
+    --track-css: #1d9a5b;
+    --track-css-soft: #dff5e8;
+}
+
+:root[data-theme="dark"] {
+    --bg: #1a1b3a; --surface: #24264d; --surface-2: #2e3160; --border: #34376a; --border-strong: #4a4e8c;
+    --text: #eef0ff; --muted: #b4b8e0;
+    --primary: #7fb0ff; --primary-edge: #4f7fcc; --primary-soft: #2b3a73; --primary-ink: #9cc2ff; --on-primary: #10122b;
+    --success: #5fd68a; --success-edge: #3a9e62; --success-soft: #173a2e; --success-ink: #bff5d2;
+    --error: #ff7a7a; --error-edge: #c24f57; --error-soft: #46202a; --error-ink: #ffd0d0;
+    --gold-soft: #4a3f1f; --gold-ink: #ffd978; --lip: #14152e; --lip-primary: #3b5db0; --lip-success: #16382a; --lip-error: #3d1e27;
+    --shadow: 0 1px 0 rgb(255 255 255 / 4%), 0 8px 24px rgb(5 6 20 / 35%); --shadow-pop: 0 12px 32px rgb(5 6 20 / 50%);
+    --code-bg: #14152e;
+    --track-python-soft: #4a3a20; --track-html-soft: #4a2630; --track-css-soft: #1f4a36;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #1a1b3a; --surface: #24264d; --surface-2: #2e3160; --border: #34376a; --border-strong: #4a4e8c;
+        --text: #eef0ff; --muted: #b4b8e0;
+        --primary: #7fb0ff; --primary-edge: #4f7fcc; --primary-soft: #2b3a73; --primary-ink: #9cc2ff; --on-primary: #10122b;
+        --success: #5fd68a; --success-edge: #3a9e62; --success-soft: #173a2e; --success-ink: #bff5d2;
+        --error: #ff7a7a; --error-edge: #c24f57; --error-soft: #46202a; --error-ink: #ffd0d0;
+        --gold-soft: #4a3f1f; --gold-ink: #ffd978; --lip: #14152e; --lip-primary: #3b5db0; --lip-success: #16382a; --lip-error: #3d1e27;
+        --shadow: 0 1px 0 rgb(255 255 255 / 4%), 0 8px 24px rgb(5 6 20 / 35%); --shadow-pop: 0 12px 32px rgb(5 6 20 / 50%);
+        --code-bg: #14152e;
+        --track-python-soft: #4a3a20; --track-html-soft: #4a2630; --track-css-soft: #1f4a36;
+    }
+}
+
+/* ---------- page and type ---------- */
+body, body.home, body.guide, body:has(.lesson), body:has(.map), body:has(.shell) {
+    background: var(--bg) !important;
+    color: var(--text);
+    font-family: var(--font);
+}
+h1, h2, h3, .lesson-intro h2, .celebration h2, .section-head h2 { font-family: var(--display); font-weight: 900; letter-spacing: -0.01em; }
+.brand, .topbar .brand { font-family: "Jersey 10", var(--font); font-weight: 400; }
+
+/* ---------- controls ---------- */
+.button {
+    border: 0;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: var(--on-primary);
+    box-shadow: 0 4px 0 var(--primary-edge);
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.button:hover:not(:disabled) { filter: brightness(1.05); }
+.button:active:not(:disabled) { transform: translateY(4px); box-shadow: none; }
+.button.is-gold { background: var(--gold); color: #1b2540; box-shadow: 0 4px 0 var(--gold-edge); }
+.button.is-success { background: var(--success); color: var(--on-primary); box-shadow: 0 4px 0 var(--success-edge); }
+.button.is-error, .button.is-danger { background: var(--error); color: var(--on-primary); box-shadow: 0 4px 0 var(--error-edge); }
+.button.is-ghost { background: var(--surface); color: var(--text); border: 2px solid var(--border-strong); box-shadow: 0 4px 0 var(--lip); }
+.button:disabled { background: var(--surface-2); color: var(--muted); box-shadow: 0 4px 0 var(--border); filter: none; }
+.input { border: 2px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: none; }
+.input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); outline: 0; }
+.card { border: 0; border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
+.bar { height: 10px; border: 0; border-radius: 999px; background: var(--surface-2); box-shadow: none; }
+.bar-fill { border-radius: 999px; box-shadow: none; }
+
+/* pixel icons (Pixelarticons and sprites): only ever 24px or 48px */
+.px-icon { width: 24px; height: 24px; flex: none; image-rendering: pixelated; }
+img.px-icon.is-sprite { width: 28px; height: 23px; }
+
+/* ---------- top bar and menu ---------- */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); box-shadow: none; }
+.hud-chip { height: 36px; border: 0; border-radius: 999px; background: var(--surface-2); color: var(--text); font-weight: 900; box-shadow: none; }
+.hud-chip.is-streak .px-icon { color: var(--flame); }
+.hud-chip.is-xp .px-icon { color: var(--zap); }
+.hud-chip.is-rank { padding-left: 6px; }
+.nav-link { border: 0; border-radius: var(--radius); font-weight: 800; }
+.nav-link[aria-current="page"] { background: var(--primary-soft); color: var(--primary-ink); box-shadow: none; }
+
+/* ---------- dashboard ---------- */
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    min-height: 260px;
+    padding: 0;
+    border: 0;
+    border-radius: 24px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.hero-text { grid-column: 1; grid-row: 1; align-self: center; max-width: none; margin: 0; padding: 32px; border: 0; background: none; box-shadow: none; rotate: none; }
+.hero-text::before { content: none; }
+.hero h1 { font-size: 36px; }
+.hero-next { color: var(--text); }
+.hero-scene { grid-column: 2; grid-row: 1; width: 100%; height: 100%; min-height: 240px; border: 0; border-radius: 0; box-shadow: none; }
+.hero-mascot { grid-column: 2; grid-row: 1; justify-self: end; align-self: end; width: 150px; margin: 0 16px 0 0; padding: 0; }
+.hero-mascot .mascot-bubble { max-width: 220px; }
+.section-head h2 { font-size: 22px; }
+.section-head a { color: var(--primary-ink); font-weight: 800; }
+.track { border: 0; border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
+.track-icon, .tab-icon { border: 0; border-radius: var(--radius-lg); color: transparent !important; font-size: 0; background-repeat: no-repeat; background-position: center; image-rendering: pixelated; }
+.track-icon { width: 80px; height: 80px; }
+.track.is-python .track-icon { background-color: var(--track-python-soft); background-image: url("../assets/art/pine_s_d.png"); background-size: 36px 58px; }
+.track.is-html .track-icon { background-color: var(--track-html-soft); background-image: url("../assets/art/cabin_red_d.png"); background-size: 76px 66px; }
+.track.is-css .track-icon { background-color: var(--track-css-soft); background-image: url("../assets/art/camellia_d.png"); background-size: 40px 34px; }
+.tab.is-python .tab-icon { background-color: var(--track-python-soft); background-image: url("../assets/art/pine_s_d.png"); background-size: 18px 29px; }
+.tab.is-html .tab-icon { background-color: var(--track-html-soft); background-image: url("../assets/art/cabin_red_d.png"); background-size: 38px 33px; }
+.tab.is-css .tab-icon { background-color: var(--track-css-soft); background-image: url("../assets/art/camellia_d.png"); background-size: 20px 17px; }
+.track.is-python .bar-fill { background: var(--track-python); }
+.track.is-html .bar-fill { background: var(--track-html); }
+.track.is-css .bar-fill { background: var(--track-css); }
+.rank-badge { display: grid; place-items: center; width: 76px; height: 76px; border: 0; border-radius: 999px; background: var(--track-python-soft); box-shadow: none; }
+.rank-badge .px-icon { width: 48px; height: 48px; color: var(--gold-edge); }
+.rank-badge img.px-icon.is-sprite { width: 56px; height: 46px; }
+.mission { background: var(--surface); }
+.mission::before { content: none; }
+.mission .bar-fill { background: var(--gold); }
+.chest-button { width: 56px; color: #9b6bd6; filter: grayscale(0.7) opacity(0.55); }
+.chest-button.is-ready { filter: none; animation: chest-bob 1.4s ease-in-out infinite; }
+.chest-button.is-open { filter: none; opacity: 0.6; }
+.chest-stage { color: #9b6bd6; width: 96px; }
+@keyframes chest-bob { 50% { translate: 0 -4px; } }
+.stats.card { padding: 0; background: none; box-shadow: none; gap: 12px; }
+.stat { border: 0 !important; border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); rotate: none; }
+.stat .px-icon { width: 24px; height: 24px; }
+.stat.is-streak .px-icon { color: var(--flame); }
+.stat.is-xp .px-icon { color: var(--zap); }
+.stat.is-lessons .px-icon { color: var(--track-css); }
+.stat.is-words .px-icon { color: var(--primary); }
+
+/* ---------- the map ---------- */
+.is-machine .node-circle { background-image: none !important; }
+.is-machine .node-circle svg { display: block !important; }
+
+/* ---------- lessons ---------- */
+.lesson-header .icon-button { border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.task-type { height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--gold-soft); color: var(--gold-ink); font-size: 14px; font-weight: 800; box-shadow: none; }
+.lesson-question:not(:empty) {
+    padding: 22px 24px;
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 900;
+}
+.option {
+    min-height: 60px;
+    border: 2px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 4px 0 var(--lip);
+    font-size: 18px;
+    font-weight: 700;
+    translate: none;
+}
+.option:hover:not(:disabled) { background: var(--surface-2); translate: none; transform: none; box-shadow: 0 4px 0 var(--lip); }
+.option:active:not(:disabled) { transform: translateY(4px); translate: none; box-shadow: none; }
+.option[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-ink); box-shadow: 0 4px 0 var(--lip-primary); }
+.option.is-correct { border-color: var(--success); background: var(--success-soft); color: var(--success-ink); box-shadow: 0 4px 0 var(--lip-success); }
+.option.is-wrong { border-color: var(--error); background: var(--error-soft); color: var(--error-ink); box-shadow: 0 4px 0 var(--lip-error); }
+.option kbd { width: 32px; height: 32px; border: 2px solid currentColor; border-radius: 8px; background: transparent !important; color: inherit !important; opacity: 0.75; font-size: 15px; font-weight: 900; box-shadow: none; }
+.option[aria-pressed="true"] kbd, .option.is-correct kbd, .option.is-wrong kbd { opacity: 1; }
+.hint-button { border: 0; border-radius: 10px; background: transparent; color: var(--primary-ink); font-weight: 800; }
+.hint-button:hover:not(:disabled) { background: var(--primary-soft); }
+.code-editor .hint-button { color: #ffd978; }
+.input.is-code { border: 2px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); box-shadow: none; }
+.code-editor { border: 0; border-radius: var(--radius-lg); background: var(--code-bg); box-shadow: var(--shadow); }
+.code-editor:focus-within { box-shadow: 0 0 0 3px var(--primary); }
+.key { border: 2px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); box-shadow: 0 3px 0 var(--lip); }
+
+.lesson-intro { border: 0; border-radius: 24px; background-color: var(--surface); box-shadow: var(--shadow); }
+.lesson-intro::before { content: none; }
+
+/* explanations: a clean card instead of the chalkboard */
+.teach {
+    margin-bottom: 16px;
+    border: 0 !important;
+    border-image: none !important;
+    outline: 0;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+.teach::after { content: none; }
+.teach-meaning, .teach-line, .teach p { color: var(--text); font-family: var(--font); }
+.teach-meaning { font-size: 20px; font-weight: 800; }
+.teach-term { border: 0; border-radius: 8px; background: var(--gold-soft); color: var(--gold-ink); }
+.teach .code-block { border: 0; border-radius: var(--radius); background: var(--code-bg); color: #e7ecf8; }
+.teach .code-block.is-output { border: 2px solid var(--border); background: var(--surface-2); color: var(--text); }
+.try-button { border: 2px dashed var(--border-strong); border-radius: var(--radius); color: var(--primary-ink); }
+.try-button:hover { background: var(--primary-soft); }
+
+/* broken machines: a light card with a coloured status, no frost bar */
+.machine { border: 2px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow); }
+.machine.is-broken { border-color: var(--error); background: var(--error-soft); }
+.machine.is-broken .machine-head::before { content: none; }
+
+/* the bottom bar */
+.lesson-footer { border-top: 1px solid var(--border) !important; background: var(--surface) !important; }
+.lesson-footer::before { content: none; }
+.lesson-footer.is-correct { border-top-color: transparent !important; background: var(--success-soft) !important; }
+.lesson-footer.is-wrong { border-top-color: transparent !important; background: var(--error-soft) !important; }
+.lesson-footer.is-near { border-top-color: transparent !important; background: var(--gold-soft) !important; }
+.lesson-footer.is-correct .feedback strong, .lesson-footer.is-correct .feedback p { color: var(--success-ink); }
+.lesson-footer.is-wrong .feedback strong, .lesson-footer.is-wrong .feedback p { color: var(--error-ink); }
+.lesson-footer.is-near .feedback strong, .lesson-footer.is-near .feedback p { color: var(--gold-ink); }
+.lesson-footer.is-correct .button { background: var(--success); box-shadow: 0 4px 0 var(--success-edge); color: var(--on-primary); }
+.lesson-footer.is-wrong .button { background: var(--error); box-shadow: 0 4px 0 var(--error-edge); color: var(--on-primary); }
+.feedback strong { font-family: var(--display); font-size: 22px; font-weight: 900; }
+.feedback-icon { border: 0 !important; border-radius: var(--radius-lg); clip-path: none; box-shadow: none; }
+
+/* the end of a lesson */
+.celebration { border: 0; outline: 0; border-radius: 24px; background: var(--surface) !important; background-image: none !important; box-shadow: var(--shadow-pop); }
+.celebration h2 { color: var(--text); }
+.celebration-scene { border-bottom: 0; border-radius: 22px 22px 0 0; }
+.celebration .stat { border: 0 !important; border-radius: var(--radius-lg); background: var(--surface-2); box-shadow: none; }
+.celebration .stat.is-xp { background: var(--gold-soft); }
+.celebration .stat.is-accuracy { background: var(--success-soft); }
+.mission-line { border: 0; border-radius: var(--radius-lg); background: var(--gold-soft); }
+
+/* ---------- dialogs ---------- */
+.game-dialog { border: 0; border-radius: 24px; box-shadow: var(--shadow-pop); }
+
+@media (max-width: 760px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-text { grid-row: 2; grid-column: 1; }
+    .hero-scene, .hero-mascot { grid-row: 1; grid-column: 1; }
+    .hero-scene { min-height: 180px; }
+    .hero-mascot { width: 110px; }
+}
+
+/* night versions of the track emblems */
+:root[data-theme="dark"] .track.is-python .track-icon, :root[data-theme="dark"] .tab.is-python .tab-icon { background-image: url("../assets/art/pine_s_n.png"); }
+:root[data-theme="dark"] .track.is-html .track-icon, :root[data-theme="dark"] .tab.is-html .tab-icon { background-image: url("../assets/art/cabin_red_n.png"); }
+:root[data-theme="dark"] .track.is-css .track-icon, :root[data-theme="dark"] .tab.is-css .tab-icon { background-image: url("../assets/art/camellia_n.png"); }
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .track.is-python .track-icon, :root:not([data-theme="light"]) .tab.is-python .tab-icon { background-image: url("../assets/art/pine_s_n.png"); }
+    :root:not([data-theme="light"]) .track.is-html .track-icon, :root:not([data-theme="light"]) .tab.is-html .tab-icon { background-image: url("../assets/art/cabin_red_n.png"); }
+    :root:not([data-theme="light"]) .track.is-css .track-icon, :root:not([data-theme="light"]) .tab.is-css .tab-icon { background-image: url("../assets/art/camellia_n.png"); }
+}
+
+/* the logo: Bit's face on a soft tile */
+.logo { width: 38px; border: 0; border-radius: var(--radius); background: #cfe6fb url("../assets/mascot.webp") 52% 6% / 205% auto no-repeat; box-shadow: none; font-size: 0; }
+.brand.is-large .logo { width: 52px; border-radius: 14px; }
+.teach .sandbox, .teach textarea { border-radius: var(--radius); }
+.hint-row .hint-button, .hint-button { border: 0 !important; background: transparent !important; color: var(--primary-ink) !important; box-shadow: none !important; }
+.hint-row .hint-button:hover:not(:disabled), .hint-button:hover:not(:disabled) { background: var(--primary-soft) !important; }
+.code-editor .hint-button { color: #ffd978 !important; }
+.home .button.is-ghost, .auth .button.is-ghost { background: var(--surface); color: var(--text); }
+
+/* the end of a lesson: Bit stands on the snow of the scene, the title sits below */
+.celebration { padding: 0 28px 28px; }
+.celebration-scene { height: 140px; margin: 0 -28px; width: calc(100% + 56px); border-bottom: 0 !important; }
+.celebration-mascot { position: relative; z-index: 1; width: 110px; margin: -84px auto 0; translate: 0 0; }
+.celebration h2 { margin: 8px 0 16px; color: var(--text); font-size: 28px; }
+@media (max-width: 560px) { .celebration { padding: 0 18px 22px; } .celebration-scene { margin: 0 -18px; width: calc(100% + 36px); } }
+.celebration-mascot:empty { display: none; }
+.celebration .stat dt { background: transparent; color: var(--muted); font-weight: 800; }
+.celebration .stat.is-xp dd { color: var(--gold-ink); }
+.celebration .stat.is-accuracy dd { color: var(--success-ink); }
+.celebration-actions .button:not(.is-ghost) { background: var(--primary); color: var(--on-primary); box-shadow: 0 4px 0 var(--primary-edge); }
+
+/* "put the code in order": lines are cards that follow the theme, the answer area is a soft dashed box */
+.lesson-content h1 { padding: 0; border: 0; border-radius: 0; background: none; color: var(--muted); font: 800 18px/1.2 var(--font); }
+.order-answer { min-height: 96px; padding: 14px; border: 2px dashed var(--border-strong); border-radius: var(--radius-lg); background: var(--surface-2); }
+.order-answer:empty::before { color: var(--muted); font-weight: 700; }
+.chip {
+    min-height: 48px;
+    padding: 10px 16px;
+    border: 2px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 4px 0 var(--lip);
+    font-weight: 600;
+}
+.chip:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-soft); }
+.chip:active:not(:disabled) { transform: translateY(4px); box-shadow: none; }
+.chip:disabled { opacity: 0.45; box-shadow: none; }
+.order-answer .chip { border-color: var(--border-strong); background: var(--surface); color: var(--text); box-shadow: 0 3px 0 var(--lip); }
+.order-answer .chip.is-correct { border-color: var(--success); background: var(--success-soft); color: var(--success-ink); box-shadow: 0 3px 0 var(--lip-success); }
+.order-answer .chip.is-wrong { border-color: var(--error); background: var(--error-soft); color: var(--error-ink); box-shadow: 0 3px 0 var(--lip-error); }
+
+/* other small pieces that were fixed to white */
+.unit-words li { background: var(--surface); color: var(--text); }
+.combo { border: 0; border-radius: 999px; background: var(--surface); color: var(--flame); box-shadow: var(--shadow); }
+.skip-link { border: 0; border-radius: var(--radius); background: var(--surface); color: var(--text); box-shadow: var(--shadow-pop); }
+.order-answer { width: 100%; box-sizing: border-box; justify-items: start; }
+
+/* ---------- readable in both themes ----------
+   The pixel layer painted some labels with an outline colour that no longer exists,
+   which left white text on a light page. Each one gets a real colour here. */
+
+/* fill-in-the-blank: the gap and the typed answer were gold on gold */
+.code-block mark, .blank { padding: 0 4px; border-radius: 6px; background: var(--gold); color: #1b2540; font-weight: 800; }
+
+/* the map */
+.node-start { border: 0; border-radius: 999px; background: var(--primary); color: var(--on-primary); box-shadow: 0 3px 0 var(--primary-edge); }
+.node-start::after { border: 0; background: var(--primary); }
+.is-creative .node-start::after { background: #1d9a8a; }
+.is-creative .node-start { background: #1d9a8a; color: #fff; box-shadow: 0 3px 0 #137468; }
+.unit-index { border: 0; border-radius: 999px; background: rgb(27 37 64 / 82%); color: #fff; }
+.lost-sign { border: 0; border-radius: 6px; background: #c98b4f; color: #3b2410; box-shadow: 0 3px 0 #8e5a2c; }
+.lost-sign::after { border: 0; background: #8e5a2c; }
+
+/* small labels */
+.avatar { color: var(--on-primary); }
+.machine-status { color: var(--on-primary); }
+.intro-badge { background: var(--track-python-soft); color: var(--gold-ink); }
+.lesson-intro.is-html .intro-badge { background: var(--track-html-soft); color: var(--error-ink); }
+.lesson-intro.is-css .intro-badge { background: var(--track-css-soft); color: var(--success-ink); }
+.hud-chip, .hud-chip b, .hud-chip.is-rank span { color: var(--text); }
+.editor .editor-bar .snippet, .editor .console-head, .editor .console-head > span { color: var(--muted); }
+.eyebrow { color: var(--primary-ink); }
+.mission-head .eyebrow, .mission-line .eyebrow { color: var(--gold-ink); }
+.estilo .sprite-card figcaption, .sprite-card figcaption { color: var(--text); }
+.snippet select { min-height: 36px; border: 2px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); font-weight: 700; }
+.snippet option { background: var(--surface); color: var(--text); }

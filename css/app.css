@@ -15,7 +15,6 @@
     padding: 10px max(24px, env(safe-area-inset-right, 0px)) 10px max(24px, env(safe-area-inset-left, 0px));
     background: color-mix(in srgb, var(--surface) 88%, transparent);
     border-bottom: 1.5px solid var(--border);
-    backdrop-filter: blur(10px);
 }
 
 body::before {
@@ -177,7 +176,6 @@ body::before {
     gap: 20px;
     align-content: start;
     min-width: 0;
-    animation: rise-in 0.35s var(--ease);
 }
 
 .view-head {
@@ -287,8 +285,6 @@ body::before {
     padding: 18px 20px;
     border-bottom-width: 4px;
     transition: border-color 0.2s, transform 0.15s;
-    animation: rise-in 0.4s var(--ease) both;
-    animation-delay: calc(var(--i, 0) * 70ms);
 }
 
 .track:hover {
@@ -298,7 +294,7 @@ body::before {
 
 .is-python { --track: #e9a908; --track-soft: color-mix(in srgb, #f2b705 18%, var(--surface)); }
 .is-html { --track: #e8590c; --track-soft: color-mix(in srgb, #e8590c 14%, var(--surface)); }
-.is-css { --track: #7c4dff; --track-soft: color-mix(in srgb, #7c4dff 14%, var(--surface)); }
+.is-css { --track: #4da35a; --track-soft: color-mix(in srgb, #4da35a 14%, var(--surface)); }
 
 .track-icon {
     display: grid;
@@ -510,7 +506,6 @@ body::before {
 
 .game-dialog::backdrop {
     background: rgb(14 19 34 / 55%);
-    backdrop-filter: blur(6px);
 }
 
 .chest-stage {
@@ -749,8 +744,6 @@ body::before {
     color: var(--track);
     font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
 }
 
 .word-term {
@@ -839,7 +832,6 @@ body::before {
     color: var(--code-muted);
     font-family: var(--mono);
     font-size: 12px;
-    text-transform: uppercase;
 }
 
 .actions {

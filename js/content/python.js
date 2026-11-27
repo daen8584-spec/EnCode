@@ -34,7 +34,9 @@ export default {
                             question: "Complete o código para mostrar Olá, mundo!",
                             code: "___(\"Olá, mundo!\")",
                             placeholder: "digite o comando",
-                            answer: "print"
+                            answer: "print",
+                            hint: "É o comando que mostra coisas na tela. Em inglês, significa imprimir.",
+                            explain: "print() mostra na tela o que está dentro dos parênteses."
                         },
                         {
                             type: "code",
@@ -70,7 +72,9 @@ export default {
                             question: "Complete para criar a variável idade com o valor 25",
                             code: "idade ___ 25",
                             placeholder: "digite o operador",
-                            answer: "="
+                            answer: "=",
+                            hint: "Em Python, um único sinal guarda o valor dentro da variável.",
+                            explain: "O sinal = guarda o valor 25 dentro da caixa idade."
                         },
                         {
                             type: "code",
@@ -117,7 +121,9 @@ export default {
                             question: "Complete para juntar texto e número",
                             code: "idade = 25\nprint('Idade: ' + ___(idade))",
                             placeholder: "digite a função",
-                            answer: "str"
+                            answer: "str",
+                            hint: "O + só junta texto com texto. Qual comando transforma um número em texto?",
+                            explain: "str() transforma o número 25 no texto '25', e aí o + consegue juntar os dois."
                         },
                         {
                             type: "code",
@@ -170,7 +176,9 @@ export default {
                             question: "Complete a condição para verificar se é maior de idade",
                             code: "idade = 20\n___ idade >= 18:\n    print('Maior')",
                             placeholder: "digite a palavra-chave",
-                            answer: "if"
+                            answer: "if",
+                            hint: "Em inglês, \"se\". É a palavra que começa uma condição.",
+                            explain: "if testa a condição: se idade >= 18 for verdade, o código de dentro roda."
                         },
                         {
                             type: "order",
@@ -222,7 +230,9 @@ export default {
                             question: "Complete o laço para contar de 0 a 2",
                             code: "for i in ___(3):\n    print(i)",
                             placeholder: "digite a função",
-                            answer: "range"
+                            answer: "range",
+                            hint: "É o comando que cria uma sequência de números para o for.",
+                            explain: "range(3) cria os números 0, 1 e 2, um para cada volta do laço."
                         },
                         {
                             type: "code",
@@ -288,6 +298,74 @@ export default {
                             solution: "idade = 15\nif idade >= 12:\n    print(\"Pode entrar\")"
                         }
                     ]
+                },
+                {
+                    id: "py-c1",
+                    title: "Do seu jeito: primeiros passos",
+                    creative: true,
+                    teach: [],
+                    exercises: [
+                        {
+                            type: "free",
+                            question: "Mostre os números de 1 a 5, um em cada linha. Pode fazer do jeito que quiser!",
+                            cases: [
+                                {
+                                    expected: "1\n2\n3\n4\n5"
+                                }
+                            ],
+                            hint: "Dá para usar cinco prints... ou um for com range. Qual você prefere?",
+                            example: "for i in range(1, 6):\n    print(i)",
+                            bonus: {
+                                lines: 2
+                            }
+                        },
+                        {
+                            type: "free",
+                            question: "A variável nome já existe. Cumprimente a pessoa: Oi, seguido do nome e de um ponto de exclamação.",
+                            cases: [
+                                {
+                                    given: {
+                                        nome: "Ana"
+                                    },
+                                    expected: "Oi, Ana!"
+                                },
+                                {
+                                    given: {
+                                        nome: "Leo"
+                                    },
+                                    expected: "Oi, Leo!"
+                                }
+                            ],
+                            hint: "O nome muda de um caso para o outro, então use a variável nome em vez de escrever o nome.",
+                            example: "print(\"Oi, \" + nome + \"!\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A variável idade já existe. Se a idade for 10 ou mais, mostre Pode entrar. Se não, mostre Ainda não.",
+                            cases: [
+                                {
+                                    given: {
+                                        idade: 12
+                                    },
+                                    expected: "Pode entrar"
+                                },
+                                {
+                                    given: {
+                                        idade: 7
+                                    },
+                                    expected: "Ainda não"
+                                },
+                                {
+                                    given: {
+                                        idade: 10
+                                    },
+                                    expected: "Pode entrar"
+                                }
+                            ],
+                            hint: "Use if para testar a idade e else para o outro caminho. Cuidado com o caso de idade igual a 10!",
+                            example: "if idade >= 10:\n    print(\"Pode entrar\")\nelse:\n    print(\"Ainda não\")"
+                        }
+                    ]
                 }
             ]
         },
@@ -324,7 +402,10 @@ export default {
                             question: "Complete para mostrar verde",
                             code: "cores = [\"azul\", \"verde\"]\nprint(cores[___])",
                             placeholder: "digite a posição",
-                            answer: "1"
+                            answer: "1",
+                            accept: ["-1"],
+                            hint: "As posições da lista começam em 0, não em 1.",
+                            explain: "\"azul\" está na posição 0 e \"verde\" na posição 1."
                         },
                         {
                             type: "order",
@@ -386,7 +467,9 @@ export default {
                             question: "Complete para adicionar 4 no fim da lista",
                             code: "numeros = [1, 2, 3]\nnumeros.___(4)",
                             placeholder: "digite o método",
-                            answer: "append"
+                            answer: "append",
+                            hint: "Em inglês, \"acrescentar\". É o método que coloca um item no fim da lista.",
+                            explain: "numeros.append(4) coloca o 4 no fim da lista."
                         },
                         {
                             type: "code",
@@ -400,7 +483,9 @@ export default {
                             question: "Complete para testar o tamanho da lista",
                             code: "amigos = [\"Ana\", \"Leo\"]\namigos.append(\"Bia\")\nif ___(amigos) > 2:\n    print(\"Turma cheia\")",
                             placeholder: "digite a função",
-                            answer: "len"
+                            answer: "len",
+                            hint: "É a função que conta quantos itens a lista tem. Vem de length, que quer dizer tamanho.",
+                            explain: "len(amigos) conta os itens: são 3 amigos, mais que 2."
                         },
                         {
                             type: "code",
@@ -452,7 +537,9 @@ export default {
                             question: "Complete para a vida diminuir a cada volta",
                             code: "vidas = 3\nwhile vidas > 0:\n    print(\"Vidas:\", vidas)\n    vidas = vidas ___ 1",
                             placeholder: "digite o sinal",
-                            answer: "-"
+                            answer: "-",
+                            hint: "Para a vida diminuir, que conta você faz com o 1?",
+                            explain: "vidas - 1 tira uma vida a cada volta, até chegar a 0."
                         },
                         {
                             type: "code",
@@ -499,7 +586,9 @@ export default {
                             question: "Complete para a função devolver a soma",
                             code: "def soma(a, b):\n    ___ a + b",
                             placeholder: "digite a palavra-chave",
-                            answer: "return"
+                            answer: "return",
+                            hint: "É a palavra que faz a função devolver um resultado. Em inglês, \"retornar\".",
+                            explain: "return devolve o resultado de a + b para quem chamou a função."
                         },
                         {
                             type: "order",
@@ -629,6 +718,89 @@ export default {
                             solution: "n = 2\nwhile n <= 8:\n    print(n)\n    n = n + 2"
                         }
                     ]
+                },
+                {
+                    id: "py-c2",
+                    title: "Do seu jeito: listas e laços",
+                    creative: true,
+                    teach: [],
+                    exercises: [
+                        {
+                            type: "free",
+                            question: "A variável n já existe. Faça uma contagem regressiva de n até 1, um número por linha, e depois mostre Já!",
+                            cases: [
+                                {
+                                    given: {
+                                        n: 3
+                                    },
+                                    expected: "3\n2\n1\nJá!"
+                                },
+                                {
+                                    given: {
+                                        n: 5
+                                    },
+                                    expected: "5\n4\n3\n2\n1\nJá!"
+                                }
+                            ],
+                            hint: "Um while que diminui n a cada volta resolve. Um range que anda para trás também!",
+                            example: "while n > 0:\n    print(n)\n    n = n - 1\nprint(\"Já!\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A lista numeros já existe. Mostre quantos números dela são maiores que 10.",
+                            cases: [
+                                {
+                                    given: {
+                                        numeros: [4, 12, 7, 20]
+                                    },
+                                    expected: "2"
+                                },
+                                {
+                                    given: {
+                                        numeros: [15, 30, 11]
+                                    },
+                                    expected: "3"
+                                },
+                                {
+                                    given: {
+                                        numeros: [1, 2]
+                                    },
+                                    expected: "0"
+                                }
+                            ],
+                            hint: "Comece com um contador em 0 e some 1 cada vez que achar um número maior que 10.",
+                            example: "grandes = 0\nfor numero in numeros:\n    if numero > 10:\n        grandes = grandes + 1\nprint(grandes)"
+                        },
+                        {
+                            type: "free",
+                            question: "A lista cores já existe. Mostre a última cor da lista, seja qual for o tamanho dela.",
+                            cases: [
+                                {
+                                    given: {
+                                        cores: ["azul", "verde", "roxo"]
+                                    },
+                                    expected: "roxo"
+                                },
+                                {
+                                    given: {
+                                        cores: ["sol"]
+                                    },
+                                    expected: "sol"
+                                },
+                                {
+                                    given: {
+                                        cores: ["preto", "rosa"]
+                                    },
+                                    expected: "rosa"
+                                }
+                            ],
+                            hint: "A última posição depende do tamanho da lista. len pode ajudar, e o Python também entende posições negativas.",
+                            example: "print(cores[len(cores) - 1])",
+                            bonus: {
+                                lines: 1
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -665,7 +837,9 @@ export default {
                             question: "Complete para testar outra condição",
                             code: "temperatura = 25\nif temperatura > 30:\n    print(\"Calor\")\n___ temperatura > 20:\n    print(\"Agradável\")",
                             placeholder: "digite a palavra-chave",
-                            answer: "elif"
+                            answer: "elif",
+                            hint: "É a junção de else com if: \"senão, se\".",
+                            explain: "elif testa outra condição quando a primeira deu falso."
                         },
                         {
                             type: "order",
@@ -684,7 +858,9 @@ export default {
                             question: "Complete a função que diz o clima",
                             code: "def clima(graus):\n    if graus > 30:\n        return \"calor\"\n    ___ graus > 15:\n        return \"agradável\"\n    return \"frio\"\n\nprint(clima(20))",
                             placeholder: "digite a palavra-chave",
-                            answer: "elif"
+                            answer: "elif",
+                            hint: "É a junção de else com if: \"senão, se\".",
+                            explain: "elif testa outra condição quando a primeira deu falso: 20 não é maior que 30, mas é maior que 15."
                         },
                         {
                             type: "code",
@@ -742,7 +918,9 @@ export default {
                             question: "Complete para ficar em casa se tiver chuva OU frio",
                             code: "chuva = True\nfrio = False\nif chuva ___ frio:\n    print(\"Fique em casa\")",
                             placeholder: "digite a palavra",
-                            answer: "or"
+                            answer: "or",
+                            hint: "Em inglês, \"ou\". Basta uma das condições ser verdade.",
+                            explain: "Com or, basta chuva OU frio ser verdade para o código de dentro rodar."
                         },
                         {
                             type: "code",
@@ -801,7 +979,9 @@ export default {
                             question: "Complete para mostrar PYTHON",
                             code: "print(\"python\".___())",
                             placeholder: "digite o método",
-                            answer: "upper"
+                            answer: "upper",
+                            hint: "É o método das letras maiúsculas. Em inglês, upper quer dizer \"de cima\".",
+                            explain: "\"python\".upper() deixa todas as letras maiúsculas: PYTHON."
                         },
                         {
                             type: "code",
@@ -820,7 +1000,9 @@ export default {
                             question: "Complete para mostrar cada nome em maiúsculas",
                             code: "nomes = [\"ana\", \"leo\"]\nfor nome in nomes:\n    print(nome.___())",
                             placeholder: "digite o método",
-                            answer: "upper"
+                            answer: "upper",
+                            hint: "É o método das letras maiúsculas. Em inglês, upper quer dizer \"de cima\".",
+                            explain: "nome.upper() deixa cada nome com letras maiúsculas."
                         },
                         {
                             type: "code",
@@ -867,7 +1049,9 @@ export default {
                             question: "Complete para mostrar o total de gols",
                             code: "gols = [1, 3, 2]\nprint(___(gols))",
                             placeholder: "digite a função",
-                            answer: "sum"
+                            answer: "sum",
+                            hint: "Em inglês, \"soma\". Essa função soma todos os números da lista.",
+                            explain: "sum(gols) soma 1 + 3 + 2 e mostra 6."
                         },
                         {
                             type: "code",
@@ -886,7 +1070,9 @@ export default {
                             question: "Complete para testar o total de gols",
                             code: "gols = [2, 0, 3]\nif ___(gols) > 4:\n    print(\"Grande campeonato\")",
                             placeholder: "digite a função",
-                            answer: "sum"
+                            answer: "sum",
+                            hint: "Em inglês, \"soma\". Essa função soma todos os números da lista.",
+                            explain: "sum(gols) soma 2 + 0 + 3 = 5, que é maior que 4."
                         },
                         {
                             type: "code",
@@ -956,6 +1142,95 @@ export default {
                             hint: "para somar tudo use sum.",
                             mustInclude: ["sum("],
                             solution: "gols = [2, 4, 3]\nprint(sum(gols))"
+                        }
+                    ]
+                },
+                {
+                    id: "py-c3",
+                    title: "Do seu jeito: decisões",
+                    creative: true,
+                    teach: [],
+                    exercises: [
+                        {
+                            type: "free",
+                            question: "A variável nota já existe. Mostre Ótimo para nota 9 ou mais, Bom para nota 6 até 8 e Estude mais para nota abaixo de 6.",
+                            cases: [
+                                {
+                                    given: {
+                                        nota: 10
+                                    },
+                                    expected: "Ótimo"
+                                },
+                                {
+                                    given: {
+                                        nota: 7
+                                    },
+                                    expected: "Bom"
+                                },
+                                {
+                                    given: {
+                                        nota: 6
+                                    },
+                                    expected: "Bom"
+                                },
+                                {
+                                    given: {
+                                        nota: 3
+                                    },
+                                    expected: "Estude mais"
+                                }
+                            ],
+                            hint: "if, elif e else formam três caminhos. Teste a nota maior primeiro.",
+                            example: "if nota >= 9:\n    print(\"Ótimo\")\nelif nota >= 6:\n    print(\"Bom\")\nelse:\n    print(\"Estude mais\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A lista gols já existe. Mostre o total de gols. Na linha de baixo, mostre Vitória! se o total for maior que 5, senão Tente de novo.",
+                            cases: [
+                                {
+                                    given: {
+                                        gols: [2, 3, 1]
+                                    },
+                                    expected: "6\nVitória!"
+                                },
+                                {
+                                    given: {
+                                        gols: [1, 1]
+                                    },
+                                    expected: "2\nTente de novo"
+                                },
+                                {
+                                    given: {
+                                        gols: [5]
+                                    },
+                                    expected: "5\nTente de novo"
+                                }
+                            ],
+                            hint: "Primeiro descubra o total (sum ajuda!), guarde numa variável e depois decida com if.",
+                            example: "total = sum(gols)\nprint(total)\nif total > 5:\n    print(\"Vitória!\")\nelse:\n    print(\"Tente de novo\")"
+                        },
+                        {
+                            type: "free",
+                            question: "A variável palavra já existe. Mostre a palavra gritando: toda em maiúsculas e com um ! no fim.",
+                            cases: [
+                                {
+                                    given: {
+                                        palavra: "oi"
+                                    },
+                                    expected: "OI!"
+                                },
+                                {
+                                    given: {
+                                        palavra: "python"
+                                    },
+                                    expected: "PYTHON!"
+                                }
+                            ],
+                            hint: "upper deixa tudo maiúsculo. Depois é só juntar com o !",
+                            example: "print(palavra.upper() + \"!\")",
+                            bonus: {
+                                lines: 1
+                            }
                         }
                     ]
                 }

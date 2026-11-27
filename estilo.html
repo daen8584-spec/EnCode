@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Guia de estilo | EnCoder</title>
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;600;700;800;900&family=Jersey+10&family=JetBrains+Mono:wght@500;700&family=Lexend:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/mascot.css">
+    <link rel="stylesheet" href="css/lesson.css">
+    <link rel="stylesheet" href="css/vale.css">
+    <link rel="stylesheet" href="css/clean.css">
+    <script type="module" src="js/vale.js"></script>
+    <script type="module" src="js/estilo.js"></script>
+</head>
+<body class="guide">
+    <header class="guide-head">
+        <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span>EnCoder</a>
+        <div>
+            <h1>Guia de estilo: O Vale do Bit</h1>
+            <p>As peças que formam o EnCoder. Use estas, e não variações, ao criar uma tela nova. Tudo aqui usa o CSS real do site.</p>
+        </div>
+    </header>
+
+    <nav class="guide-nav" aria-label="Seções">
+        <a href="#mundo">Mundo</a><a href="#cores">Cores</a><a href="#tipos">Tipografia</a><a href="#botoes">Botões</a>
+        <a href="#respostas">Respostas</a><a href="#bit">Bit</a><a href="#cenas">Cenas</a><a href="#sprites">Sprites</a><a href="#regras">Regras</a>
+    </nav>
+
+    <main class="guide-main">
+        <section id="mundo">
+            <h2>Mundo</h2>
+            <p>O Bit, uma raposa do ártico, ensina num vale de neve em pixel art. <b>Lá fora é o vale</b>: início, entrar, mapa e lições. <b>Lá dentro é a cabana</b> do Bit: o painel com o caderno. Toda tela é um lugar que a criança consegue apontar.</p>
+            <ul class="guide-list">
+                <li><b>A resposta muda o mundo.</b> Cada acerto rola a bola de neve; uma unidade completa acende a aurora.</li>
+                <li><b>Um guia pergunta.</b> As perguntas aparecem na caixa de diálogo do Bit.</li>
+                <li><b>O caminho passa por um lugar.</b> Floresta para Python, vila para HTML, jardim de cristais para CSS.</li>
+            </ul>
+        </section>
+
+        <section id="cores">
+            <h2>Cores</h2>
+            <p>Cada cor tem um papel. Não crie cores novas: escolha pelo papel.</p>
+            <div class="swatches" id="swatches"></div>
+        </section>
+
+        <section id="tipos">
+            <h2>Tipografia</h2>
+            <div class="type-row"><span class="type-name">Jersey 10, títulos, números, rótulos</span><p class="type-display">Aprenda a programar com o Bit</p></div>
+            <div class="type-row"><span class="type-name">Lexend, leitura</span><p class="type-body">Lições curtas de Python, HTML e CSS, num vale de neve em pixel art.</p></div>
+            <div class="type-row"><span class="type-name">JetBrains Mono, código</span><p class="type-mono">print("Olá, mundo!")</p></div>
+        </section>
+
+        <section id="botoes">
+            <h2>Botões</h2>
+            <div class="guide-row">
+                <button class="button" type="button">Principal</button>
+                <button class="button is-ghost" type="button">Secundário</button>
+                <button class="button" type="button" disabled>Desativado</button>
+                <button class="hint-button" type="button">Dica</button>
+            </div>
+        </section>
+
+        <section id="respostas">
+            <h2>Respostas: blocos de gelo</h2>
+            <p>Respostas são blocos que afundam ao toque. O estado vem da cor e de um texto, nunca só da cor.</p>
+            <div class="options guide-options">
+                <button class="option" type="button"><kbd>1</kbd>Normal</button>
+                <button class="option" type="button" aria-pressed="true"><kbd>2</kbd>Escolhida</button>
+                <button class="option is-correct" type="button"><kbd>3</kbd>Certa</button>
+                <button class="option is-wrong" type="button"><kbd>4</kbd>Errada</button>
+                <button class="option is-removed" type="button" disabled><kbd>5</kbd>Tirada pela dica</button>
+            </div>
+            <h3>Pergunta do Bit</h3>
+            <p class="lesson-question guide-question">Qual é a posição do primeiro item de uma lista?</p>
+            <h3>Faixas de resultado</h3>
+            <div class="guide-banners">
+                <div class="lesson-footer is-correct"><div class="feedback"><span class="feedback-icon"></span><div><strong>Muito bom!</strong></div></div></div>
+                <div class="lesson-footer is-near"><div class="feedback"><span class="feedback-icon"></span><div><strong>Quase!</strong><p>Um detalhe diferente: a lição continua aberta.</p></div></div></div>
+                <div class="lesson-footer is-wrong"><div class="feedback"><span class="feedback-icon"></span><div><strong>Resposta incorreta</strong><p>Mostra a resposta e o porquê.</p></div></div></div>
+            </div>
+        </section>
+
+        <section id="bit">
+            <h2>Bit</h2>
+            <p>O humor do Bit acompanha o que a criança faz. Use <code>mascot.mood(nome)</code>.</p>
+            <div class="moods" id="moods"></div>
+        </section>
+
+        <section id="cenas">
+            <h2>Cenas</h2>
+            <p>Faixas de céu e neve com sprites, desenhadas por <code>js/vale.js</code>. Use <code>&lt;canvas class="vale-scene" data-scene="..."&gt;</code>: python, html, css, cabin, map ou stage. Cada cena é viva: neve caindo, fumaça, fogo e bichos.</p>
+            <div class="scene-grid">
+                <figure><canvas class="vale-scene" data-scene="python"></canvas><figcaption>python</figcaption></figure>
+                <figure><canvas class="vale-scene" data-scene="html"></canvas><figcaption>html</figcaption></figure>
+                <figure><canvas class="vale-scene" data-scene="css"></canvas><figcaption>css</figcaption></figure>
+                <figure><canvas class="vale-scene" data-scene="cabin"></canvas><figcaption>cabin</figcaption></figure>
+                <figure><canvas class="vale-scene" data-scene="map"></canvas><figcaption>map</figcaption></figure>
+                <figure><canvas class="vale-scene" data-scene="stage"></canvas><figcaption>stage</figcaption></figure>
+            </div>
+        </section>
+
+        <section id="sprites">
+            <h2>Sprites</h2>
+            <p>Desenhados à mão, pixel a pixel, ou sombreados em faixas limpas de cor. A luz vem sempre do alto à esquerda, e o contorno escurece a cor que encosta nele: mais suave do lado da luz, mais firme na sombra. Os bichos olham para onde andam.</p>
+            <div class="sprite-grid" id="sprite-list"></div>
+        </section>
+
+        <section id="regras">
+            <h2>Regras</h2>
+            <ul class="guide-list">
+                <li><b>Contornos de 3px na cor de tinta</b>, cantos de 6px, sombras duras deslocadas. Sem vidro fosco, sem degradê em botões.</li>
+                <li><b>Movimento só quando significa algo:</b> a bola rolando, o Bit reagindo, a máquina descongelando. Tudo para com "reduzir movimento".</li>
+                <li><b>Toques de pelo menos 44px</b>, texto de pelo menos 16px, contraste AA.</li>
+                <li><b>Sem emojis na interface</b>: ícones e sprites em pixel art.</li>
+                <li><b>Novas cores entram aqui primeiro</b>, com um papel.</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>

@@ -7,7 +7,7 @@ body {
 }
 
 body[data-track="html"] { --track: #e8590c; --track-edge: #b54106; }
-body[data-track="css"] { --track: #7c4dff; --track-edge: #5a2fd6; }
+body[data-track="css"] { --track: #4da35a; --track-edge: #2f7d3e; }
 
 .is-loading main {
     visibility: hidden;
@@ -32,7 +32,6 @@ body::before {
     padding: 10px max(24px, env(safe-area-inset-right, 0px)) 10px max(24px, env(safe-area-inset-left, 0px));
     background: color-mix(in srgb, var(--surface) 90%, transparent);
     border-bottom: 1.5px solid var(--border);
-    backdrop-filter: blur(10px);
 }
 
 .back {
@@ -122,7 +121,7 @@ body::before {
 
 .tab.is-python { --tab: #e9a908; }
 .tab.is-html { --tab: #e8590c; }
-.tab.is-css { --tab: #7c4dff; }
+.tab.is-css { --tab: #4da35a; }
 
 .tab:hover {
     transform: translateY(-2px);
@@ -214,8 +213,6 @@ body::before {
 .unit-index {
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
     opacity: 0.9;
 }
 
@@ -286,8 +283,6 @@ body::before {
 .node {
     position: relative;
     translate: var(--x, 0) 0;
-    animation: rise-in 0.45s var(--ease) both;
-    animation-delay: calc(var(--i, 0) * 60ms);
 }
 
 .node.is-current {
@@ -422,7 +417,6 @@ body::before {
     font-size: 15px;
     font-weight: 800;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
     white-space: nowrap;
     translate: -50% 0;
     box-shadow: var(--shadow);

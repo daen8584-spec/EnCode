@@ -38,7 +38,7 @@ test("every lesson can be finished and earns XP the rules accept", { timeout: 30
 
         const { count, problems } = await page.evaluate(async (maxPerSave) => {
             const { ALL_LESSONS } = await import("/js/content.js");
-            const { checkBlank, checkCode } = await import("/js/grading.js");
+            const { checkBlank, checkCode, checkFree } = await import("/js/grading.js");
             const { maxXp } = await import("/js/xp.js");
             const { runPython } = await import("/js/python.js");
             const problems = [];
@@ -67,7 +67,16 @@ test("every lesson can be finished and earns XP the rules accept", { timeout: 30
                             if (new Set(exercise.options).size !== exercise.options.length) report(where, "has duplicate options");
                         } else if (exercise.type === "blank") {
                             if (!exercise.code.includes("___")) report(where, "code has no ___ to fill");
-                            if (!checkBlank(exercise.answer, exercise.answer)) report(where, "its answer does not pass");
+                            for (const answer of [exercise.answer, ...(exercise.accept ?? [])]) {
+                                if (!checkBlank(answer, exercise).ok) report(where, `the answer ${JSON.stringify(answer)} does not pass`);
+                            }
+                            // Kids type in capitals by accident: in Python that is a near miss, never a plain "wrong".
+                            const shouted = exercise.answer.toUpperCase();
+                            if (shouted !== exercise.answer) {
+                                const result = checkBlank(shouted, exercise);
+                                if (!(language === "python" ? result.near : result.ok)) report(where, `${JSON.stringify(shouted)} should be ${language === "python" ? "a near miss" : "accepted"}`);
+                            }
+                            if (exercise.type === "blank" && !lesson.challenge && !exercise.hint) report(where, "needs a `hint`");
                         } else if (exercise.type === "order") {
                             if (exercise.lines.length < 2) report(where, "needs at least 2 lines");
                             if (language === "python") {
@@ -91,6 +100,20 @@ test("every lesson can be finished and earns XP the rules accept", { timeout: 30
                             // The automatic CSS hint reads the first rule of `expected`.
                             if (language === "css" && !exercise.hint && !/^\s*([^{]+?)\s*\{([^}]*)\}/.test(exercise.expected)) {
                                 report(where, "needs a `hint`: its expected CSS does not start with a rule");
+                            }
+                        } else if (exercise.type === "free") {
+                            if (language !== "python") report(where, "free exercises are Python only");
+                            if (!exercise.cases?.length) report(where, "needs at least one case");
+                            if (!exercise.hint) report(where, "needs a `hint`");
+                            if (!exercise.example) report(where, "needs an `example` solution");
+                            else {
+                                const result = await checkFree(exercise.example, exercise);
+                                if (!result.ok) report(where, `its example fails: ${result.message}`);
+                            }
+                            // With several cases, printing the first answer directly must not pass: the cases have to ask for logic.
+                            if (exercise.cases?.length > 1) {
+                                const shortcut = `print(${JSON.stringify(exercise.cases[0].expected)})`;
+                                if ((await checkFree(shortcut, exercise)).ok) report(where, "printing the first answer passes every case");
                             }
                         } else {
                             report(where, "unknown exercise type");

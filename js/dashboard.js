@@ -1,5 +1,7 @@
+import { pixelChest } from "./vale-icons.js";
 import { displayName, logOut, requireUser } from "./auth.js";
 import { ALL_LESSONS, TRACKS } from "./content.js";
+import { codeKeys } from "./code-keys.js";
 import { $, h } from "./dom.js";
 import { createMascot } from "./mascot.js";
 import { initProfile } from "./profile.js";
@@ -18,7 +20,7 @@ const TIPS = [
     "Cumpra a missão do dia para abrir o baú de recompensa.",
     "Errou algo? Em Praticar eu trago esses exercícios de volta.",
     "No Dicionário ficam todas as palavras em inglês que você aprendeu.",
-    "Ganhe XP para subir de patente: Filhote, Explorador, Inventor e Mestre.",
+    "Ganhe XP para subir de patente: Aprendiz, Explorador, Inventor e Mestre.",
     "Nos desafios, a XP vale o dobro."
 ];
 
@@ -37,11 +39,7 @@ function countUp(element, to) {
     requestAnimationFrame(tick);
 }
 
-const CHEST = `<svg class="chest" viewBox="0 0 64 58" aria-hidden="true">
-    <g class="chest-base"><rect x="6" y="26" width="52" height="28" rx="5" fill="#b8742f" stroke="#6e4216" stroke-width="3"/>
-    <rect x="6" y="34" width="52" height="5" fill="#f4a51c"/><rect x="28" y="31" width="8" height="11" rx="2" fill="#fff3d9" stroke="#6e4216" stroke-width="2"/></g>
-    <g class="chest-lid"><path d="M6 28v-6a14 14 0 0 1 14-14h24a14 14 0 0 1 14 14v6z" fill="#cf8a3c" stroke="#6e4216" stroke-width="3"/>
-    <rect x="6" y="20" width="52" height="5" fill="#f4a51c"/></g></svg>`;
+const CHEST = pixelChest();
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const firstName = displayName(user).split(" ")[0];
@@ -50,7 +48,7 @@ $("hero-mascot").append(guide.root);
 
 // The home screen always offers one next step: open the chest, do the day's training, or continue the course.
 function nextStep(mission) {
-    const next = ALL_LESSONS.find((lesson) => !completed.has(lesson.id));
+    const next = ALL_LESSONS.find((lesson) => !completed.has(lesson.id) && !lesson.creative);
     const mistakes = data.mistakes.length;
     if (mission.done && !mission.chestOpened) {
         return { eyebrow: "Missão cumprida!", title: "Seu baú do dia está pronto", action: "Abrir baú", chest: true,
@@ -149,7 +147,13 @@ function initWelcome() {
     const steps = [...dialog.querySelectorAll(".welcome-step")];
     const dots = [...dialog.querySelectorAll(".welcome-dots i")];
     const mascot = createMascot();
-    const lines = [`Oi, ${firstName}! Eu sou o ${MASCOT_NAME}, seu professor.`, "Pode contar comigo em cada passo.", "Pronto? Vamos juntos!"];
+    const lines = [
+        `Oi, ${firstName}! Eu sou o ${MASCOT_NAME}, seu professor.`,
+        "Esta é a minha cabana. Fique à vontade!",
+        "Lá fora fica o vale. Vamos explorar juntos?",
+        "Essa é a parte mais divertida!",
+        "Pronto? Vamos juntos!"
+    ];
     let current = 0;
     $("welcome-mascot").append(mascot.root);
     $("welcome-title").textContent = "Que bom ter você na turma!";
@@ -257,6 +261,7 @@ function initEditor() {
     const run = $("run");
     let answer = null; // answers the input() the program is waiting on
     code.value = SNIPPETS.hello;
+    codeKeys(code, { onRun: () => { if (!run.disabled) run.click(); } });
 
     // input() asks right in the output panel, like a terminal, instead of a browser pop-up.
     const ask = (prompt) => new Promise((resolve) => {

@@ -88,7 +88,6 @@
     max-width: 420px;
     padding: 36px;
     box-shadow: var(--shadow);
-    animation: rise-in 0.5s var(--ease) both;
 }
 
 .auth-card h1 {

@@ -34,7 +34,9 @@ export default {
                             question: "Complete a tag para criar um título",
                             code: "<___>Olá</___>",
                             placeholder: "digite a tag",
-                            answer: "h1"
+                            answer: "h1",
+                            hint: "É a tag do título principal: a letra h seguida do número 1.",
+                            explain: "<h1> é o título mais importante da página."
                         },
                         {
                             type: "code",
@@ -69,7 +71,9 @@ export default {
                             question: "Complete a tag de parágrafo",
                             code: "<___>Texto aqui</___>",
                             placeholder: "digite a tag",
-                            answer: "p"
+                            answer: "p",
+                            hint: "É só uma letra, a primeira de parágrafo.",
+                            explain: "<p> cria um parágrafo de texto."
                         },
                         {
                             type: "code",
@@ -104,7 +108,9 @@ export default {
                             question: "Complete a tag do item",
                             code: "<ul><___>Item</___></ul>",
                             placeholder: "digite a tag",
-                            answer: "li"
+                            answer: "li",
+                            hint: "Duas letras, de list item (item da lista).",
+                            explain: "<li> é cada item dentro da lista <ul>."
                         },
                         {
                             type: "order",
@@ -205,7 +211,9 @@ export default {
                             question: "Complete o link para a Wikipédia",
                             code: "<a ___=\"https://wikipedia.org\">Wikipédia</a>",
                             placeholder: "digite o atributo",
-                            answer: "href"
+                            answer: "href",
+                            hint: "É o atributo que guarda o endereço do link.",
+                            explain: "href diz para onde o link leva."
                         },
                         {
                             type: "code",
@@ -255,7 +263,9 @@ export default {
                             question: "Complete com o atributo que indica o arquivo da imagem",
                             code: "<img ___=\"foto.jpg\" alt=\"Praia\">",
                             placeholder: "digite o atributo",
-                            answer: "src"
+                            answer: "src",
+                            hint: "Três letras, de source (origem).",
+                            explain: "src diz qual arquivo de imagem mostrar."
                         },
                         {
                             type: "code",
@@ -310,7 +320,9 @@ export default {
                             question: "Complete para dar a classe menu à div",
                             code: "<div ___=\"menu\"></div>",
                             placeholder: "digite o atributo",
-                            answer: "class"
+                            answer: "class",
+                            hint: "É o atributo que dá um nome de grupo para o CSS usar depois.",
+                            explain: "class=\"menu\" dá um nome para a div, que o CSS pode usar."
                         },
                         {
                             type: "order",
@@ -449,7 +461,9 @@ export default {
                             question: "Complete para dar ênfase à palavra lanche",
                             code: "<p>Não esqueça o <___>lanche</___>!</p>",
                             placeholder: "digite a tag",
-                            answer: "em"
+                            answer: "em",
+                            hint: "Duas letras, de emphasis (ênfase).",
+                            explain: "<em> dá ênfase ao texto, que aparece em itálico."
                         },
                         {
                             type: "code",
@@ -494,7 +508,9 @@ export default {
                             question: "Complete a tag do botão",
                             code: "<___>Enviar</___>",
                             placeholder: "digite a tag",
-                            answer: "button"
+                            answer: "button",
+                            hint: "Em inglês, \"botão\".",
+                            explain: "<button> cria um botão que dá para clicar."
                         },
                         {
                             type: "order",
@@ -511,7 +527,9 @@ export default {
                             question: "Complete o cartão com um botão",
                             code: "<div class=\"jogo\">\n  <h2>Pega-pega</h2>\n  <___>Jogar</___>\n</div>",
                             placeholder: "digite a tag",
-                            answer: "button"
+                            answer: "button",
+                            hint: "Em inglês, \"botão\".",
+                            explain: "<button> cria um botão que dá para clicar."
                         },
                         {
                             type: "code",
@@ -556,7 +574,9 @@ export default {
                             question: "Complete com o atributo do texto de exemplo",
                             code: "<input ___=\"Seu email\">",
                             placeholder: "digite o atributo",
-                            answer: "placeholder"
+                            answer: "placeholder",
+                            hint: "É o texto de exemplo que aparece clarinho dentro do campo. Começa com place.",
+                            explain: "placeholder mostra um exemplo dentro do campo antes de a pessoa digitar."
                         },
                         {
                             type: "code",
@@ -616,7 +636,9 @@ export default {
                             question: "Complete com a parte de cima da página",
                             code: "<___>\n  <h1>Clube de Leitura</h1>\n</___>",
                             placeholder: "digite a tag",
-                            answer: "header"
+                            answer: "header",
+                            hint: "Em inglês, \"cabeçalho\": a parte de cima da página.",
+                            explain: "<header> é o cabeçalho, a parte de cima da página."
                         },
                         {
                             type: "code",
@@ -628,7 +650,9 @@ export default {
                             question: "Complete com a parte de baixo da página",
                             code: "<header>\n  <h1>Clube do Bit</h1>\n</header>\n<p>Bem-vindos!</p>\n<___>\n  <p>Feito pela turma</p>\n</___>",
                             placeholder: "digite a tag",
-                            answer: "footer"
+                            answer: "footer",
+                            hint: "Em inglês, \"rodapé\": a parte de baixo, o pé da página.",
+                            explain: "<footer> é o rodapé, a parte de baixo da página."
                         },
                         {
                             type: "order",
